@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class SpecularGui : MonoBehaviour {
@@ -133,6 +133,7 @@ public class SpecularGui : MonoBehaviour {
 	}
 
 	void OnGUI () {
+		Theme.Apply ();
 		
 		//toolsWindowRect = new Rect (20, 20, 300, 700);
 		
@@ -145,53 +146,53 @@ public class SpecularGui : MonoBehaviour {
 		int offsetX = 30;
 		int offsetY = 330;
 		
-		GUI.Box (new Rect (20, 300, 300, 630), "Metallic");
+		GUI.Box (new Rect (20, 300, 300, 630), L.T("Metallic"));
 		
-		GUI.Label (new Rect (offsetX, offsetY, 250, 30), "Contrast: " + FloatToString(DiffuseContrast,4) + " Bias: " + FloatToString(DiffuseBias,4) );
+		GUI.Label (new Rect (offsetX, offsetY, 250, 30), L.T("Contrast: ") + FloatToString(DiffuseContrast,4) + " Bias: " + FloatToString(DiffuseBias,4) );
 		DiffuseContrast = GUI.HorizontalSlider( new Rect( offsetX, offsetY + 30, 280, 10 ),DiffuseContrast,-1.0f, 1.0f );
 		DiffuseBias = GUI.HorizontalSlider( new Rect( offsetX, offsetY + 50, 280, 10 ),DiffuseBias,-0.5f, 0.5f );
 
 		offsetY += spacing2Y;
 
-		GUI.Label (new Rect (offsetX, offsetY, 250, 30), "Blur Size: " + BlurSize.ToString() + " Contrast: " + FloatToString(BlurContrast,4) );
+		GUI.Label (new Rect (offsetX, offsetY, 250, 30), L.T("Blur Size: ") + BlurSize.ToString() + " Contrast: " + FloatToString(BlurContrast,4) );
 		BlurSize = Mathf.FloorToInt( GUI.HorizontalSlider( new Rect( offsetX, offsetY + 30, 280, 10 ),BlurSize,1.0f, 100.0f ) );
 		BlurContrast = GUI.HorizontalSlider( new Rect( offsetX, offsetY + 50, 280, 10 ),BlurContrast,-5.0f, 5.0f );
 
 		offsetY += spacing2Y;
 
-		GUI.Label (new Rect (offsetX, offsetY, 250, 30), "Light Mask Power: " + FloatToString(LightMaskPow,4) + " Intensity: " + FloatToString(LightPow,4) );
+		GUI.Label (new Rect (offsetX, offsetY, 250, 30), L.T("Light Mask Power: ") + FloatToString(LightMaskPow,4) + " Intensity: " + FloatToString(LightPow,4) );
 		LightMaskPow = GUI.HorizontalSlider( new Rect( offsetX, offsetY + 30, 280, 10 ),LightMaskPow,0.1f, 5.0f );
 		LightPow = GUI.HorizontalSlider( new Rect( offsetX, offsetY + 50, 280, 10 ),LightPow,-1.0f, 1.0f );
 
 		offsetY += spacing2Y;
 		
-		GUI.Label (new Rect (offsetX, offsetY, 250, 30), "Dark Mask Power: " + FloatToString(DarkMaskPow,4) + " Intensity: " + FloatToString(DarkPow,4) );
+		GUI.Label (new Rect (offsetX, offsetY, 250, 30), L.T("Dark Mask Power: ") + FloatToString(DarkMaskPow,4) + " Intensity: " + FloatToString(DarkPow,4) );
 		DarkMaskPow = GUI.HorizontalSlider( new Rect( offsetX, offsetY + 30, 280, 10 ),DarkMaskPow,0.1f, 5.0f );
 		DarkPow = GUI.HorizontalSlider( new Rect( offsetX, offsetY + 50, 280, 10 ),DarkPow,0.0f, 5.0f );
 
 		offsetY += spacing2Y;
 
-		GUI.Label (new Rect (offsetX, offsetY, 250, 30), "Final Contrast: " + FloatToString(FinalContrast,4) );
+		GUI.Label (new Rect (offsetX, offsetY, 250, 30), L.T("Final Contrast: ") + FloatToString(FinalContrast,4) );
 		FinalContrast = GUI.HorizontalSlider( new Rect( offsetX, offsetY + 30, 280, 10 ),FinalContrast,-2.0f, 2.0f );
 
 		offsetY += spacingY;
 		
-		GUI.Label (new Rect (offsetX, offsetY, 250, 30), "Final Bias: " + FloatToString(FinalBias,4) );
+		GUI.Label (new Rect (offsetX, offsetY, 250, 30), L.T("Final Bias: ") + FloatToString(FinalBias,4) );
 		FinalBias = GUI.HorizontalSlider( new Rect( offsetX, offsetY + 30, 280, 10 ),FinalBias,-0.5f, 0.5f );
 
 		offsetY += spacingY;
 
-		GUI.Label (new Rect (offsetX, offsetY, 250, 30), "Keep Original Color: " + FloatToString(ColorLerp,4) );
+		GUI.Label (new Rect (offsetX, offsetY, 250, 30), L.T("Keep Original Color: ") + FloatToString(ColorLerp,4) );
 		ColorLerp = GUI.HorizontalSlider( new Rect( offsetX, offsetY + 30, 280, 10 ),ColorLerp,0.0f, 1.0f );
 
 		offsetY += spacingY;
 
-		GUI.Label (new Rect (offsetX, offsetY, 250, 30), "Saturation: " + FloatToString(Saturation,4) );
+		GUI.Label (new Rect (offsetX, offsetY, 250, 30), L.T("Saturation: ") + FloatToString(Saturation,4) );
 		Saturation = GUI.HorizontalSlider( new Rect( offsetX, offsetY + 30, 280, 10 ),Saturation,0.0f, 1.0f );
 
 		offsetY += spacingY;
 
-		if( GUI.Button (new Rect (offsetX, offsetY, 130, 30), "Set as Metallic" ) ){
+		if( GUI.Button (new Rect (offsetX, offsetY, 130, 30), L.T("Set as Metallic") ) ){
 			StartCoroutine( ProcessRoughSpec ( Textures.specular ) );
 		}
 		

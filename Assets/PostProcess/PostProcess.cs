@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -62,6 +62,9 @@ public class PostProcess : MonoBehaviour {
 	public Texture noiseTexture;
 	[Range( 0.0f, 1.0f)]
 	public float noiseAmount = 0.2f;
+	// Materialize CE
+	public bool filmicTonemap = true;
+	public float exposure = 1.0f;
 	
 	[Header("Depth of Field:")]
 	public float focalDepth = 2.0f;
@@ -416,6 +419,8 @@ public class PostProcess : MonoBehaviour {
 		
 		PostProcessMaterial.SetTexture ( "_NoiseTex", noiseTexture );
 		PostProcessMaterial.SetFloat ("_NoiseAmount", noiseAmount );
+		PostProcessMaterial.SetFloat ("_Tonemap", filmicTonemap ? 1.0f : 0.0f );
+		PostProcessMaterial.SetFloat ("_Exposure", exposure );
 		
 		PostProcessMaterial.SetTexture ( "_BloomTex", bloomBlurY );
 		PostProcessMaterial.SetFloat ("_BloomAmount", bloomAmount );

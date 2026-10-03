@@ -1,4 +1,4 @@
-﻿Shader "Custom/CubeMapProbe" {
+Shader "Custom/CubeMapProbe" {
 	Properties {
 		_MainTex ("Base (RGB)", 2D) = "white" {}
 		_CubeMap ("Cube Map", CUBE) = "" {}
@@ -24,6 +24,11 @@
 			float _Factor;
 			
 			uniform samplerCUBE _GlobalCubemap;
+			// Materialize CE: your own HDRI (equirectangular), its rotation and brightness.
+			uniform sampler2D _GlobalEquirect;
+			uniform float _EnvEquirect;
+			uniform float _EnvRotation;
+			uniform float _EnvExposure;
 			uniform samplerCUBE _ProbeCubemap;
 
 			// vertex-to-fragment interpolation data
@@ -45,9 +50,21 @@
 				
 				fixed3 localNormal = normalize( IN.localNormal.xyz );
 				
-				half3 ambIBL = texCUBElod(_GlobalCubemap, half4( localNormal , 0.0 ) ).xyz;
-				
-				return float4( ( ambIBL + ( ambIBL * ambIBL ) ) * _Factor, 1.0 );
+				float s = sin( _EnvRotation ), c = cos( _EnvRotation );
+				float3 dir = float3( c * localNormal.x - s * localNormal.z, localNormal.y, s * localNormal.x + c * localNormal.z );
+
+				half3 ambIBL;
+				if ( _EnvEquirect > 0.5 ) {
+					float2 uv = float2( atan2( dir.x, dir.z ) / 6.2831853 + 0.5, asin( clamp( dir.y, -1.0, 1.0 ) ) / 3.1415927 + 0.5 );
+					ambIBL = tex2Dlod( _GlobalEquirect, float4( uv, 0, 0 ) ).xyz;
+				} else {
+					ambIBL = texCUBElod(_GlobalCubemap, half4( dir , 0.0 ) ).xyz;
+				}
+				float exposure = _EnvExposure > 0.0 ? _EnvExposure : 1.0;
+				// Real HDR data needs no boost (the built-in 8-bit cubemaps get one to fake their highlights).
+				if ( _EnvEquirect > 0.5 ) return float4( ambIBL * exposure * _Factor, 1.0 );
+
+				return float4( ( ambIBL + ( ambIBL * ambIBL ) ) * exposure * _Factor, 1.0 );
 				
 			}
 			ENDCG

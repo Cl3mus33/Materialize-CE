@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.ComponentModel;
 
@@ -583,12 +583,13 @@ public class HeightFromDiffuseGui : MonoBehaviour {
 	}
 
 	void DoMyWindow ( int windowID ) {
+		UiHelp.Panel = "Height";
 		
 		int offsetX = 10;
 		int offsetY = 30;
 
 		if (MainGuiScript._DiffuseMap != null) { GUI.enabled = true; } else { GUI.enabled = false; }
-		HFDS.useAdjustedDiffuse = GUI.Toggle(new Rect(offsetX, offsetY, 80, 30), HFDS.useAdjustedDiffuse, " Diffuse");
+		HFDS.useAdjustedDiffuse = GUI.Toggle (new Rect(offsetX, offsetY, 80, 30), HFDS.useAdjustedDiffuse, UiHelp.Content (" Albedo"));
 		if (HFDS.useAdjustedDiffuse)
         {
             HFDS.useOriginalDiffuse = false;
@@ -600,7 +601,7 @@ public class HeightFromDiffuseGui : MonoBehaviour {
         }
 
 		if (MainGuiScript._DiffuseMapOriginal != null) { GUI.enabled = true; } else { GUI.enabled = false; }
-        HFDS.useOriginalDiffuse = GUI.Toggle (new Rect (offsetX + 80, offsetY, 120, 30), HFDS.useOriginalDiffuse, "Original Diffuse");
+        HFDS.useOriginalDiffuse = GUI.Toggle (new Rect (offsetX + 80, offsetY, 120, 30), HFDS.useOriginalDiffuse, UiHelp.Content ("Original Albedo"));
 		if (HFDS.useOriginalDiffuse)
         {
 			HFDS.useAdjustedDiffuse = false;
@@ -612,7 +613,7 @@ public class HeightFromDiffuseGui : MonoBehaviour {
         }
 
 		if (MainGuiScript._NormalMap) { GUI.enabled = true; } else { GUI.enabled = false; }
-        HFDS.useNormal = GUI.Toggle(new Rect(offsetX + 210, offsetY, 80, 30), HFDS.useNormal, " Normal");
+        HFDS.useNormal = GUI.Toggle (new Rect(offsetX + 210, offsetY, 80, 30), HFDS.useNormal, UiHelp.Content (" Normal"));
         if (HFDS.useNormal)
         {
 			HFDS.useAdjustedDiffuse = false;
@@ -625,7 +626,7 @@ public class HeightFromDiffuseGui : MonoBehaviour {
         GUI.enabled = true;
         offsetY += 30;
 
-		GUI.Label(new Rect(offsetX, offsetY, 250, 30), "Height Reveal Slider");
+		GUI.Label (new Rect(offsetX, offsetY, 250, 30), UiHelp.Content ("Height Reveal Slider"));
 		Slider = GUI.HorizontalSlider(new Rect(offsetX, offsetY + 20, 280, 10), Slider, 0.0f, 1.0f);
 		offsetY += 40;
 
@@ -646,17 +647,17 @@ public class HeightFromDiffuseGui : MonoBehaviour {
 
         } else {
 
-            GUI.Label(new Rect(offsetX, offsetY, 250, 30), "Frequency Weight Equalizer");
-            GUI.Label(new Rect(offsetX + 225, offsetY, 100, 30), "Presets");
-            if (GUI.Button(new Rect(offsetX + 215, offsetY + 30, 60, 20), "Default"))
+            GUI.Label (new Rect(offsetX, offsetY, 250, 30), UiHelp.Content ("Frequency Weight Equalizer"));
+            GUI.Label (new Rect(offsetX + 225, offsetY, 100, 30), UiHelp.Content ("Presets"));
+            if (GUI.Button (new Rect(offsetX + 215, offsetY + 30, 60, 20), UiHelp.Content ("Default")))
             {
                 SetWeightEQDefault();
             }
-            if (GUI.Button(new Rect(offsetX + 215, offsetY + 60, 60, 20), "Details"))
+            if (GUI.Button (new Rect(offsetX + 215, offsetY + 60, 60, 20), UiHelp.Content ("Details")))
             {
                 SetWeightEQDetail();
             }
-            if (GUI.Button(new Rect(offsetX + 215, offsetY + 90, 60, 20), "Displace"))
+            if (GUI.Button (new Rect(offsetX + 215, offsetY + 90, 60, 20), UiHelp.Content ("Displace")))
             {
                 SetWeightEQDisplace();
             }
@@ -674,17 +675,17 @@ public class HeightFromDiffuseGui : MonoBehaviour {
             offsetY += 100;
 
 
-            GUI.Label(new Rect(offsetX, offsetY, 250, 30), "Frequency Contrast Equalizer");
-            GUI.Label(new Rect(offsetX + 225, offsetY, 100, 30), "Presets");
-            if (GUI.Button(new Rect(offsetX + 215, offsetY + 30, 60, 20), "Default"))
+            GUI.Label (new Rect(offsetX, offsetY, 250, 30), UiHelp.Content ("Frequency Contrast Equalizer"));
+            GUI.Label (new Rect(offsetX + 225, offsetY, 100, 30), UiHelp.Content ("Presets"));
+            if (GUI.Button (new Rect(offsetX + 215, offsetY + 30, 60, 20), UiHelp.Content ("Default")))
             {
                 SetContrastEQDefault();
             }
-            if (GUI.Button(new Rect(offsetX + 215, offsetY + 60, 60, 20), "Cracks"))
+            if (GUI.Button (new Rect(offsetX + 215, offsetY + 60, 60, 20), UiHelp.Content ("Cracks")))
             {
                 SetContrastEQCrackedMud();
             }
-            if (GUI.Button(new Rect(offsetX + 215, offsetY + 90, 60, 20), "Funky"))
+            if (GUI.Button (new Rect(offsetX + 215, offsetY + 90, 60, 20), UiHelp.Content ("Funky")))
             {
                 SetContrastEQFunky();
             }
@@ -698,14 +699,14 @@ public class HeightFromDiffuseGui : MonoBehaviour {
             HFDS.Blur5Contrast = GUI.VerticalSlider(new Rect(offsetX + 30, offsetY, 10, 80), HFDS.Blur5Contrast, 5.0f, -5.0f);
             HFDS.Blur6Contrast = GUI.VerticalSlider(new Rect(offsetX + 0, offsetY, 10, 80), HFDS.Blur6Contrast, 5.0f, -5.0f);
             offsetX -= 10;
-            GUI.Label(new Rect(offsetX + 210, offsetY + 21, 30, 30), "-");
-            GUI.Label(new Rect(offsetX + 180, offsetY + 21, 30, 30), "-");
-            GUI.Label(new Rect(offsetX + 150, offsetY + 21, 30, 30), "-");
-            GUI.Label(new Rect(offsetX + 120, offsetY + 21, 30, 30), "-");
-            GUI.Label(new Rect(offsetX + 90, offsetY + 21, 30, 30), "-");
-            GUI.Label(new Rect(offsetX + 60, offsetY + 21, 30, 30), "-");
-            GUI.Label(new Rect(offsetX + 30, offsetY + 21, 30, 30), "-");
-            GUI.Label(new Rect(offsetX + 0, offsetY + 21, 30, 30), "-");
+            GUI.Label (new Rect(offsetX + 210, offsetY + 21, 30, 30), UiHelp.Content ("-"));
+            GUI.Label (new Rect(offsetX + 180, offsetY + 21, 30, 30), UiHelp.Content ("-"));
+            GUI.Label (new Rect(offsetX + 150, offsetY + 21, 30, 30), UiHelp.Content ("-"));
+            GUI.Label (new Rect(offsetX + 120, offsetY + 21, 30, 30), UiHelp.Content ("-"));
+            GUI.Label (new Rect(offsetX + 90, offsetY + 21, 30, 30), UiHelp.Content ("-"));
+            GUI.Label (new Rect(offsetX + 60, offsetY + 21, 30, 30), UiHelp.Content ("-"));
+            GUI.Label (new Rect(offsetX + 30, offsetY + 21, 30, 30), UiHelp.Content ("-"));
+            GUI.Label (new Rect(offsetX + 0, offsetY + 21, 30, 30), UiHelp.Content ("-"));
             offsetY += 100;
 
 
@@ -721,7 +722,7 @@ public class HeightFromDiffuseGui : MonoBehaviour {
                 }
                 offsetY += 30;
 
-                if (GUI.Button(new Rect(offsetX, offsetY + 5, 80, 20), "Pick Color"))
+                if (GUI.Button (new Rect(offsetX, offsetY + 5, 80, 20), UiHelp.Content ("Pick Color")))
                 {
                     selectingColor = true;
                     currentSelection = 1;
@@ -729,22 +730,22 @@ public class HeightFromDiffuseGui : MonoBehaviour {
 
                 GUI.DrawTexture(new Rect(offsetX + 10, offsetY + 35, 60, 60), _SampleColorMap1);
 
-                GUI.Label(new Rect(offsetX + 90, offsetY, 250, 30), "Hue");
+                GUI.Label (new Rect(offsetX + 90, offsetY, 250, 30), UiHelp.Content ("Hue"));
                 doStuff = GuiHelper.VerticalSlider(new Rect(offsetX + 95, offsetY + 30, 10, 70), HFDS.HueWeight1, out HFDS.HueWeight1, 1.0f, 0.0f, doStuff);
 
-                GUI.Label(new Rect(offsetX + 120, offsetY, 250, 30), "Sat");
+                GUI.Label (new Rect(offsetX + 120, offsetY, 250, 30), UiHelp.Content ("Sat"));
                 doStuff = GuiHelper.VerticalSlider(new Rect(offsetX + 125, offsetY + 30, 10, 70), HFDS.SatWeight1, out HFDS.SatWeight1, 1.0f, 0.0f, doStuff);
 
-                GUI.Label(new Rect(offsetX + 150, offsetY, 250, 30), "Lum");
+                GUI.Label (new Rect(offsetX + 150, offsetY, 250, 30), UiHelp.Content ("Lum"));
                 doStuff = GuiHelper.VerticalSlider(new Rect(offsetX + 155, offsetY + 30, 10, 70), HFDS.LumWeight1, out HFDS.LumWeight1, 1.0f, 0.0f, doStuff);
 
-                GUI.Label(new Rect(offsetX + 180, offsetY, 250, 30), "Low");
+                GUI.Label (new Rect(offsetX + 180, offsetY, 250, 30), UiHelp.Content ("Low"));
                 doStuff = GuiHelper.VerticalSlider(new Rect(offsetX + 185, offsetY + 30, 10, 70), HFDS.MaskLow1, out HFDS.MaskLow1, 1.0f, 0.0f, doStuff);
 
-                GUI.Label(new Rect(offsetX + 210, offsetY, 250, 30), "High");
+                GUI.Label (new Rect(offsetX + 210, offsetY, 250, 30), UiHelp.Content ("High"));
                 doStuff = GuiHelper.VerticalSlider(new Rect(offsetX + 215, offsetY + 30, 10, 70), HFDS.MaskHigh1, out HFDS.MaskHigh1, 1.0f, 0.0f, doStuff);
 
-                GUI.Label(new Rect(offsetX + 240, offsetY, 250, 30), "Height");
+                GUI.Label (new Rect(offsetX + 240, offsetY, 250, 30), UiHelp.Content ("Height"));
                 doStuff = GuiHelper.VerticalSlider(new Rect(offsetX + 255, offsetY + 30, 10, 70), HFDS.Sample1Height, out HFDS.Sample1Height, 1.0f, 0.0f, doStuff);
 
                 offsetY += 110;
@@ -767,7 +768,7 @@ public class HeightFromDiffuseGui : MonoBehaviour {
                 }
                 offsetY += 30;
 
-                if (GUI.Button(new Rect(offsetX, offsetY + 5, 80, 20), "Pick Color"))
+                if (GUI.Button (new Rect(offsetX, offsetY + 5, 80, 20), UiHelp.Content ("Pick Color")))
                 {
                     selectingColor = true;
                     currentSelection = 2;
@@ -775,22 +776,22 @@ public class HeightFromDiffuseGui : MonoBehaviour {
 
                 GUI.DrawTexture(new Rect(offsetX + 10, offsetY + 35, 60, 60), _SampleColorMap2);
 
-                GUI.Label(new Rect(offsetX + 90, offsetY, 250, 30), "Hue");
+                GUI.Label (new Rect(offsetX + 90, offsetY, 250, 30), UiHelp.Content ("Hue"));
                 doStuff = GuiHelper.VerticalSlider(new Rect(offsetX + 95, offsetY + 30, 10, 70), HFDS.HueWeight2, out HFDS.HueWeight2, 1.0f, 0.0f, doStuff);
 
-                GUI.Label(new Rect(offsetX + 120, offsetY, 250, 30), "Sat");
+                GUI.Label (new Rect(offsetX + 120, offsetY, 250, 30), UiHelp.Content ("Sat"));
                 doStuff = GuiHelper.VerticalSlider(new Rect(offsetX + 125, offsetY + 30, 10, 70), HFDS.SatWeight2, out HFDS.SatWeight2, 1.0f, 0.0f, doStuff);
 
-                GUI.Label(new Rect(offsetX + 150, offsetY, 250, 30), "Lum");
+                GUI.Label (new Rect(offsetX + 150, offsetY, 250, 30), UiHelp.Content ("Lum"));
                 doStuff = GuiHelper.VerticalSlider(new Rect(offsetX + 155, offsetY + 30, 10, 70), HFDS.LumWeight2, out HFDS.LumWeight2, 1.0f, 0.0f, doStuff);
 
-                GUI.Label(new Rect(offsetX + 180, offsetY, 250, 30), "Low");
+                GUI.Label (new Rect(offsetX + 180, offsetY, 250, 30), UiHelp.Content ("Low"));
                 doStuff = GuiHelper.VerticalSlider(new Rect(offsetX + 185, offsetY + 30, 10, 70), HFDS.MaskLow2, out HFDS.MaskLow2, 1.0f, 0.0f, doStuff);
 
-                GUI.Label(new Rect(offsetX + 210, offsetY, 250, 30), "High");
+                GUI.Label (new Rect(offsetX + 210, offsetY, 250, 30), UiHelp.Content ("High"));
                 doStuff = GuiHelper.VerticalSlider(new Rect(offsetX + 215, offsetY + 30, 10, 70), HFDS.MaskHigh2, out HFDS.MaskHigh2, 1.0f, 0.0f, doStuff);
 
-                GUI.Label(new Rect(offsetX + 240, offsetY, 250, 30), "Height");
+                GUI.Label (new Rect(offsetX + 240, offsetY, 250, 30), UiHelp.Content ("Height"));
                 doStuff = GuiHelper.VerticalSlider(new Rect(offsetX + 255, offsetY + 30, 10, 70), HFDS.Sample2Height, out HFDS.Sample2Height, 1.0f, 0.0f, doStuff);
 
                 offsetY += 110;
@@ -824,15 +825,18 @@ public class HeightFromDiffuseGui : MonoBehaviour {
         offsetY += 50;
 
 		if (busy) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), "Set as Height Map" ) ){
+		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), UiHelp.Content ("Set as Height Map")) ){
             StartCoroutine( ProcessHeight () );
 		}
 		GUI.enabled = true;
+
+		Tips.Capture (true);
 
 		GUI.DragWindow();
 	}
 
 	void OnGUI () {
+		Theme.Apply ();
 
 		windowRect.width = 300;
 		windowRect.height = 590;
@@ -849,7 +853,11 @@ public class HeightFromDiffuseGui : MonoBehaviour {
 			windowRect.height += 40;
 		}
 
-		windowRect = GUI.Window(13, windowRect, DoMyWindow, "Height From Diffuse");
+		windowRect = UiShell.Dock (windowRect);
+
+		windowRect = UiShell.Window(13, windowRect, DoMyWindow, L.T("Height From Albedo"));
+
+		Tips.Block (windowRect);
 
 	}
 
@@ -1010,10 +1018,8 @@ public class HeightFromDiffuseGui : MonoBehaviour {
 			Destroy (MainGuiScript._HeightMap);
 		}
 
-		RenderTexture.active = _TempHeightMap;
-		MainGuiScript._HeightMap = new Texture2D( _TempHeightMap.width, _TempHeightMap.height, TextureFormat.ARGB32, true, true );
-		MainGuiScript._HeightMap.ReadPixels(new Rect(0, 0, _TempHeightMap.width, _TempHeightMap.height), 0, 0);
-		MainGuiScript._HeightMap.Apply();
+		// Materialize CE: read back without freezing, mipmaps made on the GPU.
+		yield return StartCoroutine (GpuReadback.Into (_TempHeightMap, t => MainGuiScript._HeightMap = t));
 		RenderTexture.active = null;
 
 		// Save high fidelity for normal making

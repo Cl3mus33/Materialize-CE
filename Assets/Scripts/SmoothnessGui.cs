@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.ComponentModel;
 
@@ -447,6 +447,7 @@ public class SmoothnessGui : MonoBehaviour {
 	}
 
 	void DoMyWindow ( int windowID ) {
+		UiHelp.Panel = "Smoothness";
 		
 		int spacingX = 0;
 		int spacingY = 50;
@@ -456,58 +457,58 @@ public class SmoothnessGui : MonoBehaviour {
 		int offsetY = 30;
 
 		if (_DiffuseMap != null) { GUI.enabled = true; } else { GUI.enabled = false; }
-		if( GUI.Toggle (new Rect (offsetX, offsetY, 140, 30), SS.useAdjustedDiffuse, " Use Edited Diffuse")) {
+		if( GUI.Toggle (new Rect (offsetX, offsetY, 140, 30), SS.useAdjustedDiffuse, UiHelp.Content (" Use Edited Albedo"))) {
 			SS.useAdjustedDiffuse = true;
 			SS.useOriginalDiffuse = false;
 		}
 		GUI.enabled = true;
-		if (GUI.Toggle (new Rect (offsetX + 150, offsetY, 140, 30), SS.useOriginalDiffuse, " Use Original Diffuse")) {
+		if (GUI.Toggle (new Rect (offsetX + 150, offsetY, 140, 30), SS.useOriginalDiffuse, UiHelp.Content (" Use Original Albedo"))) {
 			SS.useAdjustedDiffuse = false;
 			SS.useOriginalDiffuse = true;
 		}
 
 		offsetY += 30;
 
-		GUI.Label (new Rect (offsetX, offsetY, 250, 30), "Smoothness Reveal Slider" );
+		GUI.Label (new Rect (offsetX, offsetY, 250, 30), UiHelp.Content ("Smoothness Reveal Slider"));
 		Slider = GUI.HorizontalSlider( new Rect( offsetX, offsetY + 20, 280, 10 ),Slider,0.0f, 1.0f );
 		offsetY += 40;
 
 		GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Metal Smoothness", SS.MetalSmoothness, SS.MetalSmoothnessText, out SS.MetalSmoothness, out SS.MetalSmoothnessText, 0.0f, 1.0f );
 		offsetY += 40;
 
-		SS.UseSample1 = GUI.Toggle (new Rect (offsetX, offsetY, 150, 20), SS.UseSample1, "Use Color Sample 1");
+		SS.UseSample1 = GUI.Toggle (new Rect (offsetX, offsetY, 150, 20), SS.UseSample1, UiHelp.Content ("Use Color Sample 1"));
 		if (SS.UseSample1) {
 
-			SS.IsolateSample1 = GUI.Toggle (new Rect (offsetX + 180, offsetY, 150, 20), SS.IsolateSample1, "Isolate Mask");
+			SS.IsolateSample1 = GUI.Toggle (new Rect (offsetX + 180, offsetY, 150, 20), SS.IsolateSample1, UiHelp.Content ("Isolate Mask"));
 			if( SS.IsolateSample1 ){
 				SS.IsolateSample2 = false;
 				SS.IsolateSample3 = false;
 			}
 			offsetY += 30;
 
-			if ( GUI.Button (new Rect (offsetX, offsetY + 5, 80, 20), "Pick Color") ) {
+			if ( GUI.Button (new Rect (offsetX, offsetY + 5, 80, 20), UiHelp.Content ("Pick Color")) ) {
 				selectingColor = true;
 				currentSelection = 1;
 			}
 		
 			GUI.DrawTexture (new Rect (offsetX + 10, offsetY + 35, 60, 60), _SampleColorMap1);
 		
-			GUI.Label (new Rect (offsetX + 90, offsetY, 250, 30), "Hue");
+			GUI.Label (new Rect (offsetX + 90, offsetY, 250, 30), UiHelp.Content ("Hue"));
 			SS.HueWeight1 = GUI.VerticalSlider (new Rect (offsetX + 95, offsetY + 30, 10, 70), SS.HueWeight1, 1.0f, 0.0f);
 		
-			GUI.Label (new Rect (offsetX + 120, offsetY, 250, 30), "Sat");
+			GUI.Label (new Rect (offsetX + 120, offsetY, 250, 30), UiHelp.Content ("Sat"));
 			SS.SatWeight1 = GUI.VerticalSlider (new Rect (offsetX + 125, offsetY + 30, 10, 70), SS.SatWeight1, 1.0f, 0.0f);
 		
-			GUI.Label (new Rect (offsetX + 150, offsetY, 250, 30), "Lum");
+			GUI.Label (new Rect (offsetX + 150, offsetY, 250, 30), UiHelp.Content ("Lum"));
 			SS.LumWeight1 = GUI.VerticalSlider (new Rect (offsetX + 155, offsetY + 30, 10, 70), SS.LumWeight1, 1.0f, 0.0f);
 		
-			GUI.Label (new Rect (offsetX + 180, offsetY, 250, 30), "Low");
+			GUI.Label (new Rect (offsetX + 180, offsetY, 250, 30), UiHelp.Content ("Low"));
 			SS.MaskLow1 = GUI.VerticalSlider (new Rect (offsetX + 185, offsetY + 30, 10, 70), SS.MaskLow1, 1.0f, 0.0f);
 		
-			GUI.Label (new Rect (offsetX + 210, offsetY, 250, 30), "High");
+			GUI.Label (new Rect (offsetX + 210, offsetY, 250, 30), UiHelp.Content ("High"));
 			SS.MaskHigh1 = GUI.VerticalSlider (new Rect (offsetX + 215, offsetY + 30, 10, 70), SS.MaskHigh1, 1.0f, 0.0f);
 
-			GUI.Label (new Rect (offsetX + 240, offsetY, 250, 30), "Smooth");
+			GUI.Label (new Rect (offsetX + 240, offsetY, 250, 30), UiHelp.Content ("Smooth"));
 			SS.Sample1Smoothness = GUI.VerticalSlider (new Rect (offsetX + 255, offsetY + 30, 10, 70), SS.Sample1Smoothness, 1.0f, 0.0f);
 		
 			offsetY += 110;
@@ -517,39 +518,39 @@ public class SmoothnessGui : MonoBehaviour {
 		}
 
 
-		SS.UseSample2 = GUI.Toggle (new Rect (offsetX, offsetY, 150, 20), SS.UseSample2, "Use Color Sample 2");
+		SS.UseSample2 = GUI.Toggle (new Rect (offsetX, offsetY, 150, 20), SS.UseSample2, UiHelp.Content ("Use Color Sample 2"));
 		if (SS.UseSample2) {
 			
-			SS.IsolateSample2 = GUI.Toggle (new Rect (offsetX + 180, offsetY, 150, 20), SS.IsolateSample2, "Isolate Mask");
+			SS.IsolateSample2 = GUI.Toggle (new Rect (offsetX + 180, offsetY, 150, 20), SS.IsolateSample2, UiHelp.Content ("Isolate Mask"));
 			if( SS.IsolateSample2 ){
 				SS.IsolateSample1 = false;
 				SS.IsolateSample3 = false;
 			}
 			offsetY += 30;
 			
-			if ( GUI.Button (new Rect (offsetX, offsetY + 5, 80, 20), "Pick Color") ) {
+			if ( GUI.Button (new Rect (offsetX, offsetY + 5, 80, 20), UiHelp.Content ("Pick Color")) ) {
 				selectingColor = true;
 				currentSelection = 2;
 			}
 			
 			GUI.DrawTexture (new Rect (offsetX + 10, offsetY + 35, 60, 60), _SampleColorMap2);
 			
-			GUI.Label (new Rect (offsetX + 90, offsetY, 250, 30), "Hue");
+			GUI.Label (new Rect (offsetX + 90, offsetY, 250, 30), UiHelp.Content ("Hue"));
 			SS.HueWeight2 = GUI.VerticalSlider (new Rect (offsetX + 95, offsetY + 30, 10, 70), SS.HueWeight2, 1.0f, 0.0f);
 			
-			GUI.Label (new Rect (offsetX + 120, offsetY, 250, 30), "Sat");
+			GUI.Label (new Rect (offsetX + 120, offsetY, 250, 30), UiHelp.Content ("Sat"));
 			SS.SatWeight2 = GUI.VerticalSlider (new Rect (offsetX + 125, offsetY + 30, 10, 70), SS.SatWeight2, 1.0f, 0.0f);
 			
-			GUI.Label (new Rect (offsetX + 150, offsetY, 250, 30), "Lum");
+			GUI.Label (new Rect (offsetX + 150, offsetY, 250, 30), UiHelp.Content ("Lum"));
 			SS.LumWeight2 = GUI.VerticalSlider (new Rect (offsetX + 155, offsetY + 30, 10, 70), SS.LumWeight2, 1.0f, 0.0f);
 			
-			GUI.Label (new Rect (offsetX + 180, offsetY, 250, 30), "Low");
+			GUI.Label (new Rect (offsetX + 180, offsetY, 250, 30), UiHelp.Content ("Low"));
 			SS.MaskLow2 = GUI.VerticalSlider (new Rect (offsetX + 185, offsetY + 30, 10, 70), SS.MaskLow2, 1.0f, 0.0f);
 			
-			GUI.Label (new Rect (offsetX + 210, offsetY, 250, 30), "High");
+			GUI.Label (new Rect (offsetX + 210, offsetY, 250, 30), UiHelp.Content ("High"));
 			SS.MaskHigh2 = GUI.VerticalSlider (new Rect (offsetX + 215, offsetY + 30, 10, 70), SS.MaskHigh2, 1.0f, 0.0f);
 			
-			GUI.Label (new Rect (offsetX + 240, offsetY, 250, 30), "Smooth");
+			GUI.Label (new Rect (offsetX + 240, offsetY, 250, 30), UiHelp.Content ("Smooth"));
 			SS.Sample2Smoothness = GUI.VerticalSlider (new Rect (offsetX + 255, offsetY + 30, 10, 70), SS.Sample2Smoothness, 1.0f, 0.0f);
 			
 			offsetY += 110;
@@ -580,15 +581,18 @@ public class SmoothnessGui : MonoBehaviour {
 		GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Final Bias", SS.FinalBias, SS.FinalBiasText, out SS.FinalBias, out SS.FinalBiasText, -0.5f, 0.5f );
 		offsetY += 50;
 		
-		if( GUI.Button (new Rect (offsetX, offsetY, 130, 30), "Set as Smoothness" ) ){
+		if( GUI.Button (new Rect (offsetX, offsetY, 130, 30), UiHelp.Content ("Set as Smoothness")) ){
 			StartCoroutine( ProcessSmoothness() );
 		}
+
+		Tips.Capture (true);
 
 		GUI.DragWindow();
 		
 	}
 
 	void OnGUI () {
+		Theme.Apply ();
 		
 		windowRect.width = 300;
 		windowRect.height = 490;
@@ -601,7 +605,11 @@ public class SmoothnessGui : MonoBehaviour {
 			windowRect.height += 110;
 		}
 		
-		windowRect = GUI.Window(17, windowRect, DoMyWindow, "Smoothness From Diffuse");
+		windowRect = UiShell.Dock (windowRect);
+		
+		windowRect = UiShell.Window(17, windowRect, DoMyWindow, L.T("Smoothness From Albedo"));
+		
+		Tips.Block (windowRect);
 		
 	}
 
@@ -754,9 +762,8 @@ public class SmoothnessGui : MonoBehaviour {
 			Destroy (MainGuiScript._SmoothnessMap);
 		}
 
-		MainGuiScript._SmoothnessMap = new Texture2D (_TempMap.width, _TempMap.height, TextureFormat.ARGB32, true, true);
-		MainGuiScript._SmoothnessMap.ReadPixels (new Rect (0, 0, _TempMap.width, _TempMap.height), 0, 0);
-		MainGuiScript._SmoothnessMap.Apply ();
+		// Materialize CE: read back without freezing, mipmaps made on the GPU.
+		yield return StartCoroutine (GpuReadback.Into (_TempMap, t => MainGuiScript._SmoothnessMap = t));
 
 		yield return new WaitForSeconds(0.01f);
 		

@@ -28,16 +28,9 @@ public class ScreenGuard : MonoBehaviour {
 		Screen.SetResolution(Screen.width, Screen.height, Screen.fullScreen);
 	}
 	
+	// Unity fixed that bug long ago; forcing the resolution back while the user drags the window edge only
+	// fights the resize, so this no longer does anything (Materialize CE). Kept so the scene keeps its component.
 	public void Update()
 	{
-		if (!isInited)
-		{
-			Start();
-		}
-		
-		if ((Screen.width != prevWidth) || (Screen.height != prevHeight))
-		{
-			SetResolution();
-		}
 	}
 }

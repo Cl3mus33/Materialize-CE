@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.ComponentModel;
 
@@ -295,6 +295,7 @@ public class EdgeFromNormalGui : MonoBehaviour {
 	}
 
 	void DoMyWindow ( int windowID ) {
+		UiHelp.Panel = "Edge";
 
 		int spacingX = 0;
 		int spacingY = 50;
@@ -305,18 +306,18 @@ public class EdgeFromNormalGui : MonoBehaviour {
 		doStuff = GuiHelper.Slider( new Rect( offsetX, offsetY, 280, 50 ), "Pre Contrast", ES.Blur0Contrast, ES.Blur0ContrastText, out ES.Blur0Contrast, out ES.Blur0ContrastText, 0.0f, 5.0f );
 		offsetY += 50;
 		
-		GUI.Label (new Rect (offsetX, offsetY, 250, 30), "Frequency Equalizer" );
-		GUI.Label (new Rect (offsetX + 225, offsetY, 100, 30), "Presets" );
-		if ( GUI.Button (new Rect (offsetX + 215, offsetY + 30, 60, 20), "Default") ) {
+		GUI.Label (new Rect (offsetX, offsetY, 250, 30), UiHelp.Content ("Frequency Equalizer"));
+		GUI.Label (new Rect (offsetX + 225, offsetY, 100, 30), UiHelp.Content ("Presets"));
+		if ( GUI.Button (new Rect (offsetX + 215, offsetY + 30, 60, 20), UiHelp.Content ("Default")) ) {
 			SetWeightEQDefault ();
 		}
-		if ( GUI.Button (new Rect (offsetX + 215, offsetY + 60, 60, 20), "Displace") ) {
+		if ( GUI.Button (new Rect (offsetX + 215, offsetY + 60, 60, 20), UiHelp.Content ("Displace")) ) {
 			SetWeightEQDisplace ();
 		}
-		if ( GUI.Button (new Rect (offsetX + 215, offsetY + 90, 60, 20), "Soft") ) {
+		if ( GUI.Button (new Rect (offsetX + 215, offsetY + 90, 60, 20), UiHelp.Content ("Soft")) ) {
 			SetWeightEQSoft ();
 		}
-		if ( GUI.Button (new Rect (offsetX + 215, offsetY + 120, 60, 20), "Tight") ) {
+		if ( GUI.Button (new Rect (offsetX + 215, offsetY + 120, 60, 20), UiHelp.Content ("Tight")) ) {
 			SetWeightEQTight ();
 		}
 		offsetY += 30;
@@ -350,19 +351,26 @@ public class EdgeFromNormalGui : MonoBehaviour {
 		offsetY += 50;
 
 
-		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), "Set as Edge Map" ) ){
+		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), UiHelp.Content ("Set as Edge Map")) ){
 			StartCoroutine( ProcessEdge() );
 		}
+		
+		Tips.Capture (true);
 		
 		GUI.DragWindow();
 	}
 
 	void OnGUI () {
+		Theme.Apply ();
 
 		windowRect.width = 300;
 		windowRect.height = 520;
 		
-		windowRect = GUI.Window(11, windowRect, DoMyWindow, "Edge from Normal");
+		windowRect = UiShell.Dock (windowRect);
+		
+		windowRect = UiShell.Window(11, windowRect, DoMyWindow, L.T("Edge from Normal"));
+		
+		Tips.Block (windowRect);
 		
 	}
 
@@ -471,9 +479,8 @@ public class EdgeFromNormalGui : MonoBehaviour {
 			Destroy (MainGuiScript._EdgeMap);
 		}
 
-		MainGuiScript._EdgeMap = new Texture2D (_TempEdgeMap.width, _TempEdgeMap.height, TextureFormat.ARGB32, true, true);
-		MainGuiScript._EdgeMap.ReadPixels (new Rect (0, 0, _TempEdgeMap.width, _TempEdgeMap.height), 0, 0);
-		MainGuiScript._EdgeMap.Apply ();
+		// Materialize CE: read back without freezing, mipmaps made on the GPU.
+		yield return StartCoroutine (GpuReadback.Into (_TempEdgeMap, t => MainGuiScript._EdgeMap = t));
 		
 		yield return new WaitForSeconds(0.1f);
 

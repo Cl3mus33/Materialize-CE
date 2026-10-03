@@ -1,4 +1,4 @@
-﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
 
 Shader "Hidden/Blit_Shader" {
 	Properties {
@@ -201,16 +201,32 @@ Shader "Hidden/Blit_Shader" {
 	}
 
 	
+	float _ScharrNormal;
+
+	float HeightAt (float2 uv) { return tex2Dlod(_MainTex, float4( uv, 0, 0 ) ).x; }
+
 	float4 fragNormal (v2f IN) : SV_Target
 	{
 		float2 UV = IN.uv;
 		float2 pixelSize = 1.0 / _ImageSize.xy;
 		float4 mainTex = tex2Dlod(_MainTex, float4( UV, 0, 0 ) );
-		float4 mainTexDDX = tex2Dlod(_MainTex, float4( UV.x + pixelSize.x, UV.y, 0, 0 ) );
-		float4 mainTexDDY = tex2Dlod(_MainTex, float4( UV.x, UV.y + pixelSize.y, 0, 0 ) );
-		
-		mainTexDDX = mainTexDDX - mainTex;
-		mainTexDDY = mainTexDDY - mainTex;
+		float4 mainTexDDX;
+		float4 mainTexDDY;
+
+		if( _ScharrNormal > 0.5 ){
+			// Materialize CE: Scharr filter. Centred on the pixel and averaged over its 8 neighbours, so the
+			// normal is not shifted half a pixel and picks up far less noise than a one-sided difference.
+			float2 px = pixelSize;
+			float tl = HeightAt( UV + float2( -px.x,  px.y ) ), t = HeightAt( UV + float2( 0,  px.y ) ), tr = HeightAt( UV + float2( px.x,  px.y ) );
+			float l  = HeightAt( UV + float2( -px.x, 0 ) ),                                         r  = HeightAt( UV + float2( px.x, 0 ) );
+			float bl = HeightAt( UV + float2( -px.x, -px.y ) ), b = HeightAt( UV + float2( 0, -px.y ) ), br = HeightAt( UV + float2( px.x, -px.y ) );
+			// Weights 3, 10, 3 on each side (sum 16), central difference over two pixels: same scale as before.
+			mainTexDDX = ( ( 3.0 * tr + 10.0 * r + 3.0 * br ) - ( 3.0 * tl + 10.0 * l + 3.0 * bl ) ) / 32.0;
+			mainTexDDY = ( ( 3.0 * tl + 10.0 * t + 3.0 * tr ) - ( 3.0 * bl + 10.0 * b + 3.0 * br ) ) / 32.0;
+		} else {
+			mainTexDDX = tex2Dlod(_MainTex, float4( UV.x + pixelSize.x, UV.y, 0, 0 ) ) - mainTex;
+			mainTexDDY = tex2Dlod(_MainTex, float4( UV.x, UV.y + pixelSize.y, 0, 0 ) ) - mainTex;
+		}
 		
 		float3 normalTex = normalize( cross( normalize( float3( 1.0, 0.0, mainTexDDX.x * _BlurContrast ) ), normalize( float3( 0.0, 1.0, mainTexDDY.x * _BlurContrast ) ) ) );
 		
@@ -340,6 +356,7 @@ Shader "Hidden/Blit_Shader" {
 	}
 	
 	float _Progress;
+	float _HorizonAO;
 	
 	float4 fragAO (v2f IN) : SV_Target
 	{
@@ -371,6 +388,14 @@ Shader "Hidden/Blit_Shader" {
 
 
 		float oneOverSpread = 1.0 / (float)_Spread;
+
+		// Materialize CE, horizon AO: the occlusion is measured against the surface's own tilt in this
+		// direction (a plain slope no longer darkens itself), and far samples count less than near ones.
+		float px1 = 1.0;
+		float slopeAhead = ( tex2Dlod(_HeightTex, float4( UV.xy + pixelSize.xy * direction * px1, 0, 0 ) ).x
+		                   - tex2Dlod(_HeightTex, float4( UV.xy - pixelSize.xy * direction * px1, 0, 0 ) ).x ) * _Depth / ( 2.0 * px1 );
+		float sinTangent = slopeAhead / sqrt( 1.0 + slopeAhead * slopeAhead );
+		float horizon = sinTangent;
 		
 		for( i = 1; i <= AOSamples; i++ ){
 			
@@ -396,6 +421,13 @@ Shader "Hidden/Blit_Shader" {
 			float sampleDist = saturate( length( samplePos ) * 0.1 );
 			float sampleAO = saturate( dot( float3(0,0,1), normalize( samplePos ) ) );
 			AO.y = max( sampleAO * sampleDist, AO.y );
+
+			float sinHorizon = samplePos.z / max( length( samplePos ), 1e-4 );
+			float falloff = 1.0 - progress * progress;
+			horizon = max( horizon, sinTangent + ( sinHorizon - sinTangent ) * falloff );
+		}
+		if( _HorizonAO > 0.5 ){
+			AO.y = saturate( horizon - sinTangent );
 		}
 		
 		AO.x *= 1.0 / AOAccum;

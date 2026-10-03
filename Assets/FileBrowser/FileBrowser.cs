@@ -166,6 +166,11 @@ public class FileBrowser : MonoBehaviour {
 	//===========================================================================
 	// Shows a file browser at current working dir, centered on screen occupying 2/3 of w and h (or more on low resolutions), Ok button string "Select"
 	public void ShowBrowser(string title, FinishedCallback callback) {
+		// Materialize CE: the Windows dialog instead of this browser (fast on big folders, any path).
+		if (NativeFileDialog.Available && this.isActiveAndEnabled) {
+			this.StartCoroutine(this.ShowNativeDialog(title, callback));
+			return;
+		}
 		string dir = this.defaultDir == "" ? Directory.GetCurrentDirectory() : this.defaultDir.FixPathSeparators();
 
 		if (firstUse) {
@@ -174,6 +179,26 @@ public class FileBrowser : MonoBehaviour {
 		}
 		this.ShowBrowser(title, callback, dir, screenRect, "Select");
 	}
+	// Opened on the next frame, out of OnGUI: a modal window in the middle of a GUI pass upsets Unity's layout.
+	IEnumerator ShowNativeDialog(string title, FinishedCallback callback) {
+		yield return null;
+		string path = null;
+		bool failed = false;
+		try {
+			path = NativeFileDialog.Show(title, this.fileMasks, title.StartsWith("Save"));
+		} catch (Exception) {
+			failed = true;
+		}
+		if (failed) {
+			// Fall back to the built-in browser.
+			string dir = this.defaultDir == "" ? Directory.GetCurrentDirectory() : this.defaultDir.FixPathSeparators();
+			if (firstUse) { screenRect = this.GetDefaultRect(); firstUse = false; }
+			this.ShowBrowser(title, callback, dir, screenRect, "Select");
+		} else if (path != null) {
+			callback(path);
+		}
+	}
+
 	public void ShowBrowser(string title, FinishedCallback callback, string okString) {
 		string dir = this.defaultDir == "" ? Directory.GetCurrentDirectory() : this.defaultDir.FixPathSeparators();
 

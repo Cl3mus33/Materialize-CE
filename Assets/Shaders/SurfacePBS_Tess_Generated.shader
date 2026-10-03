@@ -1,4 +1,4 @@
-﻿Shader "Custom/SurfacePBS_Tess_Generated" {
+Shader "Custom/SurfacePBS_Tess_Generated" {
 	Properties {
 		_DiffuseMap("Diffuse", 2D) = "grey" {}
 		_NormalMap("Normal", 2D) = "bump" {}
@@ -125,6 +125,10 @@ CGPROGRAM
 		//float _TopProj;
 
 		float _Parallax;
+		// Materialize CE: Adjust's reveal slider (see SurfacePBS_Tess).
+		uniform float _AdjustReveal;
+		uniform float _AdjustRevealInvert;
+		uniform sampler2D _AdjustRevealMap;
 		float _DispOffset;
 		float _EdgeLength;
 
@@ -167,7 +171,7 @@ CGPROGRAM
 				d = lerp( dy, d, TexBlend );
 			#endif
 
-			v.vertex.xyz += v.normal * d;
+			if ( !( _AdjustReveal > 0.0 && v.texcoord.x < _AdjustReveal ) ) v.vertex.xyz += v.normal * d;   // the revealed map stays flat
 
 		}
 
@@ -264,6 +268,18 @@ CGPROGRAM
 			o.Occlusion = pow( texAO, max( _AOPower, 0.001 ) );
 			half3 ambIBL = texCUBElod(_ProbeCubemap, half4( normalize( worldNormal ), 7 ) ).xyz;
 			o.Emission = texDiffuse.xyz * ambIBL * o.Occlusion * 0.5;
+
+			float cut = IN.uv_DiffuseMap.x;
+			if ( _AdjustReveal > 0.0 && cut < _AdjustReveal ) {
+				half3 m = tex2D( _AdjustRevealMap, UV ).rgb;
+				if ( _AdjustRevealInvert > 0.5 ) m = 1.0 - m;
+				o.Albedo = 0; o.Metallic = 1; o.Smoothness = 0; o.Occlusion = 0; o.Normal = float3( 0, 0, 1 );   // black metal: no light, no reflection
+				o.Emission = m;
+			}
+			if ( _AdjustReveal > 0.0 && _AdjustReveal < 1.0 && abs( cut - _AdjustReveal ) < 0.0015 ) {
+				o.Albedo = 0; o.Metallic = 0; o.Smoothness = 0;
+				o.Emission = half3( 0.24, 0.55, 0.99 );
+			}
 		}
 		
 
@@ -615,6 +631,10 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 		//float _TopProj;
 
 		float _Parallax;
+		// Materialize CE: Adjust's reveal slider (see SurfacePBS_Tess).
+		uniform float _AdjustReveal;
+		uniform float _AdjustRevealInvert;
+		uniform sampler2D _AdjustRevealMap;
 		float _DispOffset;
 		float _EdgeLength;
 
@@ -657,7 +677,7 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 				d = lerp( dy, d, TexBlend );
 			#endif
 
-			v.vertex.xyz += v.normal * d;
+			if ( !( _AdjustReveal > 0.0 && v.texcoord.x < _AdjustReveal ) ) v.vertex.xyz += v.normal * d;   // the revealed map stays flat
 
 		}
 
@@ -754,6 +774,18 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 			o.Occlusion = pow( texAO, max( _AOPower, 0.001 ) );
 			half3 ambIBL = texCUBElod(_ProbeCubemap, half4( normalize( worldNormal ), 7 ) ).xyz;
 			o.Emission = texDiffuse.xyz * ambIBL * o.Occlusion * 0.5;
+
+			float cut = IN.uv_DiffuseMap.x;
+			if ( _AdjustReveal > 0.0 && cut < _AdjustReveal ) {
+				half3 m = tex2D( _AdjustRevealMap, UV ).rgb;
+				if ( _AdjustRevealInvert > 0.5 ) m = 1.0 - m;
+				o.Albedo = 0; o.Metallic = 1; o.Smoothness = 0; o.Occlusion = 0; o.Normal = float3( 0, 0, 1 );   // black metal: no light, no reflection
+				o.Emission = m;
+			}
+			if ( _AdjustReveal > 0.0 && _AdjustReveal < 1.0 && abs( cut - _AdjustReveal ) < 0.0015 ) {
+				o.Albedo = 0; o.Metallic = 0; o.Smoothness = 0;
+				o.Emission = half3( 0.24, 0.55, 0.99 );
+			}
 		}
 		
 
@@ -1105,6 +1137,10 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 		//float _TopProj;
 
 		float _Parallax;
+		// Materialize CE: Adjust's reveal slider (see SurfacePBS_Tess).
+		uniform float _AdjustReveal;
+		uniform float _AdjustRevealInvert;
+		uniform sampler2D _AdjustRevealMap;
 		float _DispOffset;
 		float _EdgeLength;
 
@@ -1147,7 +1183,7 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 				d = lerp( dy, d, TexBlend );
 			#endif
 
-			v.vertex.xyz += v.normal * d;
+			if ( !( _AdjustReveal > 0.0 && v.texcoord.x < _AdjustReveal ) ) v.vertex.xyz += v.normal * d;   // the revealed map stays flat
 
 		}
 
@@ -1244,6 +1280,18 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 			o.Occlusion = pow( texAO, max( _AOPower, 0.001 ) );
 			half3 ambIBL = texCUBElod(_ProbeCubemap, half4( normalize( worldNormal ), 7 ) ).xyz;
 			o.Emission = texDiffuse.xyz * ambIBL * o.Occlusion * 0.5;
+
+			float cut = IN.uv_DiffuseMap.x;
+			if ( _AdjustReveal > 0.0 && cut < _AdjustReveal ) {
+				half3 m = tex2D( _AdjustRevealMap, UV ).rgb;
+				if ( _AdjustRevealInvert > 0.5 ) m = 1.0 - m;
+				o.Albedo = 0; o.Metallic = 1; o.Smoothness = 0; o.Occlusion = 0; o.Normal = float3( 0, 0, 1 );   // black metal: no light, no reflection
+				o.Emission = m;
+			}
+			if ( _AdjustReveal > 0.0 && _AdjustReveal < 1.0 && abs( cut - _AdjustReveal ) < 0.0015 ) {
+				o.Albedo = 0; o.Metallic = 0; o.Smoothness = 0;
+				o.Emission = half3( 0.24, 0.55, 0.99 );
+			}
 		}
 		
 
@@ -1595,6 +1643,10 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 		//float _TopProj;
 
 		float _Parallax;
+		// Materialize CE: Adjust's reveal slider (see SurfacePBS_Tess).
+		uniform float _AdjustReveal;
+		uniform float _AdjustRevealInvert;
+		uniform sampler2D _AdjustRevealMap;
 		float _DispOffset;
 		float _EdgeLength;
 
@@ -1637,7 +1689,7 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 				d = lerp( dy, d, TexBlend );
 			#endif
 
-			v.vertex.xyz += v.normal * d;
+			if ( !( _AdjustReveal > 0.0 && v.texcoord.x < _AdjustReveal ) ) v.vertex.xyz += v.normal * d;   // the revealed map stays flat
 
 		}
 
@@ -1734,6 +1786,18 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 			o.Occlusion = pow( texAO, max( _AOPower, 0.001 ) );
 			half3 ambIBL = texCUBElod(_ProbeCubemap, half4( normalize( worldNormal ), 7 ) ).xyz;
 			o.Emission = texDiffuse.xyz * ambIBL * o.Occlusion * 0.5;
+
+			float cut = IN.uv_DiffuseMap.x;
+			if ( _AdjustReveal > 0.0 && cut < _AdjustReveal ) {
+				half3 m = tex2D( _AdjustRevealMap, UV ).rgb;
+				if ( _AdjustRevealInvert > 0.5 ) m = 1.0 - m;
+				o.Albedo = 0; o.Metallic = 1; o.Smoothness = 0; o.Occlusion = 0; o.Normal = float3( 0, 0, 1 );   // black metal: no light, no reflection
+				o.Emission = m;
+			}
+			if ( _AdjustReveal > 0.0 && _AdjustReveal < 1.0 && abs( cut - _AdjustReveal ) < 0.0015 ) {
+				o.Albedo = 0; o.Metallic = 0; o.Smoothness = 0;
+				o.Emission = half3( 0.24, 0.55, 0.99 );
+			}
 		}
 		
 
@@ -2108,6 +2172,10 @@ CGPROGRAM
 		//float _TopProj;
 
 		float _Parallax;
+		// Materialize CE: Adjust's reveal slider (see SurfacePBS_Tess).
+		uniform float _AdjustReveal;
+		uniform float _AdjustRevealInvert;
+		uniform sampler2D _AdjustRevealMap;
 		float _DispOffset;
 		float _EdgeLength;
 
@@ -2150,7 +2218,7 @@ CGPROGRAM
 				d = lerp( dy, d, TexBlend );
 			#endif
 
-			v.vertex.xyz += v.normal * d;
+			if ( !( _AdjustReveal > 0.0 && v.texcoord.x < _AdjustReveal ) ) v.vertex.xyz += v.normal * d;   // the revealed map stays flat
 
 		}
 
@@ -2247,6 +2315,18 @@ CGPROGRAM
 			o.Occlusion = pow( texAO, max( _AOPower, 0.001 ) );
 			half3 ambIBL = texCUBElod(_ProbeCubemap, half4( normalize( worldNormal ), 7 ) ).xyz;
 			o.Emission = texDiffuse.xyz * ambIBL * o.Occlusion * 0.5;
+
+			float cut = IN.uv_DiffuseMap.x;
+			if ( _AdjustReveal > 0.0 && cut < _AdjustReveal ) {
+				half3 m = tex2D( _AdjustRevealMap, UV ).rgb;
+				if ( _AdjustRevealInvert > 0.5 ) m = 1.0 - m;
+				o.Albedo = 0; o.Metallic = 1; o.Smoothness = 0; o.Occlusion = 0; o.Normal = float3( 0, 0, 1 );   // black metal: no light, no reflection
+				o.Emission = m;
+			}
+			if ( _AdjustReveal > 0.0 && _AdjustReveal < 1.0 && abs( cut - _AdjustReveal ) < 0.0015 ) {
+				o.Albedo = 0; o.Metallic = 0; o.Smoothness = 0;
+				o.Emission = half3( 0.24, 0.55, 0.99 );
+			}
 		}
 		
 
@@ -2482,6 +2562,10 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 		//float _TopProj;
 
 		float _Parallax;
+		// Materialize CE: Adjust's reveal slider (see SurfacePBS_Tess).
+		uniform float _AdjustReveal;
+		uniform float _AdjustRevealInvert;
+		uniform sampler2D _AdjustRevealMap;
 		float _DispOffset;
 		float _EdgeLength;
 
@@ -2524,7 +2608,7 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 				d = lerp( dy, d, TexBlend );
 			#endif
 
-			v.vertex.xyz += v.normal * d;
+			if ( !( _AdjustReveal > 0.0 && v.texcoord.x < _AdjustReveal ) ) v.vertex.xyz += v.normal * d;   // the revealed map stays flat
 
 		}
 
@@ -2621,6 +2705,18 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 			o.Occlusion = pow( texAO, max( _AOPower, 0.001 ) );
 			half3 ambIBL = texCUBElod(_ProbeCubemap, half4( normalize( worldNormal ), 7 ) ).xyz;
 			o.Emission = texDiffuse.xyz * ambIBL * o.Occlusion * 0.5;
+
+			float cut = IN.uv_DiffuseMap.x;
+			if ( _AdjustReveal > 0.0 && cut < _AdjustReveal ) {
+				half3 m = tex2D( _AdjustRevealMap, UV ).rgb;
+				if ( _AdjustRevealInvert > 0.5 ) m = 1.0 - m;
+				o.Albedo = 0; o.Metallic = 1; o.Smoothness = 0; o.Occlusion = 0; o.Normal = float3( 0, 0, 1 );   // black metal: no light, no reflection
+				o.Emission = m;
+			}
+			if ( _AdjustReveal > 0.0 && _AdjustReveal < 1.0 && abs( cut - _AdjustReveal ) < 0.0015 ) {
+				o.Albedo = 0; o.Metallic = 0; o.Smoothness = 0;
+				o.Emission = half3( 0.24, 0.55, 0.99 );
+			}
 		}
 		
 
@@ -2856,6 +2952,10 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 		//float _TopProj;
 
 		float _Parallax;
+		// Materialize CE: Adjust's reveal slider (see SurfacePBS_Tess).
+		uniform float _AdjustReveal;
+		uniform float _AdjustRevealInvert;
+		uniform sampler2D _AdjustRevealMap;
 		float _DispOffset;
 		float _EdgeLength;
 
@@ -2898,7 +2998,7 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 				d = lerp( dy, d, TexBlend );
 			#endif
 
-			v.vertex.xyz += v.normal * d;
+			if ( !( _AdjustReveal > 0.0 && v.texcoord.x < _AdjustReveal ) ) v.vertex.xyz += v.normal * d;   // the revealed map stays flat
 
 		}
 
@@ -2995,6 +3095,18 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 			o.Occlusion = pow( texAO, max( _AOPower, 0.001 ) );
 			half3 ambIBL = texCUBElod(_ProbeCubemap, half4( normalize( worldNormal ), 7 ) ).xyz;
 			o.Emission = texDiffuse.xyz * ambIBL * o.Occlusion * 0.5;
+
+			float cut = IN.uv_DiffuseMap.x;
+			if ( _AdjustReveal > 0.0 && cut < _AdjustReveal ) {
+				half3 m = tex2D( _AdjustRevealMap, UV ).rgb;
+				if ( _AdjustRevealInvert > 0.5 ) m = 1.0 - m;
+				o.Albedo = 0; o.Metallic = 1; o.Smoothness = 0; o.Occlusion = 0; o.Normal = float3( 0, 0, 1 );   // black metal: no light, no reflection
+				o.Emission = m;
+			}
+			if ( _AdjustReveal > 0.0 && _AdjustReveal < 1.0 && abs( cut - _AdjustReveal ) < 0.0015 ) {
+				o.Albedo = 0; o.Metallic = 0; o.Smoothness = 0;
+				o.Emission = half3( 0.24, 0.55, 0.99 );
+			}
 		}
 		
 
@@ -3230,6 +3342,10 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 		//float _TopProj;
 
 		float _Parallax;
+		// Materialize CE: Adjust's reveal slider (see SurfacePBS_Tess).
+		uniform float _AdjustReveal;
+		uniform float _AdjustRevealInvert;
+		uniform sampler2D _AdjustRevealMap;
 		float _DispOffset;
 		float _EdgeLength;
 
@@ -3272,7 +3388,7 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 				d = lerp( dy, d, TexBlend );
 			#endif
 
-			v.vertex.xyz += v.normal * d;
+			if ( !( _AdjustReveal > 0.0 && v.texcoord.x < _AdjustReveal ) ) v.vertex.xyz += v.normal * d;   // the revealed map stays flat
 
 		}
 
@@ -3369,6 +3485,18 @@ fixed4 frag_surf (v2f_surf IN) : SV_Target {
 			o.Occlusion = pow( texAO, max( _AOPower, 0.001 ) );
 			half3 ambIBL = texCUBElod(_ProbeCubemap, half4( normalize( worldNormal ), 7 ) ).xyz;
 			o.Emission = texDiffuse.xyz * ambIBL * o.Occlusion * 0.5;
+
+			float cut = IN.uv_DiffuseMap.x;
+			if ( _AdjustReveal > 0.0 && cut < _AdjustReveal ) {
+				half3 m = tex2D( _AdjustRevealMap, UV ).rgb;
+				if ( _AdjustRevealInvert > 0.5 ) m = 1.0 - m;
+				o.Albedo = 0; o.Metallic = 1; o.Smoothness = 0; o.Occlusion = 0; o.Normal = float3( 0, 0, 1 );   // black metal: no light, no reflection
+				o.Emission = m;
+			}
+			if ( _AdjustReveal > 0.0 && _AdjustReveal < 1.0 && abs( cut - _AdjustReveal ) < 0.0015 ) {
+				o.Albedo = 0; o.Metallic = 0; o.Smoothness = 0;
+				o.Emission = half3( 0.24, 0.55, 0.99 );
+			}
 		}
 		
 

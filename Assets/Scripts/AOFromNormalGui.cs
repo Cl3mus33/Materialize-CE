@@ -1,8 +1,12 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.ComponentModel;
 
 public class AOSettings {
+
+	// Materialize CE: occlusion measured against the surface tilt (slopes do not darken themselves).
+	public bool HorizonAO = true;
+
 
 	[DefaultValueAttribute(5.0f)]
 	public float Spread;
@@ -163,6 +167,7 @@ public class AOFromNormalGui : MonoBehaviour {
 	}
 
 	void DoMyWindow ( int windowID ) {
+		UiHelp.Panel = "AO";
 
 		int spacingX = 0;
 		int spacingY = 50;
@@ -180,6 +185,13 @@ public class AOFromNormalGui : MonoBehaviour {
 		}
 		offsetY += 40;
 
+		bool horizon = GUI.Toggle (new Rect (offsetX, offsetY, 280, 25), AOS.HorizonAO, UiHelp.Content (" Horizon AO (slopes stay clear)"));
+		if (horizon != AOS.HorizonAO) {
+			AOS.HorizonAO = horizon;
+			doStuff = true;
+		}
+		offsetY += 30;
+
 		GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Blend Normal AO and Depth AO", AOS.Blend, AOS.BlendText, out AOS.Blend, out AOS.BlendText, 0.0f, 1.0f);
 		offsetY += 40;
 		
@@ -190,19 +202,25 @@ public class AOFromNormalGui : MonoBehaviour {
 		offsetY += 50;
 
 		if (busy) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), "Set as AO Map" ) ){
+		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), UiHelp.Content ("Set as AO Map")) ){
 			StartCoroutine( ProcessAO () );
 		}
 		GUI.enabled = true;
+		Tips.Capture (true);
 		GUI.DragWindow();
 	}
 
 	void OnGUI () {
+		Theme.Apply ();
 		
 		windowRect.width = 300;
-		windowRect.height = 280;
+		windowRect.height = 310;
 		
-		windowRect = GUI.Window(10, windowRect, DoMyWindow, "Normal + Depth to AO");
+		windowRect = UiShell.Dock (windowRect);
+		
+		windowRect = UiShell.Window(10, windowRect, DoMyWindow, L.T("Normal + Depth to AO"));
+		
+		Tips.Block (windowRect);
 
 	}
 
@@ -274,10 +292,8 @@ public class AOFromNormalGui : MonoBehaviour {
 			Destroy (MainGuiScript._AOMap);
 		}
 
-		RenderTexture.active = _TempAOMap;
-		MainGuiScript._AOMap = new Texture2D( _TempAOMap.width, _TempAOMap.height, TextureFormat.ARGB32, true, true );
-		MainGuiScript._AOMap.ReadPixels(new Rect(0, 0, _TempAOMap.width, _TempAOMap.height), 0, 0);
-		MainGuiScript._AOMap.Apply();
+		// Materialize CE: read back without freezing, mipmaps made on the GPU.
+		yield return StartCoroutine (GpuReadback.Into (_TempAOMap, t => MainGuiScript._AOMap = t));
 		
 		yield return new WaitForSeconds(0.1f);
 		
@@ -311,6 +327,7 @@ public class AOFromNormalGui : MonoBehaviour {
 			
 		blitMaterial.SetTexture ("_BlendTex", _BlendedAOMap);
 		blitMaterial.SetFloat ("_Depth", AOS.Depth);
+		blitMaterial.SetFloat ("_HorizonAO", AOS.HorizonAO ? 1.0f : 0.0f);
 		thisMaterial.SetTexture ("_MainTex", _BlendedAOMap);
 
 		int yieldCountDown = 5;

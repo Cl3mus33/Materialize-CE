@@ -1,0 +1,121 @@
+{
+    "Name": "Skyrim SE",
+    "Outputs": [
+        {
+            "Enabled": true,
+            "Suffix": "",
+            "Channels": [
+                {
+                    "Source": 2,
+                    "Invert": false,
+                    "MultiplyAO": 1.0
+                },
+                {
+                    "Source": 3,
+                    "Invert": false,
+                    "MultiplyAO": 1.0
+                },
+                {
+                    "Source": 4,
+                    "Invert": false,
+                    "MultiplyAO": 1.0
+                },
+                {
+                    "Source": 0,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                }
+            ],
+            "Format": 5,
+            "Dds": 0,
+            "Normal": 0
+        },
+        {
+            "Enabled": true,
+            "Suffix": "_n",
+            "Channels": [
+                {
+                    "Source": 7,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                },
+                {
+                    "Source": 8,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                },
+                {
+                    "Source": 9,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                },
+                {
+                    "Source": 12,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                }
+            ],
+            "Format": 5,
+            "Dds": 0,
+            "Normal": 2
+        },
+        {
+            "Enabled": true,
+            "Suffix": "_p",
+            "Channels": [
+                {
+                    "Source": 10,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                },
+                {
+                    "Source": 10,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                },
+                {
+                    "Source": 10,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                },
+                {
+                    "Source": 0,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                }
+            ],
+            "Format": 5,
+            "Dds": 4,
+            "Normal": 0
+        },
+        {
+            "Enabled": true,
+            "Suffix": "_m",
+            "Channels": [
+                {
+                    "Source": 11,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                },
+                {
+                    "Source": 12,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                },
+                {
+                    "Source": 11,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                },
+                {
+                    "Source": 10,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                }
+            ],
+            "Format": 5,
+            "Dds": 0,
+            "Normal": 0
+        }
+    ]
+}

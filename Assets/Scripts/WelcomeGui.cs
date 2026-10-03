@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class WelcomeGui : MonoBehaviour {
@@ -51,10 +51,13 @@ public class WelcomeGui : MonoBehaviour {
 	}
 
 	void OnGUI () {
+		Theme.Apply ();
 
 		GUI.color = new Color(1,1,1,backgroundFade);
 
-		GUI.DrawTexture (new Rect (0, 0, Screen.width, Screen.height), background);
+		// Materialize CE: the interface's own dark colour behind the logo.
+		GUI.color = new Color (0.11f, 0.122f, 0.145f, backgroundFade);
+		GUI.DrawTexture (new Rect (0, 0, Screen.width, Screen.height), Texture2D.whiteTexture);
 
 		int logoWidth = Mathf.FloorToInt (Screen.width * 0.75f);
 		int logoHeight = Mathf.FloorToInt (logoWidth * 0.5f);

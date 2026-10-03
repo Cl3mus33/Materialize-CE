@@ -1,0 +1,869 @@
+#name ==> Français
+# Materialize CE: French translation. One line per text: English ==> Français. Lines starting with # are ignored.
+# To add a language: copy this file as <code>.txt (de.txt, es.txt…), change the #name line and the right-hand texts.
+
+# ---------- Main interface ----------
+Open project ==> Ouvrir un projet
+Open a Materialize project (.mtz) with all its maps. ==> Ouvre un projet Materialize (.mtz) avec toutes ses maps.
+Save project ==> Enregistrer le projet
+Save the project (.mtz) and all its maps next to it. ==> Enregistre le projet (.mtz) et toutes ses maps à côté.
+Clear all ==> Tout effacer
+Empty every map to start a new material. ==> Vide toutes les maps pour commencer un nouveau matériau.
+Tile maps ==> Raccorder
+Make every map seamless (tiling). ==> Rend toutes les maps raccordables (tiling).
+Align / perspective ==> Aligner / perspective
+Straighten a photo taken at an angle. ==> Redresse une photo prise de biais.
+Full material ==> Matériau complet
+Show every map together on the preview. ==> Affiche toutes les maps ensemble sur l'aperçu.
+Post process ==> Post-traitement
+Bloom, tone mapping, exposure, vignette… of the preview only. ==> Bloom, tone mapping, exposition, vignette… de l'aperçu seulement.
+Environment ==> Environnement
+Environment and background: your own HDRI, rotation, brightness, plain background… ==> Environnement et fond : tes propres HDRI, rotation, luminosité, fond uni…
+Hide panels ==> Masquer les panneaux
+Show panels ==> Afficher les panneaux
+Hide the panels to look at the render alone. ==> Masque les panneaux pour regarder le rendu seul.
+Full screen ==> Plein écran
+Windowed ==> Fenêtré
+Full screen or window (F11). ==> Plein écran ou fenêtre (F11).
+Export… ==> Exporter…
+Write all the files for your engine in one go: Skyrim, Unreal, Unity, glTF… with your own profiles. ==> Écrit tous les fichiers pour ton moteur en une fois : Skyrim, Unreal, Unity, glTF… avec tes propres profils.
+Support Materialize CE: PayPal, Patreon, GitHub. ==> Soutenir Materialize CE : PayPal, Patreon, GitHub.
+Help ==> Aide
+Mouse and keyboard controls. ==> Commandes souris et clavier.
+Settings ==> Réglages
+Preferences: normal map style, file formats, DDS tool, tooltips, look… ==> Préférences : style des normal maps, formats de fichier, outil DDS, infobulles, apparence…
+Empty every map? Unsaved work will be lost. ==> Vider toutes les maps ? Le travail non enregistré sera perdu.
+Clear everything ==> Tout effacer
+Clear all maps ==> Effacer toutes les maps
+Cancel ==> Annuler
+MAPS ==> MAPS
+MATERIAL ==> MATÉRIAU
+Material & lighting ==> Matériau et éclairage
+Environment & background ==> Environnement et fond
+Loading… ==> Chargement…
+plain background ==> fond uni
+HDRI background ==> fond HDRI
+empty ==> vide
+Open ==> Ouvrir
+Save ==> Enregistrer
+Save this map to a file ( ==> Enregistre cette map dans un fichier (
+More: paste, copy, quick save, preview alone, clear. ==> Plus : coller, copier, enregistrement rapide, aperçu seul, effacer.
+Paste ==> Coller
+Put the image from the clipboard into this map. ==> Met l'image du presse-papiers dans cette map.
+Copy ==> Copier
+Put this map on the clipboard. ==> Copie cette map dans le presse-papiers.
+Quick save ==> Enregistrement rapide
+Save again to the last file this map was saved to. ==> Réenregistre dans le dernier fichier de cette map.
+Preview alone ==> Aperçu seul
+Show only this map on the preview. ==> Affiche uniquement cette map sur l'aperçu.
+Clear ==> Effacer
+Empty this map. ==> Vide cette map.
+The preview shows something else right now. ==> L'aperçu affiche autre chose pour le moment.
+Show the full material ==> Afficher le matériau complet
+Create ==> Créer
+Edit ==> Éditer
+Adjust ==> Ajuster
+The settings that generate this map from the others. ==> Les réglages qui génèrent cette map à partir des autres.
+Levels, contrast, strength… of the map as it is, imported or created. ==> Niveaux, contraste, force… de la map telle qu'elle est, importée ou créée.
+Create the metallic mask ==> Créer le masque métallique
+Create the {0} map ==> Créer la map {0}
+Edit the {0} map ==> Éditer la map {0}
+Needs ==> Nécessite
+Open or create this map first. ==> Ouvre ou crée d'abord cette map.
+Tile maps (seamless) ==> Raccorder les maps (tiling)
+Select to see its creation settings and adjustments. ==> Sélectionne pour voir ses réglages de création et ses ajustements.
+Workflow, render mode and presets, light, tiling, preview shape. ==> Workflow, mode de rendu et presets, lumière, répétition, forme d'aperçu.
+
+# Maps
+Height ==> Hauteur
+Albedo ==> Albedo
+Normal ==> Normal
+Metallic ==> Métallique
+Smoothness ==> Lissé
+Roughness ==> Rugosité
+Glossiness ==> Brillance
+Specular ==> Spéculaire
+Edge ==> Arêtes
+Ambient occlusion ==> Occlusion ambiante
+Create the height map from the albedo: bright = high. ==> Crée la height map à partir de l'albedo : clair = haut.
+Edit the albedo: remove baked lighting and shadows, adjust colours. ==> Édite l'albedo : retire l'éclairage et les ombres incrustés, ajuste les couleurs.
+Create the normal map from the height map. ==> Crée la normal map à partir de la height map.
+Create the metallic mask by picking the colour of the metal. ==> Crée le masque métallique en choisissant la couleur du métal.
+Create the roughness / glossiness from the albedo. ==> Crée la rugosité / brillance à partir de l'albedo.
+Create the edge map (bright ridges, dark hollows) from the normal map. ==> Crée la map des arêtes (reliefs clairs, creux sombres) à partir de la normal map.
+Create the ambient occlusion from the normal and height maps. ==> Crée l'occlusion ambiante à partir de la normal map et de la height map.
+an albedo or a normal map ==> un albedo ou une normal map
+an albedo (Open one first) ==> un albedo (ouvre-en un d'abord)
+a height map ==> une height map
+an albedo ==> un albedo
+a normal map ==> une normal map
+a normal or a height map ==> une normal map ou une height map
+The specular colour is made from the albedo and a metallic mask: create the mask by picking the metal. ==> La couleur spéculaire vient de l'albedo et d'un masque métallique : crée le masque en choisissant le métal.
+The specular map is computed: open a metallic mask in the Metallic workflow (Material & lighting). ==> La map spéculaire est calculée : ouvre un masque métallique dans le workflow Métallique (Matériau et éclairage).
+Open a roughness map (white = rough). ==> Ouvre une map de rugosité (blanc = rugueux).
+Load an image file into this map (PNG, JPG, TGA, TIFF, EXR, DDS…). ==> Charge un fichier image dans cette map (PNG, JPG, TGA, TIFF, EXR, DDS…).
+The specular colour is made from the albedo and a metallic mask (white = metal). Create the mask by picking the colour of the metal. ==> La couleur spéculaire vient de l'albedo et d'un masque métallique (blanc = métal). Crée le masque en choisissant la couleur du métal.
+
+# ---------- Adjust ----------
+Show this map alone ==> Afficher cette map seule
+Off: the adjustment shows live on the full material. On: only this map is shown. ==> Décoché : l'ajustement s'affiche en direct sur le matériau complet. Coché : seule cette map est affichée.
+Reset ==> Réinitialiser
+Back to the original map's values. ==> Revient aux valeurs de la map d'origine.
+Revert ==> Annuler
+Back to the settings of the last Apply. ==> Revient aux réglages du dernier Appliquer.
+Apply ==> Appliquer
+Writes the adjustment into the map. Adjusting again later starts from the original, so nothing degrades. ==> Écrit l'ajustement dans la map. Un nouvel ajustement repart de l'original : rien ne se dégrade.
+Normal Strength ==> Force de la normal
+Steepness of the normal map's slopes: 0 = flat, 1 = as it is, above 1 = stronger relief. ==> Pente de la normal map : 0 = plat, 1 = telle quelle, au-dessus de 1 = relief plus fort.
+Flip green (OpenGL ↔ DirectX) ==> Inverser le vert (OpenGL ↔ DirectX)
+Inverts the green channel: switches the normal map between OpenGL (Unity, Blender) and DirectX (Skyrim, Unreal). ==> Inverse le canal vert : passe la normal map d'OpenGL (Unity, Blender) à DirectX (Skyrim, Unreal) et inversement.
+Displacement Strength ==> Force du displacement
+Depth of the relief: 0 = flat (all white), 1 = as it is, above 1 = deeper. White stays the top, dark areas go down, as in Texalys. ==> Profondeur du relief : 0 = plat (tout blanc), 1 = tel quel, au-dessus de 1 = plus profond. Le blanc reste en haut, les zones sombres descendent, comme dans Texalys.
+Stretch to the full range ==> Étirer sur toute la plage
+Sets the black and white points to the darkest and brightest values of the map: a flat-looking height uses the whole range. Useful when parallax or normals barely show. ==> Place les points noir et blanc sur les valeurs les plus sombres et les plus claires : une height terne utilise toute la plage. Utile quand le parallax ou les normales se voient à peine.
+Black Point ==> Point noir
+Values at or below this become black (levels). ==> Les valeurs en dessous deviennent noires (niveaux).
+White Point ==> Point blanc
+Values at or above this become white (levels). ==> Les valeurs au-dessus deviennent blanches (niveaux).
+Midtones ==> Tons moyens
+Moves the middle greys: above 1 brighter, below 1 darker, black and white unchanged. ==> Déplace les gris moyens : au-dessus de 1 plus clair, en dessous plus sombre ; le noir et le blanc ne bougent pas.
+Contrast ==> Contraste
+Separates dark and bright more (above 1) or less (below 1). ==> Sépare plus (au-dessus de 1) ou moins (en dessous) le sombre et le clair.
+Brightness ==> Luminosité
+Shifts the whole map darker or brighter. ==> Assombrit ou éclaircit toute la map.
+Saturation ==> Saturation
+Colour intensity of the albedo: 0 = grey. ==> Intensité des couleurs de l'albedo : 0 = gris.
+Invert ==> Inverser
+Swaps black and white: smoothness ↔ roughness, height ↔ depth. ==> Échange le noir et le blanc : lissé ↔ rugosité, hauteur ↔ profondeur.
+Closes without changing the map. ==> Ferme sans modifier la map.
+
+# ---------- Material & lighting ----------
+Preset ==> Preset
+A preset keeps a whole look: workflow, render mode, Skyrim settings, multipliers and light. Change anything, then Save (your presets) or Save as new. ==> Un preset garde tout un rendu : workflow, mode de rendu, réglages Skyrim, multiplicateurs et lumière. Modifie ce que tu veux, puis Enregistrer (tes presets) ou Enregistrer comme nouveau.
+(modified) ==> (modifié)
+(yours) ==> (à toi)
+Saves the changes into this preset of yours. Built-in presets cannot be changed: use Save as new. ==> Enregistre les changements dans ce preset. Les presets fournis ne se modifient pas : utilise Enregistrer comme nouveau.
+Save as new… ==> Nouveau…
+Keeps the current look as a new preset of yours. ==> Garde le rendu actuel comme un nouveau preset.
+Delete ==> Supprimer
+Deletes this preset of yours. ==> Supprime ce preset.
+OK ==> OK
+Metal ==> Métal
+How metal is described: a metallic mask (white = metal) or a specular colour map (the albedo on metal, 4 % grey elsewhere). ==> Comment le métal est décrit : un masque métallique (blanc = métal) ou une map de couleur spéculaire (l'albédo sur le métal, gris 4 % ailleurs).
+Metallic / Roughness workflow: Unreal, Unity, glTF, Blender, Skyrim PBR and Complex Material. ==> Workflow Métallique / Rugosité : Unreal, Unity, glTF, Blender, Skyrim PBR et Complex Material.
+Specular colour ==> Couleur spéculaire
+Specular / Glossiness workflow: older PBR engines. The specular map is made from the albedo and the metallic mask. ==> Workflow Spéculaire / Brillance : anciens moteurs PBR. La map spéculaire est calculée à partir de l'albedo et du masque métallique.
+Surface ==> Surface
+Roughness (white = rough) or glossiness (white = shiny, also called smoothness). One is the inverse of the other. ==> Rugosité (blanc = rugueux) ou brillance (blanc = brillant, aussi appelée lissé). L'une est l'inverse de l'autre.
+White = rough. Unreal, glTF, Blender, Skyrim PBR. ==> Blanc = rugueux. Unreal, glTF, Blender, Skyrim PBR.
+White = shiny (smoothness). Unity, Skyrim vanilla and Complex Material. ==> Blanc = brillant (lissé). Unity, Skyrim vanilla et Complex Material.
+Render ==> Rendu
+Render mode ==> Mode de rendu
+How the preview lights the material: like PBR engines, or like Skyrim (vanilla or Complex Material). The saved maps do not change. ==> Comment l'aperçu éclaire le matériau : comme les moteurs PBR, ou comme Skyrim (vanilla ou Complex Material). Les maps enregistrées ne changent pas.
+Specular Strength ==> Force spéculaire
+Skyrim: brightness of the highlights, like Specular Strength in the NIF (BSLightingShaderProperty). ==> Skyrim : intensité des reflets, comme Specular Strength dans le NIF (BSLightingShaderProperty).
+Skyrim: sharpness of the highlights, like Glossiness in the NIF. Higher = smaller, tighter highlights. In Complex Material, the gloss map scales it per pixel. ==> Skyrim : netteté des reflets, comme Glossiness dans le NIF. Plus haut = reflets plus petits et serrés. En Complex Material, la map de brillance la module par pixel.
+Skyrim Complex Material: strength of the environment reflections on the metal (the _m red channel). ==> Force des reflets d'environnement, masqués par la map métallique (le _m).
+Specular Colour ==> Couleur spéculaire
+The NIF's Specular Color: tints the highlights (white in most vanilla meshes). ==> Le Specular Color du NIF : teinte les reflets (blanc dans la plupart des meshes vanilla).
+Filmic tone curve (NifSkope look) ==> Courbe de tons filmique (rendu NifSkope)
+Softens the highlights and lifts the mid-tones like NifSkope-style previews. Off: plain colours. ==> Adoucit les hautes lumières et relève les tons moyens comme les aperçus façon NifSkope. Décoché : couleurs brutes.
+Metallic Multiplier ==> Multiplicateur métallique
+Preview only: strength of the metallic map. ==> Aperçu seulement : force de la map métallique.
+Smoothness Multiplier ==> Multiplicateur de lissé
+Glossiness Multiplier ==> Multiplicateur de brillance
+Preview only: strength of the smoothness map. ==> Aperçu seulement : force de la map de lissé.
+Parallax Displacement ==> Déplacement parallax
+Preview only: how deep the height map looks on the surface. ==> Aperçu seulement : profondeur apparente de la height map sur la surface.
+Edge Amount ==> Quantité d'arêtes
+Preview only: how much the edge map brightens edges and darkens crevices. ==> Aperçu seulement : à quel point la map des arêtes éclaircit les arêtes et assombrit les creux.
+Ambient Occlusion Power ==> Force de l'occlusion ambiante
+Preview only: strength of the ambient occlusion. ==> Aperçu seulement : force de l'occlusion ambiante.
+Light Color ==> Couleur de la lumière
+Colour of the preview light (R, G, B sliders). ==> Couleur de la lumière de l'aperçu (curseurs R, V, B).
+Intensity ==> Intensité
+Brightness of the preview light. ==> Intensité de la lumière de l'aperçu.
+Red part of the light colour. ==> Part de rouge de la lumière.
+Green part of the light colour. ==> Part de vert de la lumière.
+Blue part of the light colour. ==> Part de bleu de la lumière.
+Texture Tiling X ==> Répétition X
+How many times the textures repeat across the preview shape. ==> Nombre de répétitions des textures en largeur sur la forme d'aperçu.
+Texture Tiling Y ==> Répétition Y
+How many times the textures repeat down the preview shape. ==> Nombre de répétitions des textures en hauteur sur la forme d'aperçu.
+Texture Offset X ==> Décalage X
+Texture Offset Y ==> Décalage Y
+Shifts the textures horizontally on the shape. ==> Décale les textures horizontalement sur la forme.
+Shifts the textures vertically on the shape. ==> Décale les textures verticalement sur la forme.
+Plane ==> Plan
+Preview on a flat plane. ==> Aperçu sur un plan.
+Cube ==> Cube
+Preview on a cube. ==> Aperçu sur un cube.
+Cylinder ==> Cylindre
+Preview on a cylinder. ==> Aperçu sur un cylindre.
+Sphere ==> Sphère
+Preview on a sphere. ==> Aperçu sur une sphère.
+Full Material ==> Matériau complet
+
+# ---------- Environment ----------
+ENVIRONMENT (LIGHTING AND REFLECTIONS) ==> ENVIRONNEMENT (ÉCLAIRAGE ET REFLETS)
+MATERIALIZE ==> MATERIALIZE
+POLY HAVEN (CC0) ==> POLY HAVEN (CC0)
+YOURS ==> LES TIENS
+The picture around the material: it lights it and shows in its reflections. ==> L'image autour du matériau : elle l'éclaire et apparaît dans ses reflets.
+Remove from the list (the file stays on disk). ==> Retirer de la liste (le fichier reste sur le disque).
+(missing) ==> (introuvable)
+Import an HDRI… ==> Importer un HDRI…
+Your own environment: HDR, EXR (Poly Haven, ambientCG…) or an ordinary panorama (JPG, PNG), 2:1 equirectangular. ==> Ton propre environnement : HDR, EXR (Poly Haven, ambientCG…) ou un panorama classique (JPG, PNG), équirectangulaire 2:1.
+Rotation ==> Rotation
+Turns the environment around the material (degrees). ==> Fait tourner l'environnement autour du matériau (degrés).
+Strength of the environment's light and reflections. ==> Force de la lumière et des reflets de l'environnement.
+BACKGROUND ==> FOND
+The environment behind the material, sharp or soft. ==> L'environnement derrière le matériau, net ou flou.
+Plain colour ==> Couleur unie
+A plain colour behind the material; the lighting stays the environment's. ==> Une couleur unie derrière le matériau ; l'éclairage reste celui de l'environnement.
+Blur ==> Flou
+0 = sharp, 1 = very soft. ==> 0 = net, 1 = très flou.
+Background brightness ==> Luminosité du fond
+Brightness of the background only. ==> Luminosité du fond uniquement.
+Red ==> Rouge
+Green ==> Vert
+Blue ==> Bleu
+Interface ==> Interface
+Black ==> Noir
+Grey ==> Gris
+White ==> Blanc
+HDRI from polyhaven.com, public domain (CC0). ==> HDRI de polyhaven.com, domaine public (CC0).
+
+# ---------- Save project ----------
+Save project ==> Enregistrer le projet
+File format of the maps: ==> Format de fichier des maps :
+Lossless, 16-bit height. The usual choice. ==> Sans perte, height en 16 bits. Le choix habituel.
+Lossless, read by every game tool. ==> Sans perte, lu par tous les outils de jeu.
+Lossless, 16-bit height. ==> Sans perte, height en 16 bits.
+Small files, lossy (quality 95). ==> Fichiers légers, avec perte (qualité 95).
+Uncompressed, large files. ==> Non compressé, fichiers lourds.
+The maps are written next to the project file. This format is also used by each map's Save button. ==> Les maps sont écrites à côté du fichier projet. Ce format sert aussi au bouton Enregistrer de chaque map.
+Choose where to save… ==> Choisir l'emplacement…
+
+# ---------- Preferences ----------
+Preferences ==> Préférences
+GENERAL ==> GÉNÉRAL
+Language ==> Langue
+Language of the interface. Translations are text files in StreamingAssets/Lang: add or correct one without touching the code. ==> Langue de l'interface. Les traductions sont des fichiers texte dans StreamingAssets/Lang : on peut en ajouter ou en corriger sans toucher au code.
+Show tooltips ==> Afficher les infobulles
+Explanations that appear when the mouse rests on a button or a setting. ==> Explications qui apparaissent quand la souris reste sur un bouton ou un réglage.
+Classic look ==> Apparence classique
+Unity's original grey interface instead of Materialize CE's flat theme. Applied at once. ==> L'interface grise d'origine d'Unity au lieu du thème de Materialize CE. Appliqué tout de suite.
+Post process on at start ==> Post-traitement actif au démarrage
+Bloom, tone mapping and vignette of the preview are on when Materialize starts. ==> Le bloom, le tone mapping et la vignette de l'aperçu sont actifs au démarrage.
+Normal maps ==> Normal maps
+The green channel convention of the normal maps Materialize makes and reads. The export profiles convert when an engine needs the other one. ==> Convention du canal vert des normal maps créées et lues par Materialize. Les profils d'export convertissent quand un moteur attend l'autre.
+DirectX (Max) ==> DirectX (Max)
+Green down: Unreal, Skyrim, 3ds Max. Materialize's original default. ==> Vert vers le bas : Unreal, Skyrim, 3ds Max. Le réglage d'origine de Materialize.
+OpenGL (Maya) ==> OpenGL (Maya)
+Green up: Unity, Blender, glTF, Maya. ==> Vert vers le haut : Unity, Blender, glTF, Maya.
+File format ==> Format de fichier
+Format of each map's Save button and of the maps saved with a project. ==> Format du bouton Enregistrer de chaque map et des maps enregistrées avec un projet.
+Keep the channel packer's setup as default ==> Garder le réglage du channel packer par défaut
+The current channel packer setup is used at the next launches. ==> Le réglage actuel du channel packer sera utilisé aux prochains lancements.
+Channel packer setup kept as default. ==> Réglage du channel packer gardé par défaut.
+DDS COMPRESSION ==> COMPRESSION DDS
+Tool ==> Outil
+The program that compresses DDS files. texconv comes with Materialize CE; NVIDIA Texture Tools is found if installed; or any tool you choose. ==> Le programme qui compresse les DDS. texconv est fourni avec Materialize CE ; NVIDIA Texture Tools est trouvé s'il est installé ; ou n'importe quel outil de ton choix.
+texconv ==> texconv
+Microsoft texconv (DirectXTex), included. ==> Microsoft texconv (DirectXTex), fourni.
+NVIDIA ==> NVIDIA
+NVIDIA Texture Tools (nvcompress), if installed. ==> NVIDIA Texture Tools (nvcompress), s'il est installé.
+Custom ==> Autre
+Any command-line tool, with your own arguments. ==> N'importe quel outil en ligne de commande, avec tes arguments.
+Choose the tool's .exe… ==> Choisir le .exe de l'outil…
+Point to the program if it is not found automatically. ==> Indique le programme s'il n'est pas trouvé automatiquement.
+DDS tool (.exe) ==> Outil DDS (.exe)
+Find it automatically ==> Le trouver automatiquement
+Forget the chosen .exe and look for the tool again. ==> Oublie le .exe choisi et recherche l'outil.
+Best quality (slower) ==> Meilleure qualité (plus lent)
+Slower but finer compression. ==> Compression plus lente mais plus fine.
+Arguments ==> Arguments
+{input} = the PNG to compress, {output} = the DDS to write, {format} = BC7, BC1… as chosen in the export. ==> {input} = le PNG à compresser, {output} = le DDS à écrire, {format} = BC7, BC1… selon l'export.
+FOLDERS ==> DOSSIERS
+Export profiles, render presets and the log are kept in: ==> Les profils d'export, les presets de rendu et le journal sont rangés dans :
+Open this folder ==> Ouvrir ce dossier
+Opens it in the Explorer, to back up or share your profiles and presets. ==> L'ouvre dans l'Explorateur, pour sauvegarder ou partager tes profils et presets.
+Close ==> Fermer
+
+# ---------- Export ----------
+Export ==> Exporter
+Profile ==> Profil
+Which engine or game the files are for. Pick one, adjust it, and save it under your own name. ==> Pour quel moteur ou jeu sont les fichiers. Choisis-en un, ajuste-le et enregistre-le sous ton propre nom.
+Choose another profile. ==> Choisir un autre profil.
+Save as… ==> Enregistrer sous…
+Saves this profile under a new name, with your changes. ==> Enregistre ce profil sous un nouveau nom, avec tes changements.
+Saves your changes to this profile. ==> Enregistre tes changements dans ce profil.
+Deletes this profile (built-in ones cannot be deleted). ==> Supprime ce profil (ceux fournis ne peuvent pas être supprimés).
+Profiles folder ==> Dossier des profils
+Opens the folder where your profiles are kept as .json files, to back them up or share them. ==> Ouvre le dossier où tes profils sont rangés en .json, pour les sauvegarder ou les partager.
+Name ==> Nom
+Base name of the files; each file adds its suffix: stone + _n = stone_n. ==> Nom de base des fichiers ; chaque fichier ajoute son suffixe : pierre + _n = pierre_n.
+Folder ==> Dossier
+Where the files are written. ==> Où les fichiers sont écrits.
+Choose… ==> Choisir…
+Pick the folder (and the name) with the Windows dialog. ==> Choisit le dossier (et le nom) avec la fenêtre de Windows.
+Suffix ==> Suffixe
+Added to the name: _n, _d, _rmaos… ==> Ajouté au nom : _n, _d, _rmaos…
+Content (R, G, B, A) ==> Contenu (R, V, B, A)
+What goes in each channel. Click to change it. ==> Ce qui va dans chaque canal. Clique pour le changer.
+Click to choose what goes in each channel. ==> Clique pour choisir ce qui va dans chaque canal.
+Format ==> Format
+File format. Click to cycle. ==> Format de fichier. Clique pour changer.
+Click to change the format. ==> Clique pour changer le format.
+Compression ==> Compression
+DDS only: BC7 best, BC1 smallest, BC5 normals, BC4 grey. ==> DDS seulement : BC7 meilleur, BC1 plus léger, BC5 normales, BC4 niveaux de gris.
+Normal maps: the convention the engine expects. OpenGL = green up (Unity, Blender, glTF); DirectX = green down (Unreal, Skyrim). ==> Normal maps : la convention attendue par le moteur. OpenGL = vert vers le haut (Unity, Blender, glTF) ; DirectX = vert vers le bas (Unreal, Skyrim).
+OpenGL ↑ = green up (Unity, Blender, glTF). DirectX ↓ = green inverted (Skyrim, Unreal). The file is converted if Materialize's normal differs. As is = no change. ==> OpenGL ↑ = vert vers le haut (Unity, Blender, glTF). DirectX ↓ = vert inversé (Skyrim, Unreal). Le fichier est converti si la normale de Materialize diffère. As is = inchangé.
+Write this file. ==> Écrire ce fichier.
+Remove this file from the profile. ==> Retirer ce fichier du profil.
++ Add a file ==> + Ajouter un fichier
+Adds a file to this profile. ==> Ajoute un fichier à ce profil.
+Content of ==> Contenu de
+1 − value: smoothness ↔ roughness. ==> 1 − valeur : lissé ↔ rugosité.
+Darkens this channel with the ambient occlusion (0 = off, 1 = full). ==> Assombrit ce canal avec l'occlusion ambiante (0 = non, 1 = entière).
+DDS: ==> DDS :
+DDS settings… ==> Réglages DDS…
+Choose the DDS tool (texconv, NVIDIA, your own) in the preferences. ==> Choisis l'outil DDS (texconv, NVIDIA, le tien) dans les préférences.
+Exporting… ==> Export en cours…
+Writes every checked file. ==> Écrit tous les fichiers cochés.
+No file checked. ==> Aucun fichier coché.
+Files: ==> Fichiers :
+
+# ---------- Channel packer ----------
+Black (none) ==> Noir (rien)
+Leaves the channel black (0). ==> Laisse le canal noir (0).
+Fills the channel with white (1). Handy for an unused alpha or a full mask. ==> Remplit le canal de blanc (1). Pratique pour un alpha inutilisé ou un masque plein.
+Albedo R ==> Albedo R
+Red channel of the albedo (the edited one if there is one, else the original). ==> Canal rouge de l'albedo (celui édité s'il y en a un, sinon l'original).
+Albedo G ==> Albedo V
+Green channel of the albedo. ==> Canal vert de l'albedo.
+Albedo B ==> Albedo B
+Blue channel of the albedo. ==> Canal bleu de l'albedo.
+Albedo grey ==> Albedo en gris
+Brightness of the albedo (luminance), as one grey channel. ==> Luminosité de l'albedo (luminance), en un canal gris.
+Albedo alpha ==> Alpha de l'albedo
+Transparency of the albedo, when the image has one. ==> Transparence de l'albedo, quand l'image en a une.
+Normal R ==> Normal R
+Red of the normal map: the X slope (left / right). ==> Rouge de la normal map : la pente X (gauche / droite).
+Normal G ==> Normal V
+Green of the normal map: the Y slope. Invert it to switch between OpenGL and DirectX normals. ==> Vert de la normal map : la pente Y. Inverse-le pour passer entre OpenGL et DirectX.
+Normal B ==> Normal B
+Blue of the normal map: the Z part, mostly bright. ==> Bleu de la normal map : la composante Z, surtout claire.
+Height / displacement map: white is high. ==> Height / displacement map : blanc = haut.
+Metallic map: white is metal. ==> Map métallique : blanc = métal.
+Smoothness (= gloss): white is shiny. Skyrim's gloss, Unity's smoothness. ==> Lissé (= brillance) : blanc = brillant. Le gloss de Skyrim, le smoothness d'Unity.
+Roughness = inverted smoothness: white is rough. Unreal, glTF, Skyrim PBR. ==> Rugosité = lissé inversé : blanc = rugueux. Unreal, glTF, Skyrim PBR.
+AO map: dark in the crevices, white in the open. ==> Map d'AO : sombre dans les creux, blanche à découvert.
+Edge map: bright on edges and ridges, dark in the hollows. ==> Map des arêtes : claire sur les arêtes et les reliefs, sombre dans les creux.
+Specular R ==> Spéculaire R
+Specular G ==> Spéculaire V
+Specular B ==> Spéculaire B
+Specular colour (Specular / Glossiness workflow): the albedo on metal, 4 % grey elsewhere. Red channel. ==> Couleur spéculaire (workflow Spéculaire / Brillance) : l'albédo sur le métal, gris 4 % ailleurs. Canal rouge.
+Specular colour, green channel. ==> Couleur spéculaire, canal vert.
+Specular colour, blue channel. ==> Couleur spéculaire, canal bleu.
+Diffuse (spec.) R ==> Diffuse (spéc.) R
+Diffuse (spec.) G ==> Diffuse (spéc.) V
+Diffuse (spec.) B ==> Diffuse (spéc.) B
+Diffuse of the Specular / Glossiness workflow: the albedo, black on metal. Red channel. ==> Diffuse du workflow Spéculaire / Brillance : l'albédo, noir sur le métal. Canal rouge.
+Diffuse of the Specular / Glossiness workflow, green channel. ==> Diffuse du workflow Spéculaire / Brillance, canal vert.
+Diffuse of the Specular / Glossiness workflow, blue channel. ==> Diffuse du workflow Spéculaire / Brillance, canal bleu.
+Channel Packer: build one texture from several maps ==> Channel packer : une texture à partir de plusieurs maps
+Presets ==> Presets
+Ready-made layouts for common engines. Pick one, then adjust any channel if needed. ==> Agencements prêts pour les moteurs courants. Choisis-en un, puis ajuste un canal si besoin.
+1 − value: turns smoothness into roughness, or flips the normal's green (OpenGL ↔ DirectX). ==> 1 − valeur : transforme le lissé en rugosité, ou inverse le vert de la normale (OpenGL ↔ DirectX).
+Multiplies this channel by the ambient occlusion: darkens the crevices. 0 = off, 1 = full AO. ==> Multiplie ce canal par l'occlusion ambiante : assombrit les creux. 0 = non, 1 = AO entière.
+Source for ==> Source pour
+File suffix ==> Suffixe du fichier
+Added to the file name when saving: stone + _n = stone_n.dds. ==> Ajouté au nom du fichier : pierre + _n = pierre_n.dds.
+Preview ==> Aperçu
+Shows the packed texture on the preview plane. ==> Affiche la texture assemblée sur le plan d'aperçu.
+Save… ==> Enregistrer…
+Quick Save ==> Enregistrement rapide
+Saves next to the last map you saved, without asking. ==> Enregistre à côté de la dernière map enregistrée, sans demander.
+Keep as default ==> Garder par défaut
+Remembers this setup for the next launches. ==> Retient ce réglage pour les prochains lancements.
+Output channel ==> Canal de sortie
+of the packed texture. ==> de la texture assemblée.
+Click to choose what goes into ==> Clique pour choisir ce qui va dans
+
+# ---------- Mouse and keys ----------
+Controls ==> Commandes
+Rotate Model ==> Tourner le modèle
+Right Mouse Button ==> Bouton droit
+Move Model ==> Déplacer le modèle
+Middle Mouse Button ==> Bouton du milieu
+Zoom In/Out ==> Zoom avant / arrière
+Mouse Scroll Wheel ==> Molette
+Rotate Light ==> Tourner la lumière
+Middle Mouse Button + L ==> Bouton du milieu + L
+Rotate Background ==> Tourner le fond
+Middle Mouse Button + B ==> Bouton du milieu + B
+
+# ---------- Support ----------
+♥ Support ==> ♥ Soutenir
+Help Materialize CE: donations, and the project page. ==> Aider Materialize CE : dons et page du projet.
+Support Materialize CE ==> Soutenir Materialize CE
+Materialize CE is free and open source. If it helps you, you can support its development: ==> Materialize CE est gratuit et open source. S'il t'est utile, tu peux soutenir son développement :
+
+# ---------- Tools: shared ----------
+Final Contrast ==> Contraste final
+Contrast of the result: above 1 separates dark and bright more, below 1 flattens. ==> Contraste du résultat : au-dessus de 1 sépare plus le sombre et le clair, en dessous aplatit.
+Final Bias ==> Décalage final
+Shifts the whole result darker (negative) or brighter (positive). ==> Assombrit (négatif) ou éclaircit (positif) tout le résultat.
+Final Gain ==> Gain final
+Overall strength of the result, before contrast and bias. ==> Force globale du résultat, avant contraste et décalage.
+Pre Contrast ==> Contraste d'entrée
+Contrast of the source before processing: raise it when the source is flat and details get lost. ==> Contraste de la source avant traitement : augmente-le quand la source est terne et que les détails se perdent.
+Ready-made settings for the sliders below. ==> Réglages tout prêts pour les curseurs ci-dessous.
+Default ==> Défaut
+Back to the default settings. ==> Revient aux réglages par défaut.
+Pick Color ==> Choisir une couleur
+Click, then click a point of the image: that colour becomes the sample. ==> Clique, puis clique un point de l'image : cette couleur devient l'échantillon.
+Hue ==> Teinte
+How far the hue may differ from the picked colour and still count (tolerance). ==> À quel point la teinte peut s'écarter de la couleur choisie et compter quand même (tolérance).
+Sat ==> Sat
+Tolerance on saturation: how grey or vivid a pixel may be compared to the sample. ==> Tolérance sur la saturation : à quel point un pixel peut être gris ou vif par rapport à l'échantillon.
+Lum ==> Lum
+Tolerance on brightness compared to the sample. ==> Tolérance sur la luminosité par rapport à l'échantillon.
+Low ==> Bas
+Lower end of the mask: pixels matching less than this are left out. ==> Bas du masque : les pixels qui correspondent moins que ça sont exclus.
+High ==> Haut
+Upper end of the mask: pixels matching more than this count fully. ==> Haut du masque : les pixels qui correspondent plus que ça comptent entièrement.
+Isolate Mask ==> Isoler le masque
+Shows only this sample's mask, to check which pixels it selects. ==> Affiche seulement le masque de cet échantillon, pour vérifier les pixels choisis.
+Use Color Sample 1 ==> Utiliser l'échantillon 1
+Uses a picked colour to push the matching pixels to their own value. ==> Utilise une couleur choisie pour donner leur propre valeur aux pixels correspondants.
+Use Color Sample 2 ==> Utiliser l'échantillon 2
+A second picked colour, with its own value. ==> Une deuxième couleur choisie, avec sa propre valeur.
+Works from the edited albedo (after Edit Albedo). ==> Travaille à partir de l'albedo édité (après Éditer).
+Original Albedo ==> Albedo d'origine
+Works from the albedo as it was loaded. ==> Travaille à partir de l'albedo tel qu'il a été chargé.
+Use Edited Albedo ==> Utiliser l'albedo édité
+Use Original Albedo ==> Utiliser l'albedo d'origine
+Works from the normal map instead of the albedo. ==> Travaille à partir de la normal map au lieu de l'albedo.
+Details ==> Détails
+Smooth ==> Doux
+Crisp ==> Net
+Mids ==> Moyens
+Soft ==> Doux
+Tight ==> Serré
+Cracks ==> Fissures
+Funky ==> Fantaisie
+Displace ==> Relief
+
+# ---------- Height ----------
+Height From Albedo ==> Hauteur depuis l'albedo
+Height Reveal Slider ==> Comparer la hauteur
+Drag to compare the height map with the albedo it comes from. ==> Glisse pour comparer la height map avec l'albedo d'origine.
+Sample Spread ==> Étendue d'échantillonnage
+How far around each pixel the heights are gathered. Larger = broader shapes, smaller = finer relief. ==> Jusqu'où autour de chaque pixel les hauteurs sont prises. Plus grand = formes plus larges, plus petit = relief plus fin.
+Sample Spread Boost ==> Étendue renforcée
+Extra spreading of the large shapes, for strong overall relief. ==> Étale davantage les grandes formes, pour un relief global marqué.
+Frequency Weight Equalizer ==> Égaliseur de poids des fréquences
+Each slider is a scale of detail, from the finest (left) to the largest (right): how much it counts in the height. ==> Chaque curseur est une échelle de détail, de la plus fine (gauche) à la plus large (droite) : son poids dans la hauteur.
+Frequency Contrast Equalizer ==> Égaliseur de contraste des fréquences
+Contrast of each scale of detail, from the finest (left) to the largest (right). ==> Contraste de chaque échelle de détail, de la plus fine (gauche) à la plus large (droite).
+Preset favouring fine details: fabric, sand, small grain. ==> Preset qui favorise les détails fins : tissu, sable, grain.
+Preset favouring large shapes: stones, bricks, real displacement. ==> Preset qui favorise les grandes formes : pierres, briques, vrai displacement.
+Preset that deepens thin dark lines: cracks and joints. ==> Preset qui creuse les fines lignes sombres : fissures et joints.
+An unusual mix of scales, to experiment. ==> Un mélange inhabituel d'échelles, pour expérimenter.
+Height given to the pixels of this colour sample: raise stones, sink joints. ==> Hauteur donnée aux pixels de cet échantillon : monter les pierres, creuser les joints.
+Sample Blend ==> Mélange des échantillons
+How strongly the colour samples replace the computed height. ==> À quel point les échantillons de couleur remplacent la hauteur calculée.
+Set as Height Map ==> Définir comme height map
+Keeps this result as the height map. ==> Garde ce résultat comme height map.
+Contrast of the height: above 1 = deeper relief. ==> Contraste de la hauteur : au-dessus de 1 = relief plus profond.
+
+# ---------- Normal ----------
+Normal From Height ==> Normale depuis la hauteur
+Normal Reveal Slider ==> Comparer la normale
+Drag to compare the normal map with the height it comes from. ==> Glisse pour comparer la normal map avec la hauteur d'origine.
+Frequency Equalizer ==> Égaliseur des fréquences
+Strength of each scale of detail in the normal, from the finest (left) to the largest (right). ==> Force de chaque échelle de détail dans la normale, de la plus fine (gauche) à la plus large (droite).
+Preset for soft, rounded relief. ==> Preset pour un relief doux et arrondi.
+Preset for sharp, detailed relief. ==> Preset pour un relief net et détaillé.
+Preset favouring medium-sized details. ==> Preset qui favorise les détails moyens.
+Angular Intensity ==> Intensité angulaire
+Strength of the relief guessed from the albedo's lighting (shape recognition). ==> Force du relief deviné d'après l'éclairage de l'albedo (reconnaissance de forme).
+Angularity Amount ==> Angularité
+How flat-faced and angular that guessed relief is, like cut stone. ==> À quel point ce relief deviné est anguleux, à facettes, comme de la pierre taillée.
+Shape from Albedo (Uncheked from Height) ==> Forme depuis l'albedo (décoché : depuis la hauteur)
+Checked: the shape recognition reads the albedo. Unchecked: it reads the height map. ==> Coché : la reconnaissance de forme lit l'albedo. Décoché : elle lit la height map.
+Shape Recognition, Rotation, Spread, Bias ==> Reconnaissance de forme : rotation, étendue, décalage
+Recognises the light direction baked in the photo: its angle, reach and balance. ==> Reconnaît la direction de la lumière incrustée dans la photo : son angle, sa portée et son équilibre.
+Precise slopes (Scharr filter) ==> Pentes précises (filtre de Scharr)
+Measures each slope from the 8 neighbouring pixels, centred on the pixel: cleaner normals with less noise, not shifted by half a pixel. Uncheck for the original Materialize result. ==> Mesure chaque pente sur les 8 pixels voisins, centrée sur le pixel : normales plus propres, moins de bruit, sans décalage d'un demi-pixel. Décoche pour le résultat d'origine de Materialize.
+Strength of the normal map: above 1 = stronger slopes. ==> Force de la normal map : au-dessus de 1 = pentes plus fortes.
+Set as Normal Map ==> Définir comme normal map
+Keeps this result as the normal map. ==> Garde ce résultat comme normal map.
+
+# ---------- Ambient occlusion ----------
+Normal + Depth to AO ==> Normale + profondeur vers AO
+AO pixel Spread ==> Étendue de l'AO
+How far around each pixel the occlusion is searched. Larger = broader, softer shadows in the hollows. ==> Jusqu'où autour de chaque pixel l'occlusion est cherchée. Plus grand = ombres plus larges et douces dans les creux.
+Pixel Depth ==> Profondeur
+How deep the relief is taken to be: higher = darker crevices. ==> Profondeur supposée du relief : plus haut = creux plus sombres.
+Horizon AO (slopes stay clear) ==> AO d'horizon (les pentes restent claires)
+Measures the occlusion of the depth AO against the surface's own tilt, and lets far relief count less. A plain slope no longer darkens itself; crevices stay dark. Uncheck for the original Materialize AO. ==> Mesure l'occlusion par rapport à l'inclinaison de la surface, et fait moins compter le relief lointain. Une simple pente ne s'assombrit plus ; les creux restent sombres. Décoche pour l'AO d'origine de Materialize.
+Blend Normal AO and Depth AO ==> Mélange AO normale / AO profondeur
+Mix between the AO from the normal map (fine details) and the AO from the height map (large shapes). ==> Mélange entre l'AO de la normal map (détails fins) et l'AO de la height map (grandes formes).
+AO Power ==> Force de l'AO
+Contrast of the AO: higher = darker, tighter shadows. ==> Contraste de l'AO : plus haut = ombres plus sombres et serrées.
+AO Bias ==> Décalage de l'AO
+Shifts the whole AO brighter or darker. ==> Éclaircit ou assombrit toute l'AO.
+Set as AO Map ==> Définir comme map d'AO
+Keeps this result as the ambient occlusion map. ==> Garde ce résultat comme map d'occlusion ambiante.
+
+# ---------- Edge ----------
+Edge from Normal ==> Arêtes depuis la normale
+Which scales of detail make edges, from the finest (left) to the largest (right). ==> Quelles échelles de détail font les arêtes, de la plus fine (gauche) à la plus large (droite).
+Preset for large shapes: edges of stones and bricks. ==> Preset pour les grandes formes : arêtes des pierres et briques.
+Preset for soft, wide edges. ==> Preset pour des arêtes douces et larges.
+Preset for thin, sharp edges. ==> Preset pour des arêtes fines et nettes.
+Brightness of the raised edges and ridges (where wear shows first). ==> Clarté des arêtes et reliefs (là où l'usure apparaît en premier).
+Crevice Amount ==> Quantité de creux
+Darkness of the hollows and crevices (where dirt gathers). ==> Noirceur des creux (là où la saleté s'accumule).
+Pinch ==> Pincer
+Makes the edges thinner and sharper. ==> Rend les arêtes plus fines et nettes.
+Pillow ==> Arrondir
+Makes the edges rounder and wider. ==> Rend les arêtes plus rondes et larges.
+Set as Edge Map ==> Définir comme map d'arêtes
+Keeps this result as the edge map. ==> Garde ce résultat comme map d'arêtes.
+
+# ---------- Edit diffuse ----------
+Edit Albedo ==> Éditer l'albedo
+Albedo Reveal Slider ==> Comparer l'albedo
+Drag to compare the edited albedo with the original. ==> Glisse pour comparer l'albedo édité avec l'original.
+Average Color Blur Size ==> Flou de la couleur moyenne
+Size of the blur that estimates the lighting of the photo. Larger = removes broad light gradients. ==> Taille du flou qui estime l'éclairage de la photo. Plus grand = retire les grands dégradés de lumière.
+Overlay Blur Size ==> Taille du flou de détail
+Size of the details kept while the lighting is removed. ==> Taille des détails gardés pendant que l'éclairage est retiré.
+Overlay Blur Contrast ==> Contraste du détail
+Contrast of those kept details. ==> Contraste de ces détails gardés.
+Light Mask Power ==> Force du masque de lumière
+How strictly the bright areas are selected for light removal. ==> Sélection plus ou moins stricte des zones claires pour retirer la lumière.
+Remove Light ==> Retirer la lumière
+How much of the baked highlights to remove. ==> Quantité de reflets incrustés à retirer.
+Shadow Mask Power ==> Force du masque d'ombre
+How strictly the dark areas are selected for shadow removal. ==> Sélection plus ou moins stricte des zones sombres pour retirer les ombres.
+Remove Shadow ==> Retirer les ombres
+How much of the baked shadows to remove. ==> Quantité d'ombres incrustées à retirer.
+Hot Spot Removal ==> Retirer les points chauds
+Evens out small bright spots (reflections, glare). ==> Atténue les petits points clairs (reflets, éblouissement).
+Dark Spot Removal ==> Retirer les points sombres
+Evens out small dark spots. ==> Atténue les petits points sombres.
+Keep Original Color ==> Garder la couleur d'origine
+Brings back the photo's original colours on top of the corrected brightness. ==> Remet les couleurs d'origine de la photo sur la luminosité corrigée.
+Colour intensity: 0 = grey. ==> Intensité des couleurs : 0 = gris.
+Set as Albedo ==> Définir comme albedo
+Keeps this result as the albedo. ==> Garde ce résultat comme albedo.
+
+# ---------- Metallic ----------
+Metallic From Albedo ==> Métallique depuis l'albedo
+Metalic Reveal Slider ==> Comparer le métallique
+Drag to compare the metallic map with the albedo. ==> Glisse pour comparer la map métallique avec l'albedo.
+Blur Size ==> Taille du flou
+Softens the metal mask: fewer isolated pixels. ==> Adoucit le masque de métal : moins de pixels isolés.
+Size of the albedo details added back into the mask. ==> Taille des détails de l'albedo réinjectés dans le masque.
+High Pass Overlay ==> Superposition passe-haut
+How much of those details go into the mask: scratches and wear on the metal. ==> Quantité de ces détails dans le masque : rayures et usure du métal.
+Contrast of the metal mask: higher = clearer split between metal and non-metal. ==> Contraste du masque de métal : plus haut = séparation plus nette entre métal et non-métal.
+Set as Metallic ==> Définir comme métallique
+Keeps this result as the metallic map. ==> Garde ce résultat comme map métallique.
+
+# ---------- Smoothness ----------
+Smoothness From Albedo ==> Lissé depuis l'albedo
+Smoothness Reveal Slider ==> Comparer le lissé
+Drag to compare the smoothness map with the albedo. ==> Glisse pour comparer la map de lissé avec l'albedo.
+Metal Smoothness ==> Lissé du métal
+Smoothness given to the metal (from the metallic map). Polished metal is high. ==> Lissé donné au métal (d'après la map métallique). Le métal poli est haut.
+Smoothness given to the pixels of this colour sample. ==> Lissé donné aux pixels de cet échantillon.
+Base Smoothness ==> Lissé de base
+Smoothness of everything that is neither metal nor a colour sample. ==> Lissé de tout ce qui n'est ni métal ni échantillon de couleur.
+Sample Blur Size ==> Flou des échantillons
+Softens the colour sample masks. ==> Adoucit les masques des échantillons de couleur.
+High Pass Blur Size ==> Taille du passe-haut
+Size of the albedo details added to the smoothness. ==> Taille des détails de l'albedo ajoutés au lissé.
+How much of those details go in: small variations of shine. ==> Quantité de ces détails : petites variations de brillance.
+Set as Smoothness ==> Définir comme lissé
+Keeps this result as the smoothness map (roughness is its inverse). ==> Garde ce résultat comme map de lissé (la rugosité est son inverse).
+
+# ---------- Tiling ----------
+Tiling Texture Maker ==> Création de textures raccordables
+Technique Overlap ==> Technique Chevauchement
+Blends each border with the opposite one, taller details passing over the others (uses the height map). ==> Fond chaque bord avec le bord opposé, les détails les plus hauts passant par-dessus (utilise la height map).
+Technique Splat ==> Technique Éparpillement
+Scatters rotated pieces of the texture over itself: breaks the visible repetition. ==> Éparpille des morceaux tournés de la texture sur elle-même : casse la répétition visible.
+New Texture Size X ==> Largeur de la nouvelle texture
+Width of the tiled texture. ==> Largeur de la texture raccordée.
+New Texture Size Y ==> Hauteur de la nouvelle texture
+Height of the tiled texture. ==> Hauteur de la texture raccordée.
+Edge Falloff ==> Adoucissement des bords
+Softness of the blend between the borders: low = sharp cut following the height, high = gentle fade. ==> Douceur du fondu entre les bords : bas = coupe nette qui suit la hauteur, haut = fondu doux.
+Overlap X ==> Chevauchement X
+Width of the band blended on the left and right borders. ==> Largeur de la bande fondue sur les bords gauche et droit.
+Overlap Y ==> Chevauchement Y
+Height of the band blended on the top and bottom borders. ==> Hauteur de la bande fondue sur les bords haut et bas.
+Splat Rotation ==> Rotation des morceaux
+Rotation of the scattered pieces. ==> Rotation des morceaux éparpillés.
+Splat Random Rotation ==> Rotation aléatoire
+Random extra rotation per piece. ==> Rotation aléatoire en plus pour chaque morceau.
+Splat Scale ==> Taille des morceaux
+Size of the scattered pieces. ==> Taille des morceaux éparpillés.
+Splat Wooble Amount ==> Tremblement
+Random shift of each piece, so they do not line up. ==> Décalage aléatoire de chaque morceau, pour qu'ils ne s'alignent pas.
+Splat Randomize ==> Variation aléatoire
+Shifts the random placement of the pieces gradually. ==> Fait évoluer progressivement le placement aléatoire des morceaux.
+New Pattern ==> Nouveau motif
+Draws a new random arrangement of the pieces. The pattern stays the same while you move the sliders. ==> Tire un nouvel agencement aléatoire des morceaux. Le motif reste le même quand tu bouges les curseurs.
+Tiling Test Variables ==> Test de répétition
+Preview only: repeat the texture to check the seams. ==> Aperçu seulement : répète la texture pour vérifier les raccords.
+Texture Tiling ==> Répétition
+How many times the texture repeats on the preview. ==> Nombre de répétitions de la texture sur l'aperçu.
+Shifts the preview horizontally, to bring a seam into view. ==> Décale l'aperçu horizontalement, pour voir un raccord.
+Shifts the preview vertically, to bring a seam into view. ==> Décale l'aperçu verticalement, pour voir un raccord.
+Set Maps ==> Appliquer aux maps
+Applies the tiling to every map. ==> Applique le raccord à toutes les maps.
+
+# ---------- Alignment ----------
+Texture Alignment Adjuster ==> Ajustement de l'alignement
+Alignment Reveal Slider ==> Comparer l'alignement
+Drag to compare before and after the correction. ==> Glisse pour comparer avant et après la correction.
+Preview Map ==> Map affichée
+Which map is shown while adjusting. ==> La map affichée pendant l'ajustement.
+Original Albedo Map ==> Albedo d'origine
+Adjust while looking at the original albedo. ==> Ajuster en regardant l'albedo d'origine.
+Adjust while looking at the edited albedo. ==> Ajuster en regardant l'albedo édité.
+Adjust while looking at the height map. ==> Ajuster en regardant la height map.
+Adjust while looking at the metallic map. ==> Ajuster en regardant la map métallique.
+Adjust while looking at the smoothness map. ==> Ajuster en regardant la map de lissé.
+Adjust while looking at the edge map. ==> Ajuster en regardant la map des arêtes.
+Adjust while looking at the ambient occlusion map. ==> Ajuster en regardant la map d'occlusion ambiante.
+Lens Distort Correction ==> Correction de distorsion
+Straightens the curved lines of a wide-angle lens (barrel distortion). ==> Redresse les lignes courbées d'un grand-angle (distorsion en barillet).
+Perspective Correction X ==> Correction de perspective X
+Corrects a photo taken from the side. ==> Corrige une photo prise de côté.
+Perspective Correction Y ==> Correction de perspective Y
+Corrects a photo taken from above or below. ==> Corrige une photo prise d'en haut ou d'en bas.
+Reset Points ==> Réinitialiser les points
+Puts the four corner points back in place. ==> Remet les quatre points des coins en place.
+Set All Maps ==> Appliquer à toutes les maps
+Applies the correction to every map. ==> Applique la correction à toutes les maps.
+
+# ---------- Post process ----------
+Enable Post Process ==> Activer le post-traitement
+Turns the preview effects on or off. They never change the saved maps. ==> Active ou coupe les effets de l'aperçu. Ils ne changent jamais les maps enregistrées.
+Bloom Threshold ==> Seuil du bloom
+How bright a highlight must be to glow. ==> Luminosité à partir de laquelle un reflet brille.
+Bloom Amount ==> Force du bloom
+Strength of the glow around highlights. ==> Force du halo autour des reflets.
+Lens Flare Amount ==> Reflets d'objectif
+Strength of the lens flares. ==> Force des reflets d'objectif.
+Lens Dirt Amount ==> Salissures d'objectif
+Dirt on the virtual lens, visible in the glow. ==> Saleté sur l'objectif virtuel, visible dans le halo.
+Vignette Amount ==> Vignettage
+Darkens the corners of the view. ==> Assombrit les coins de la vue.
+Filmic tone mapping (ACES) ==> Tone mapping filmique (ACES)
+Rolls the highlights off smoothly, like a film camera, instead of clipping them flat to white: shiny metal and wet surfaces keep their detail. Preview only. ==> Adoucit les hautes lumières comme une caméra argentique au lieu de les écrêter en blanc : le métal brillant et les surfaces mouillées gardent leurs détails. Aperçu seulement.
+Exposure ==> Exposition
+Brightness of the preview before the tone mapping. Preview only: the saved maps are not affected. ==> Luminosité de l'aperçu avant le tone mapping. Aperçu seulement : les maps enregistrées ne changent pas.
+DOF Max Blur ==> Flou maximal (profondeur de champ)
+Maximum blur of what is out of focus (depth of field). ==> Flou maximal de ce qui est hors mise au point (profondeur de champ).
+DOF Focal Depth ==> Distance de mise au point
+Distance that stays sharp. ==> Distance qui reste nette.
+DOF Max Distance ==> Distance du flou complet
+Distance at which the blur is complete. ==> Distance à laquelle le flou est complet.
+Use Auto Focus ==> Mise au point automatique
+Keeps the point under the centre of the view sharp. ==> Garde net le point au centre de la vue.
+
+# ---------- Classic interface ----------
+Quit ==> Quitter
+Closes Materialize. ==> Ferme Materialize.
+Hide Gui ==> Masquer l'interface
+Show Gui ==> Afficher l'interface
+Export & Project ==> Export et projet
+Save Project ==> Enregistrer le projet
+Load Project ==> Ouvrir un projet
+Post Process ==> Post-traitement
+Are You Sure? ==> Tu es sûr ?
+Yes ==> Oui
+No ==> Non
+DDS Options ==> Options DDS
+Pick the tool's .exe… ==> Choisir le .exe de l'outil…
+
+# ---------- More ----------
+A saved look: render mode, Skyrim settings, multipliers and light. Save your own with the field and button below. ==> Un rendu enregistré : mode de rendu, réglages Skyrim, multiplicateurs et lumière. Enregistre le tien avec les boutons en dessous.
+Dark Mask Power ==> Force du masque sombre
+Bias ==> Décalage
+Blend Amount ==> Quantité de mélange
+Albedo Map ==> Map albedo
+Height Map ==> Height map
+Normal Map ==> Normal map
+Metallic Map ==> Map métallique
+Smoothness Map ==> Map de lissé
+Edge Map ==> Map des arêtes
+AO Map ==> Map d'AO
+Hides the panels to look at the preview. ==> Masque les panneaux pour regarder l'aperçu.
+Shows the panels again. ==> Réaffiche les panneaux.
+Empties this map. ==> Vide cette map.
+Shows this map alone on the preview plane. ==> Affiche cette map seule sur le plan d'aperçu.
+Saves this map again to the last file you saved it to, without asking. ==> Réenregistre cette map dans le dernier fichier, sans demander.
+Opens a Materialize project (.mtz). ==> Ouvre un projet Materialize (.mtz).
+Saves every map and every setting as a Materialize project (.mtz) with its images. ==> Enregistre toutes les maps et tous les réglages en projet Materialize (.mtz) avec ses images.
+Builds the packed texture and saves it in the file format chosen in Saving Options (DDS included). ==> Assemble la texture et l'enregistre dans le format de fichier choisi (DDS compris).
+
+# ---------- Workspace, add-ons, layout ----------
+Albedo ==> Albédo
+Support ==> Soutenir
+Material & lighting ==> Matériau et éclairage
+Shows or hides the Material & lighting panel on the right: workflow, render mode, presets, light, tiling. ==> Affiche ou masque le panneau Matériau et éclairage à droite : workflow, mode de rendu, presets, lumière, répétition.
+Hide this panel (the Material & lighting button brings it back). ==> Masque ce panneau (le bouton Matériau et éclairage le fait revenir).
+Every map together on the preview. ==> Toutes les maps ensemble sur l'aperçu.
+Welcome to Materialize CE ==> Bienvenue dans Materialize CE
+Choose the folder where Materialize CE keeps your work: projects, saved textures, export profiles, render presets, HDRIs and add-ons. Pick a short, easy to find place. ==> Choisis le dossier où Materialize CE range ton travail : projets, textures enregistrées, profils d'export, presets de rendu, HDRI et add-ons. Prends un endroit court et facile à retrouver.
+Suggested: ==> Suggestion :
+Use this folder ==> Utiliser ce dossier
+Choose another folder… ==> Choisir un autre dossier…
+Materialize CE folder ==> Dossier de Materialize CE
+Subfolders are created inside: Projects, Textures, Export profiles, Render presets, HDRI, Addons. You can change it later in Settings. ==> Des sous-dossiers y sont créés : Projects, Textures, Export profiles, Render presets, HDRI, Addons. Tu pourras le changer plus tard dans les Réglages.
+Your Materialize CE folder: ==> Ton dossier Materialize CE :
+This folder cannot be used: ==> Ce dossier ne peut pas être utilisé :
+YOUR MATERIALIZE CE FOLDER ==> TON DOSSIER MATERIALIZE CE
+Projects, saved textures, export profiles, render presets, HDRIs and add-ons go in: ==> Les projets, textures, profils d'export, presets de rendu, HDRI et add-ons vont dans :
+Opens it in the Explorer. ==> L'ouvre dans l'Explorateur.
+Change… ==> Changer…
+Another folder. Your profiles and presets are copied there; projects and textures stay where they are. ==> Un autre dossier. Tes profils et presets y sont copiés ; les projets et textures restent où ils sont.
+Log ==> Journal
+Opens the folder of Materialize's log (Player.log), useful when reporting a problem. ==> Ouvre le dossier du journal de Materialize (Player.log), utile pour signaler un problème.
+Open my HDRI folder ==> Ouvrir mon dossier HDRI
+Put .hdr / .exr files there: they appear in this list. ==> Mets-y des fichiers .hdr / .exr : ils apparaissent dans cette liste.
+By ==> Par
+Alt + Right Button (or Middle + L) ==> Alt + bouton droit (ou milieu + L)
+
+# ---------- Project & export block ----------
+PROJECT ==> PROJET
+Unsaved project ==> Projet non enregistré
+New ==> Nouveau
+Open… ==> Ouvrir…
+Save the project again where it is (or choose where, the first time). ==> Réenregistre le projet au même endroit (ou choisis où, la première fois).
+Save the project under another name or in another folder, and choose the maps' file format. ==> Enregistre le projet sous un autre nom ou ailleurs, et choisis le format des maps.
+Recent ==> Récents
+EXPORT ==> EXPORT
+Which engine or game the files are for (export profile). ==> Pour quel moteur ou jeu sont les fichiers (profil d'export).
+Click to choose another folder. ==> Clique pour choisir un autre dossier.
+Writes every file of the profile, with this name, in this folder. ==> Écrit tous les fichiers du profil, avec ce nom, dans ce dossier.
+Details: the files of the profile, their channels, formats and compression; edit and save profiles. ==> Détails : les fichiers du profil, leurs canaux, formats et compression ; modifier et enregistrer des profils.
+
+Smooth (blur) ==> Lissage (flou)
+Softens the map by a fraction of a pixel up to 4 pixels: removes grain, JPEG blocks and harsh noise without losing the shapes. The borders wrap, so tiling maps stay seamless. ==> Adoucit la map, d'une fraction de pixel jusqu'à 4 pixels : enlève le grain, les blocs JPEG et le bruit sans perdre les formes. Les bords se raccordent, les maps tuilables restent sans couture.
+
+# Levels graph
+median {0} · mean {1} · range {2}–{3} ==> médiane {0} · moyenne {1} · plage {2}–{3}
+File: ==> Fichier :
+Result: ==> Résultat :
+
+# Reveal
+Reveal ==> Comparer
+Map ==> Map
+Render ==> Rendu
+Slide to compare: on the Map side the adjusted map is shown flat, on the Render side the lit material. All the way to Map shows the map alone. ==> Glisse pour comparer : côté Map, la map ajustée est affichée à plat ; côté Rendu, le matériau éclairé. Tout à gauche, la map seule.
+
+# Preview menu
+Preview ==> Aperçu
+What the preview renders the material for: the engine or game. Each choice sets the lighting model, the workflow and the settings below. Adjust them, then save your own with Save as new. ==> Pour quel moteur ou jeu l'aperçu rend le matériau. Chaque choix règle le modèle d'éclairage, le workflow et les réglages en dessous. Ajuste-les, puis enregistre le tien avec Nouveau…
+Choose the engine or game: PBR (Unity, Unreal, glTF), Skyrim… ==> Choisis le moteur ou le jeu : PBR (Unity, Unreal, glTF), Skyrim…
+Custom ==> Personnalisé
+Lighting: ==> Éclairage :
+physically based (PBR) ==> physique (PBR)
+Skyrim vanilla (Blinn-Phong) ==> Skyrim vanilla (Blinn-Phong)
+Skyrim Complex Material ==> Skyrim Complex Material
+
+Shift + Right Button (or Middle + L) ==> Maj + bouton droit (ou milieu + L)
+
+# Shortcuts
+MOUSE ==> SOURIS
+KEYBOARD ==> CLAVIER
+VIEWS ==> VUES
+Hide / show the panels ==> Masquer / afficher les panneaux
+Space ==> Espace
+Quick export ==> Export rapide
+Export details (channels) ==> Détails de l'export (canaux)
+Material & lighting panel ==> Panneau Matériau et éclairage
+New project ==> Nouveau projet
+Open project ==> Ouvrir un projet
+Save project as ==> Enregistrer le projet sous
+Metalness / specular ==> Métallique / spéculaire
+Roughness / glossiness ==> Rugosité / brillance
+Displacement (height) ==> Displacement (hauteur)
+
+# Viewport keys
+Right Mouse Button (or Alt + Left) ==> Bouton droit (ou Alt + gauche)
+Mouse Scroll Wheel (or Alt + Right, up / down) ==> Molette (ou Alt + droit, haut / bas)
+Focus / reset the angle ==> Recadrer / remettre l'angle
+F / Shift + F ==> F / Maj + F
+Next preview shape ==> Forme d'aperçu suivante
+Displacement on / off ==> Displacement activé / coupé
+Tiling preview (3 × 3) ==> Aperçu de la répétition (3 × 3)
+Previous / next environment ==> Environnement précédent / suivant
+Arrow Up / Down ==> Flèche haut / bas
+Displacement on ==> Displacement activé
+Displacement off ==> Displacement coupé
+Environment: ==> Environnement :
+
+Font ==> Police
+The interface's font: Open Sans (as in Quixel Mixer) or Segoe UI (Windows'). Applied at once. ==> La police de l'interface : Open Sans (comme Quixel Mixer) ou Segoe UI (celle de Windows). Appliqué tout de suite.
+
+# Rendering quality
+RENDERING QUALITY ==> QUALITÉ DU RENDU
+Reflection occlusion ==> Occlusion des reflets
+Reflections fade in crevices and where a normal-mapped reflection would point under the surface. 0 = off. ==> Les reflets s'estompent dans les creux et là où un reflet de normal map passerait sous la surface. 0 = désactivé.
+Contact shadows (AO) ==> Ombres de contact (AO)
+Direct light is also shaded by the AO at the bottom of crevices. 0 = off. ==> La lumière directe est aussi assombrie par l'AO au fond des creux. 0 = désactivé.
+Relief shadows ==> Ombres du relief
+Small shadows cast by the height map itself towards the light, finer than the shadow map. 0 = off. ==> Petites ombres projetées par la height map elle-même vers la lumière, plus fines que la shadow map. 0 = désactivé.
+Fine relief (parallax) ==> Relief fin (parallax)
+Parallax occlusion for the detail the tessellation cannot follow, down to the texel. 0 = off. ==> Parallax occlusion pour le détail que la tessellation ne peut pas suivre, jusqu'au texel. 0 = désactivé.
+Reflection anti-aliasing ==> Anti-aliasing des reflets
+Widens highlights where the normal changes faster than a pixel, so they stop shimmering. 0 = off. ==> Élargit les reflets là où la normale change plus vite qu'un pixel, pour qu'ils ne scintillent plus. 0 = désactivé.
+Parallax occlusion for the detail the tessellation cannot follow, down to the texel. Best on flat, finely detailed materials (sand, fabric, concrete); off by default because it can smear on steep relief. 0 = off. ==> Parallax occlusion pour le détail que la tessellation ne peut pas suivre, jusqu'au texel. Idéal sur les matériaux plats et fins (sable, tissu, béton) ; désactivé par défaut car il peut baver sur un relief pentu. 0 = désactivé.
+
+ Enhanced rendering (experimental) ==> Rendu amélioré (expérimental)
+Enhanced rendering (experimental) ==> Rendu amélioré (expérimental)
+Reflection occlusion, contact shadows, relief shadows, reflection anti-aliasing. Off: Materialize's original rendering. ==> Occlusion des reflets, ombres de contact, ombres du relief, anti-aliasing des reflets. Décoché : le rendu d'origine de Materialize.
+Modern rendering (linear PBR) ==> Rendu moderne (PBR linéaire)
+Lighting computed in linear light with a GGX BRDF and the environment's light (as in Substance, Marmoset, Mixer), plus reflection occlusion, contact and relief shadows, reflection anti-aliasing. Off: Materialize's original rendering. ==> Éclairage calculé en lumière linéaire avec un BRDF GGX et la lumière de l'environnement (comme Substance, Marmoset, Mixer), plus l'occlusion des reflets, les ombres de contact et du relief, l'anti-aliasing des reflets. Décoché : le rendu d'origine de Materialize.
+Game-like parallax ==> Parallax comme en jeu
+As in Skyrim: the height map only shifts the texture (height × 0.08), no real relief. Off: the relief is displaced (tessellation), much deeper than in the game. ==> Comme dans Skyrim : la height map décale seulement la texture (hauteur × 0,08), sans vrai relief. Décoché : le relief est déplacé (tessellation), bien plus profond qu'en jeu.
+
+View ▾ ==> Vue ▾
+Preset angles: front, three-quarter from above, grazing light on the relief; and reset the camera. ==> Angles prédéfinis : de face, trois-quarts du dessus, rasant sur le relief ; et recadrer la caméra.
+Front ==> De face
+The material flat, facing you: the texture as it is. ==> Le matériau à plat, face à toi : la texture telle quelle.
+Three-quarter from above ==> Trois-quarts du dessus
+Seen from above at an angle, as on the ground or a wall in a game. ==> Vu de dessus en biais, comme un sol ou un mur en jeu.
+From above ==> Du dessus
+Looking down on it, slightly tilted. ==> Vu de haut, légèrement incliné.
+Grazing (relief) ==> Rasant (relief)
+Almost edge-on: shows the depth of the relief and the parallax. ==> Presque de profil : montre la profondeur du relief et le parallax.
+Reset the camera (F) ==> Recadrer la caméra (F)
+Back to the starting framing, keeping the angle. ==> Revient au cadrage de départ, en gardant l'angle.
+
+Grid at level 0 (G) ==> Grille au niveau 0 (G)
+A reference grid at the plane's zero level: what the displacement raises covers it, what sinks shows under it. ==> Une grille de référence au niveau zéro du plane : ce que le displacement monte la recouvre, ce qui descend passe dessous.
+Grid at level 0 ==> Grille au niveau 0
+Size ==> Taille
+Full ==> Pleine
+BC1 sRGB (colour) ==> BC1 sRGB (couleur)
+Game exposure ==> Exposition du jeu
+BC7 sRGB (colour) ==> BC7 sRGB (couleur)
+Materialize (original) ==> Materialize (original)
+☀ Light follows the HDRI's sun ==> ☀ La lumière suit le soleil de l'HDRI
+The light comes from the sun of the picture, also when you turn the environment. Shift + right drag still moves it. ==> La lumière vient du soleil de l'image, même quand vous tournez l'environnement. Maj + glisser droit la déplace toujours.
+This environment has no clear sun. ==> Cet environnement n'a pas de soleil net.
+1 = full material ==> 1 = matériau complet

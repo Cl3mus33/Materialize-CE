@@ -1,0 +1,15 @@
+HDRIs shipped with Materialize CE
+=================================
+
+All from Poly Haven (https://polyhaven.com), released under CC0 (public domain).
+Converted to 4096 x 2048 half-float EXR (PIZ) for Materialize CE. Thank you to their authors:
+
+kloofendal_43d_clear    Kloofendal 43d Clear    Greg Zaal                       midday sun
+golden_gate_hills       Golden Gate Hills       Dimitrios Savva, Jarod Guest    high sun
+autumn_field            Autumn Field            Sergej Majboroda                afternoon sun
+syferfontein_1d_clear   Syferfontein 1d Clear   Greg Zaal                       golden hour
+venice_sunset           Venice Sunset           Greg Zaal                       sunset
+moonlit_golf            Moonlit Golf            Greg Zaal                       moonlight
+hochsal_forest          Hochsal Forest          Adrian Kubasa                   soft light (no sun)
+
+Each one: https://polyhaven.com/a/<file name>

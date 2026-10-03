@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.IO;
 
@@ -29,7 +29,8 @@ public enum FileFormat {
 	jpg,
 	png,
 	tga,
-	tiff
+	tiff,
+	dds
 }
 
 public class ProjectObject {
@@ -138,6 +139,9 @@ public class SaveLoadProject : MonoBehaviour {
 		case FileFormat.tiff:
 			extension = "tiff";
 			break;
+		case FileFormat.dds:
+			extension = "dds";
+			break;
 		}
 		
 		return extension;
@@ -146,10 +150,22 @@ public class SaveLoadProject : MonoBehaviour {
 	public void LoadProject ( string pathToFile ) {
 		UnityEngine.Debug.Log ("Loading Project: " + pathToFile);
 
-		var serializer = new XmlSerializer(typeof(ProjectObject));
-		var stream = new FileStream(pathToFile, FileMode.Open);
-		thisProject = serializer.Deserialize(stream) as ProjectObject;
-		stream.Close();
+		// A damaged or foreign file used to throw here and leave Materialize half-reset (Materialize CE).
+		ProjectObject loaded = null;
+		try {
+			var serializer = new XmlSerializer(typeof(ProjectObject));
+			using (var stream = new FileStream(pathToFile, FileMode.Open, FileAccess.Read)) {
+				loaded = serializer.Deserialize(stream) as ProjectObject;
+			}
+		} catch (Exception e) {
+			Notifications.Error ("Could not open the project " + Path.GetFileName (pathToFile) + ": " + (e.InnerException ?? e).Message);
+			return;
+		}
+		if (loaded == null) {
+			Notifications.Error ("Not a Materialize project: " + Path.GetFileName (pathToFile));
+			return;
+		}
+		thisProject = loaded;
 
 		heightFromDiffuseGui.SetValues(thisProject);
 		editDiffuseGui.SetValues(thisProject);
@@ -168,6 +184,11 @@ public class SaveLoadProject : MonoBehaviour {
 	public void SaveProject ( string pathToFile,  FileFormat selectedFormat ) {
 		UnityEngine.Debug.Log ("Saving Project: " + pathToFile);
 
+		// A project's maps must open again: FreeImage cannot read BC7, so DDS projects keep PNG maps (Materialize CE).
+		if (selectedFormat == FileFormat.dds) {
+			selectedFormat = FileFormat.png;
+			Notifications.Info ("Project maps are saved as PNG: DDS is for exporting.");
+		}
 		string extension = SwitchFormats(selectedFormat);
 
 		if ( pathToFile.Contains (".") ) {
@@ -234,10 +255,15 @@ public class SaveLoadProject : MonoBehaviour {
 
 		materailGui.GetValues (thisProject);
 
-		var serializer = new XmlSerializer(typeof(ProjectObject));
-		var stream = new FileStream(pathToFile + ".mtz", FileMode.Create);
-		serializer.Serialize(stream, thisProject);
-		stream.Close();
+		try {
+			var serializer = new XmlSerializer(typeof(ProjectObject));
+			using (var stream = new FileStream(pathToFile + ".mtz", FileMode.Create)) {
+				serializer.Serialize(stream, thisProject);
+			}
+		} catch (Exception e) {
+			Notifications.Error ("Could not save the project: " + e.Message);
+			return;
+		}
 
 		SaveAllFiles (pathToFile, selectedFormat);
 	}
@@ -249,7 +275,7 @@ public class SaveLoadProject : MonoBehaviour {
 		if (pathToFile.Contains (".")) {
 			pathToFile = pathToFile.Substring (0, pathToFile.LastIndexOf ("."));
 		}
-		StartCoroutine ( SaveAllTextures( extension, pathToFile ) );
+		mainGui.StartCoroutine ( SaveAllTextures( extension, pathToFile ) );
 	}
 
 	public void SaveFile ( string pathToFile, FileFormat selectedFormat, Texture2D textureToSave, string mapType ) {
@@ -264,8 +290,7 @@ public class SaveLoadProject : MonoBehaviour {
 
 	public void PasteFile( MapType mapTypeToLoad ){
 
-		string tempImagePath = Application.dataPath + "/temp.png";
-		//string tempImagePath = Application.persistentDataPath + "/temp.png";
+		string tempImagePath = Path.Combine (Application.temporaryCachePath, "paste.png");
 		UnityEngine.Debug.Log (tempImagePath);
 
 		try{
@@ -274,7 +299,7 @@ public class SaveLoadProject : MonoBehaviour {
 			myProcess.StartInfo.CreateNoWindow = true;
 			myProcess.StartInfo.UseShellExecute = false;
 			myProcess.StartInfo.FileName = Application.streamingAssetsPath.Replace ("/", "\\") + "\\c2i.exe";
-			myProcess.StartInfo.Arguments = tempImagePath.Replace ("/", "\\");
+			myProcess.StartInfo.Arguments = "\"" + tempImagePath.Replace ("/", "\\") + "\"";
 			myProcess.EnableRaisingEvents = true;
 			myProcess.Start();
 			myProcess.WaitForExit ();
@@ -288,8 +313,14 @@ public class SaveLoadProject : MonoBehaviour {
 
 	public void CopyFile( Texture2D textureToSave ){
 
-		SaveFile(Application.dataPath + "/temp.png",FileFormat.png,textureToSave, "" );
-		//SaveFile(Application.persistentDataPath + "/temp.png",FileFormat.png,textureToSave, "" );
+		// Written right now (the clipboard helper reads it immediately), in Windows' temp folder: the
+		// Materialize folder may be read-only (Materialize CE).
+		string tempImage = Path.Combine (Application.temporaryCachePath, "clipboard");
+		string error = FastImageSaver.Write (FastImageSaver.Prepare (textureToSave, tempImage, "png"));
+		if (error != null) {
+			Notifications.Error (error);
+			return;
+		}
 
 		try{
 			Process myProcess = new Process ();
@@ -297,7 +328,7 @@ public class SaveLoadProject : MonoBehaviour {
 			myProcess.StartInfo.CreateNoWindow = true;
 			myProcess.StartInfo.UseShellExecute = false;
 			myProcess.StartInfo.FileName = Application.streamingAssetsPath.Replace ("/", "\\") + "\\i2c.exe";
-			myProcess.StartInfo.Arguments = Application.dataPath.Replace ("/", "\\") + "\\temp.png";
+			myProcess.StartInfo.Arguments = "\"" + (tempImage + ".png").Replace ("/", "\\") + "\"";
 			myProcess.EnableRaisingEvents = true;
 			myProcess.Start();
 			myProcess.WaitForExit ();
@@ -311,91 +342,67 @@ public class SaveLoadProject : MonoBehaviour {
 	//==============================================//
 
 
+	// Materialize CE: each map is saved after the previous one finishes (no shared "busy" flag, which loading
+	// also uses), and the user is told what was written.
 	public IEnumerator SaveAllTextures( string extension, string pathToFile ) {
 
-		StartCoroutine( SaveTexture ( extension, mainGui._HeightMap, pathToFile + "_height" ) );
-		while( busy ){ yield return new WaitForSeconds( 0.01f ); }
+		var maps = new System.Collections.Generic.List<(Texture2D Texture, string Suffix)> {
+			(mainGui._HeightMap, "_height"), (mainGui._DiffuseMap, "_diffuse"), (mainGui._DiffuseMapOriginal, "_diffuseOriginal"),
+			(mainGui._NormalMap, "_normal"), (mainGui._MetallicMap, "_metallic"), (mainGui._SmoothnessMap, "_smoothness"),
+			(mainGui._EdgeMap, "_edge"), (mainGui._AOMap, "_ao"),
+		};
+		int count = 0;
+		foreach (var m in maps) if (m.Texture != null) count++;
+		Notifications.Info ("Saving the project: " + count + " maps…");
+		UnityEngine.Debug.Log ("Saving " + count + " project maps to " + pathToFile + "_*." + extension);
 
-		StartCoroutine( SaveTexture ( extension, mainGui._DiffuseMap, pathToFile + "_diffuse" ) );
-		while( busy ){ yield return new WaitForSeconds( 0.01f ); }
-
-		StartCoroutine( SaveTexture ( extension, mainGui._DiffuseMapOriginal, pathToFile + "_diffuseOriginal" ) );
-		while( busy ){ yield return new WaitForSeconds( 0.01f ); }
-
-		StartCoroutine( SaveTexture ( extension, mainGui._NormalMap, pathToFile + "_normal" ) );
-		while( busy ){ yield return new WaitForSeconds( 0.01f ); }
-
-		StartCoroutine( SaveTexture ( extension, mainGui._MetallicMap, pathToFile + "_metallic" ) );
-		while( busy ){ yield return new WaitForSeconds( 0.01f ); }
-
-		StartCoroutine( SaveTexture ( extension, mainGui._SmoothnessMap, pathToFile + "_smoothness" ) );
-		while( busy ){ yield return new WaitForSeconds( 0.01f ); }
-
-		StartCoroutine( SaveTexture ( extension, mainGui._EdgeMap, pathToFile + "_edge" ) );
-		while( busy ){ yield return new WaitForSeconds( 0.01f ); }
-
-		StartCoroutine( SaveTexture ( extension, mainGui._AOMap, pathToFile + "_ao" ) );
-		while( busy ){ yield return new WaitForSeconds( 0.01f ); }
-		
-		yield return new WaitForSeconds( 0.01f );
+		int written = 0;
+		var failed = new System.Collections.Generic.List<string> ();
+		foreach (var m in maps) {
+			if (m.Texture == null) continue;
+			string path = pathToFile + m.Suffix + "." + extension;
+			yield return mainGui.StartCoroutine (SaveTexture (extension, m.Texture, pathToFile + m.Suffix));
+			if (File.Exists (path)) written++;
+			else failed.Add (Path.GetFileName (path));
+		}
+		if (failed.Count == 0) {
+			Notifications.Info ("Project saved: " + written + " maps next to " + Path.GetFileName (pathToFile) + ".mtz");
+		} else {
+			Notifications.Error ("Project saved, but these maps could not be written: " + string.Join (", ", failed.ToArray ()));
+		}
 	}
 
-	
 	public IEnumerator SaveTexture( string extension, Texture2D textureToSave, string pathToFile ) {
 		busy = true;
 
 		if (textureToSave != null) {
-
-			FREE_IMAGE_FORMAT imageFormat = FREE_IMAGE_FORMAT.FIF_UNKNOWN;
-			FREE_IMAGE_SAVE_FLAGS flags = FREE_IMAGE_SAVE_FLAGS.DEFAULT;
-			
-			bool useFIF = true;
-
-			switch ( extension.ToLower() ) {
-			case "bmp":
-				imageFormat = FREE_IMAGE_FORMAT.FIF_BMP;
-				break;
-			case "tga":
-				imageFormat = FREE_IMAGE_FORMAT.FIF_TARGA;
-				break;
-			case "tiff":
-				imageFormat = FREE_IMAGE_FORMAT.FIF_TIFF;
-				flags = FREE_IMAGE_SAVE_FLAGS.TIFF_NONE;
-				break;
-			case "png":
-				byte[] pngBytes = textureToSave.EncodeToPNG ();
-				File.WriteAllBytes (pathToFile + ".png", pngBytes);
-				useFIF = false;
-				//imageFormat = FREE_IMAGE_FORMAT.FIF_PNG;
-				break;
-			case "jpg":
-				byte[] jpgBytes = textureToSave.EncodeToJPG ();
-				File.WriteAllBytes (pathToFile + ".jpg", jpgBytes);
-				useFIF = false;
-				//imageFormat = FREE_IMAGE_FORMAT.FIF_JPEG;
-				//flags = FREE_IMAGE_SAVE_FLAGS.JPEG_QUALITYSUPERB;
-				break;
-			default:
-				imageFormat = FREE_IMAGE_FORMAT.FIF_UNKNOWN;
-				break;
+			// Materialize CE: pixels read here, encoding and writing on a worker thread (see FastImageSaver).
+			FastImageSaver.Job job = null;
+			string error = null;
+			try {
+				job = FastImageSaver.Prepare (textureToSave, pathToFile, extension);
+				// The height keeps its full precision in 16-bit PNG / TIFF when a high-precision version exists.
+				string ext = extension.ToLowerInvariant ();
+				if (textureToSave == mainGui._HeightMap && mainGui._HDHeightMap != null && (ext == "png" || ext == "tiff")
+					&& mainGui._HDHeightMap.width == textureToSave.width && mainGui._HDHeightMap.height == textureToSave.height) {
+					job.Grey = FastImageSaver.ReadHeight (mainGui._HDHeightMap);
+				}
+			} catch (Exception e) {
+				error = "Could not read the map to save it: " + e.Message;
 			}
-
-			if( useFIF ){
-				byte[] bytes = textureToSave.EncodeToPNG ();
-
-				string tempFilePath = Application.dataPath + pathChar + "temp.png";
-				//string tempFilePath = Application.persistentDataPath + pathChar + "temp.png";
-				File.WriteAllBytes (tempFilePath, bytes);
-
-				FIBITMAP bitmap = FreeImage_Load (FREE_IMAGE_FORMAT.FIF_PNG, tempFilePath, 0);
-				bool saveSuccess = FreeImage_Save (imageFormat, bitmap, pathToFile + "." + extension, flags );
-				FreeImage_Unload(bitmap);
-
-				//File.Delete (tempFilePath);
+			if (job != null) {
+				var writing = System.Threading.Tasks.Task.Run (() => FastImageSaver.Write (job));
+				while (!writing.IsCompleted) {
+					yield return null;
+				}
+				error = writing.Result;
 			}
-
-			Resources.UnloadUnusedAssets();
-		
+			if (error != null) {
+				UnityEngine.Debug.LogWarning (error);
+				Notifications.Error (error);
+			} else {
+				Notifications.Info ("Saved " + job.Path);
+			}
 		}
 		yield return new WaitForSeconds (0.01f);
 		busy = false;
@@ -456,71 +463,42 @@ public class SaveLoadProject : MonoBehaviour {
 	public IEnumerator LoadTexture( MapType textureToLoad, string pathToFile ) {
 		busy = true;
 
-		int fileIndex = pathToFile.LastIndexOf ('.');
-		string extension = pathToFile.Substring (fileIndex+1, pathToFile.Length-fileIndex-1);
+		// Decoded on a worker thread; the interface keeps running meanwhile (Materialize CE).
+		UnityEngine.Debug.Log ("Loading Image: " + pathToFile );
+		var decoding = System.Threading.Tasks.Task.Run (() => FastImageLoader.Decode (pathToFile));
+		while (!decoding.IsCompleted) {
+			yield return null;
+		}
+		FastImageLoader.Pixels pixels = decoding.Result;
+		if (pixels.Error != null) {
+			UnityEngine.Debug.LogWarning (pixels.Error);
+			Notifications.Error (pixels.Error);
+		}
 
-		bool loadSuccess = false;
-		string newPathToFile = Application.dataPath + pathChar + "temp.png";
-		//string newPathToFile = Application.persistentDataPath + pathChar + "temp.png";
-		try {
-			// Load The Image
-			FREE_IMAGE_FORMAT imageFormat = FREE_IMAGE_FORMAT.FIF_UNKNOWN;
-			
-			switch ( extension.ToLower() ) {
-			case "bmp":
-				imageFormat = FREE_IMAGE_FORMAT.FIF_BMP;
-				break;
-			case "tga":
-				imageFormat = FREE_IMAGE_FORMAT.FIF_TARGA;
-				break;
-			case "tif":
-				imageFormat = FREE_IMAGE_FORMAT.FIF_TIFF;
-				break;
-			case "tiff":
-				imageFormat = FREE_IMAGE_FORMAT.FIF_TIFF;
-				break;
-			case "png":
-				imageFormat = FREE_IMAGE_FORMAT.FIF_PNG;
-				break;
-			case "jpg":
-				imageFormat = FREE_IMAGE_FORMAT.FIF_JPEG;
-				break;
-			case "jpeg":
-				imageFormat = FREE_IMAGE_FORMAT.FIF_JPEG;
-				break;
-			default:
-				imageFormat = FREE_IMAGE_FORMAT.FIF_UNKNOWN;
-				break;
+		if (pixels.Error == null) {
+			// A roughness file opened in the Roughness row: Materialize keeps smoothness, its inverse (Materialize CE).
+			if (textureToLoad == MapType.smoothness && Workflow.InvertNextSmoothnessLoad) {
+				for (int i = 0; i < pixels.Bgra.Length; i += 4) {
+					pixels.Bgra[i] = (byte)(255 - pixels.Bgra[i]);
+					pixels.Bgra[i + 1] = (byte)(255 - pixels.Bgra[i + 1]);
+					pixels.Bgra[i + 2] = (byte)(255 - pixels.Bgra[i + 2]);
+				}
 			}
-			
-			UnityEngine.Debug.Log ("Loading Image: " + pathToFile );
-
-			FIBITMAP bitmap = FreeImage_Load (imageFormat, pathToFile, 0);
-
-			loadSuccess = FreeImage_Save (FREE_IMAGE_FORMAT.FIF_PNG, bitmap, newPathToFile, 0);
-
-			FreeImage_Unload(bitmap);
-
-		}
-		
-		catch (System.Exception e) {
-			UnityEngine.Debug.Log( e );
-			UnityEngine.Debug.Log( "Could not import with Free Image Importer" );
-		}
-
-		if (loadSuccess) {
-			Texture2D newTexture;
-
-			//var path = System.IO.Path.Combine("file:///"+Application.streamingAssetsPath,"image.png");
-			WWW www = new WWW ("file:///" + newPathToFile);
-			yield return www;
-			newTexture = www.texture;
-			newTexture.anisoLevel = 9;
-
+			Workflow.InvertNextSmoothnessLoad = false;
+			Texture2D newTexture = FastImageLoader.ToTexture (pixels);
 
 			switch( textureToLoad ){
 			case MapType.height:
 				mainGui._HeightMap = newTexture;
+				// 16-bit / EXR heights: the tools read this full-precision copy (Materialize CE).
+				if (mainGui._HDHeightMap != null) {
+					mainGui._HDHeightMap.Release ();
+					mainGui._HDHeightMap = null;
+				}
+				mainGui._HDHeightMap = FastImageLoader.ToHeightTexture (pixels);
+				if (mainGui._HDHeightMap != null) {
+					Notifications.Info ("High-precision height loaded: normals and AO will use its full precision.");
+				}
 				break;
 			case MapType.diffuse:
 				mainGui._DiffuseMap = newTexture;
@@ -547,11 +525,7 @@ public class SaveLoadProject : MonoBehaviour {
 				break;
 			}
 
-			//File.Delete(newPathToFile);
-
 			mainGui.SetLoadedTexture (textureToLoad);
-
-			www.Dispose();
 
 			Resources.UnloadUnusedAssets();
 

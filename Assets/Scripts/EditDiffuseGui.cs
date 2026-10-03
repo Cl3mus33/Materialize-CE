@@ -233,6 +233,7 @@ public class EditDiffuseGui : MonoBehaviour {
 	}
 
 	void DoMyWindow ( int windowID ) {
+		UiHelp.Panel = "EditDiffuse";
 
 		int spacingX = 0;
 		int spacingY = 50;
@@ -246,7 +247,7 @@ public class EditDiffuseGui : MonoBehaviour {
 		//GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Bias", EDS.DiffuseBias, EDS.DiffuseBiasText, out EDS.DiffuseBias, out EDS.DiffuseBiasText, -0.5f, 0.5f);		
 		//offsetY += 50;
 
-		GUI.Label (new Rect (offsetX, offsetY, 250, 30), "Diffuse Reveal Slider" );
+		GUI.Label (new Rect (offsetX, offsetY, 250, 30), UiHelp.Content ("Albedo Reveal Slider"));
 		Slider = GUI.HorizontalSlider( new Rect( offsetX, offsetY + 20, 280, 10 ),Slider,0.0f, 1.0f );		
 		offsetY += 50;
 
@@ -286,19 +287,26 @@ public class EditDiffuseGui : MonoBehaviour {
 		GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Saturation", EDS.Saturation, EDS.SaturationText, out EDS.Saturation, out EDS.SaturationText, 0.0f, 1.0f );		
 		offsetY += 50;
 		
-		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), "Set as Diffuse" ) ){
+		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), UiHelp.Content ("Set as Albedo")) ){
 			StartCoroutine( ProcessDiffuse ( MapType.diffuse ) );
 		}
+
+		Tips.Capture (true);
 
 		GUI.DragWindow();
 	}
 
 	void OnGUI () {
+		Theme.Apply ();
 		
 		windowRect.width = 300;
 		windowRect.height = 650;
 
-		windowRect = GUI.Window(12, windowRect, DoMyWindow, "Edit Diffuse");
+		windowRect = UiShell.Dock (windowRect);
+
+		windowRect = UiShell.Window(12, windowRect, DoMyWindow, L.T("Edit Albedo"));
+
+		Tips.Block (windowRect);
 
 	}
 
@@ -391,9 +399,8 @@ public class EditDiffuseGui : MonoBehaviour {
 			MainGuiScript._DiffuseMap = null;
 		}
 
-		MainGuiScript._DiffuseMap = new Texture2D (_TempMap.width, _TempMap.height, TextureFormat.ARGB32, true, true );
-		MainGuiScript._DiffuseMap.ReadPixels (new Rect (0, 0, _TempMap.width, _TempMap.height), 0, 0);
-		MainGuiScript._DiffuseMap.Apply ();
+		// Materialize CE: read back without freezing, mipmaps made on the GPU.
+		yield return StartCoroutine (GpuReadback.Into (_TempMap, t => MainGuiScript._DiffuseMap = t));
 		
 		yield return new WaitForSeconds(0.1f);
 		

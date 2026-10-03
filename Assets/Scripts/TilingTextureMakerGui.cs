@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+
 
 public class TilingTextureMakerGui : MonoBehaviour {
 	
@@ -94,8 +96,22 @@ public class TilingTextureMakerGui : MonoBehaviour {
 		Splat
 	}
 
-	TileTechnique tileTech = TileTechnique.Overlap;
+		TileTechnique tileTech = TileTechnique.Overlap;
 	TileTechnique lastTileTech = TileTechnique.Overlap;
+
+	// ---------- Materialize CE: fluid preview ----------
+	// While a slider moves, the maps are tiled at PreviewMax at most; the full size follows once the user
+	// stops for RefineDelay seconds (and always before Set Maps). GPU buffers come from Unity's pool instead
+	// of being created and destroyed on every change, and the source maps are copied once per session.
+	const int PreviewMax = 1024;
+	const float RefineDelay = 0.35f;
+	int workX = 1024, workY = 1024;
+	bool pendingRefine;
+	float lastChange;
+	readonly Dictionary<Texture, RenderTexture> sourceCache = new Dictionary<Texture, RenderTexture> ();
+	// The splat pattern's randomness is seeded: it no longer reshuffles while a slider moves.
+	int patternSeed = 1;
+
 
 	
 	void Start () {
@@ -103,10 +119,10 @@ public class TilingTextureMakerGui : MonoBehaviour {
 		blitMaterial = new Material (Shader.Find ("Hidden/Blit_Seamless_Texture_Maker"));
 
 		TexSizes = new GUIContent[4];
-		TexSizes [0] = new GUIContent( "512" );
-		TexSizes [1] = new GUIContent( "1024" );
-		TexSizes [2] = new GUIContent( "2048" );
-		TexSizes [3] = new GUIContent( "4096" );
+		TexSizes [0] = L.G("512" );
+		TexSizes [1] = L.G("1024" );
+		TexSizes [2] = L.G("2048" );
+		TexSizes [3] = L.G("4096" );
 
         //offsetKernel = new Vector2[4];
         //offsetKernel [0] = new Vector2 (-0.5f, -0.5f);
@@ -210,7 +226,11 @@ public class TilingTextureMakerGui : MonoBehaviour {
 
 
 
-    		float aspect = (float)NewTexSizeX / (float)NewTexSizeY;
+    			    		float aspect = (float)NewTexSizeX / (float)NewTexSizeY;
+
+				var randomState = Random.state;
+				Random.InitState (patternSeed);
+
 
             if (Mathf.Approximately(aspect, 8.0f)) { 
     			SKRectWide3 ();
@@ -224,9 +244,11 @@ public class TilingTextureMakerGui : MonoBehaviour {
     			SKRectTall ();
             } else if (Mathf.Approximately(aspect, 0.25f)) { 
     			SKRectTall2 ();
-            } else if (Mathf.Approximately(aspect, 0.125f)) { 
+                        } else if (Mathf.Approximately(aspect, 0.125f)) {
     			SKRectTall3 ();
     		}
+				Random.state = randomState;
+
     		
 
     		float area = 1.0f;
@@ -238,11 +260,21 @@ public class TilingTextureMakerGui : MonoBehaviour {
     		objectScale.x *= areaScale;
     		objectScale.y *= areaScale;
     		
-    		testObject.transform.localScale = objectScale;
+    			    		testObject.transform.localScale = objectScale;
 
-			StartCoroutine ( TileTextures ());
+				float scale = Mathf.Min (1f, (float)PreviewMax / Mathf.Max (NewTexSizeX, NewTexSizeY));
+				workX = Mathf.Max (64, Mathf.RoundToInt (NewTexSizeX * scale));
+				workY = Mathf.Max (64, Mathf.RoundToInt (NewTexSizeY * scale));
+				TileTextures ();
+				pendingRefine = scale < 1f;
+				lastChange = Time.unscaledTime;
+			} else if (pendingRefine && Time.unscaledTime - lastChange > RefineDelay) {
+				pendingRefine = false;
+				workX = NewTexSizeX;
+				workY = NewTexSizeY;
+				TileTextures ();
+			}
 		}
-	}
 
 	void SKSquare(){
         splatKernel = new Vector4[4];
@@ -315,6 +347,7 @@ public class TilingTextureMakerGui : MonoBehaviour {
 	}
 	
 	void DoMyWindow ( int windowID ) {
+		UiHelp.Panel = "Tiling";
 		
 		int spacingX = 0;
 		int spacingY = 50;
@@ -323,7 +356,7 @@ public class TilingTextureMakerGui : MonoBehaviour {
 		int offsetX = 10;
 		int offsetY = 30;
 
-		techniqueOverlap = GUI.Toggle(new Rect(offsetX, offsetY, 130, 30), techniqueOverlap, "Technique Overlap");
+		techniqueOverlap = GUI.Toggle (new Rect(offsetX, offsetY, 130, 30), techniqueOverlap, UiHelp.Content ("Technique Overlap"));
 		if (techniqueOverlap) {
 			techniqueSplat = false;
 			tileTech = TileTechnique.Overlap;
@@ -332,7 +365,7 @@ public class TilingTextureMakerGui : MonoBehaviour {
 			tileTech = TileTechnique.Overlap;
 		}
 
-		techniqueSplat = GUI.Toggle (new Rect (offsetX + 150, offsetY, 130, 30), techniqueSplat, "Technique Splat");
+		techniqueSplat = GUI.Toggle (new Rect (offsetX + 150, offsetY, 130, 30), techniqueSplat, UiHelp.Content ("Technique Splat"));
 		if (techniqueSplat) {
 			techniqueOverlap = false;
 			tileTech = TileTechnique.Splat;
@@ -343,10 +376,10 @@ public class TilingTextureMakerGui : MonoBehaviour {
 
 		offsetY += 40;
 		
-		GUI.Label (new Rect (offsetX, offsetY, 150, 20), "New Texture Size X" );
+		GUI.Label (new Rect (offsetX, offsetY, 150, 20), UiHelp.Content ("New Texture Size X"));
 		NewTexSelectionX = GUI.SelectionGrid( new Rect (offsetX, offsetY + 30, 120, 50), NewTexSelectionX, TexSizes, 2 );
 		
-		GUI.Label (new Rect (offsetX + 150, offsetY, 150, 20), "New Texture Size Y" );
+		GUI.Label (new Rect (offsetX + 150, offsetY, 150, 20), UiHelp.Content ("New Texture Size Y"));
 		NewTexSelectionY = GUI.SelectionGrid( new Rect (offsetX + 150, offsetY + 30, 120, 50), NewTexSelectionY, TexSizes, 2 );
 		
 		offsetY += 100;
@@ -392,14 +425,21 @@ public class TilingTextureMakerGui : MonoBehaviour {
 			}
             offsetY += 40;
 
-            if (GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Splat Randomize", SplatRandomize, SplatRandomizeText, out SplatRandomize, out SplatRandomizeText, 0.0f, 1.0f)) {
+                        if (GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Splat Randomize", SplatRandomize, SplatRandomizeText, out SplatRandomize, out SplatRandomizeText, 0.0f, 1.0f)) {
                 doStuff = true;
             }
-            offsetY += 50;
+            offsetY += 40;
+
+			if (GUI.Button (new Rect (offsetX, offsetY, 130, 25), UiHelp.Content ("New Pattern"))) {
+				patternSeed++;
+				doStuff = true;
+			}
+			GUI.Label (new Rect (offsetX + 140, offsetY + 3, 150, 22), pendingRefine ? "Preview (refining…)" : "Full resolution");
+            offsetY += 40;
 
 		}
 
-		GUI.Label (new Rect (offsetX, offsetY, 150, 30), "Tiling Test Variables" );
+		GUI.Label (new Rect (offsetX, offsetY, 150, 30), UiHelp.Content ("Tiling Test Variables"));
 		offsetY += 30;
 
 		GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Texture Tiling", TexTiling, TexTilingText, out TexTiling, out TexTilingText, 0.1f, 5.0f);
@@ -411,9 +451,12 @@ public class TilingTextureMakerGui : MonoBehaviour {
 		GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Texture Offset Y", TexOffsetY, TexOffsetYText, out TexOffsetY, out TexOffsetYText, -1.0f, 1.0f);
 		offsetY += 40;
 		
-		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), "Set Maps" ) ){
+		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), UiHelp.Content ("Set Maps")) ){
 			StartCoroutine( SetMaps ( ) );
 		}
+
+		
+		Tips.Capture (true);
 
 		
 		GUI.DragWindow();
@@ -421,15 +464,20 @@ public class TilingTextureMakerGui : MonoBehaviour {
 	}
 
 	void OnGUI () {
+		Theme.Apply ();
 		
 		windowRect.width = 300;
-		if (techniqueSplat) {
-			windowRect.height = 610;
+				if (techniqueSplat) {
+			windowRect.height = 650;
 		} else {
 			windowRect.height = 490;
 		}
 		
-		windowRect = GUI.Window(18, windowRect, DoMyWindow, "Tiling Texture Maker");
+		windowRect = UiShell.Dock (windowRect);
+		
+		windowRect = UiShell.Window(18, windowRect, DoMyWindow, L.T("Tiling Texture Maker"));
+		
+		Tips.Block (windowRect);
 		
 	}
 
@@ -448,11 +496,20 @@ public class TilingTextureMakerGui : MonoBehaviour {
 		return textureTarget;
 	}
 
-	IEnumerator SetMaps () {
+		IEnumerator SetMaps () {
 
-		if (MGS._HeightMap == null) { 
-			yield break; 
+		if (MGS._HeightMap == null) {
+			yield break;
 		}
+
+		// The preview may be at reduced size: the maps are always set at the chosen size.
+		if (workX != NewTexSizeX || workY != NewTexSizeY) {
+			workX = NewTexSizeX;
+			workY = NewTexSizeY;
+			pendingRefine = false;
+			TileTextures ();
+		}
+
 
 		if (MGS._DiffuseMap != null) { 
 			Debug.Log ("Setting Diffuse");
@@ -536,8 +593,17 @@ public class TilingTextureMakerGui : MonoBehaviour {
 
 		yield return new WaitForSeconds(0.1f);
 
+		// The maps were replaced: their cached copies are stale.
+		foreach (var rt in sourceCache.Values) {
+			if (rt != null) {
+				rt.Release ();
+				Destroy (rt);
+			}
+		}
+		sourceCache.Clear ();
 
 		Resources.UnloadUnusedAssets ();
+		Notifications.Info ("Tiled maps set at " + NewTexSizeX + " × " + NewTexSizeY + ".");
 
 	}
 
@@ -546,11 +612,18 @@ public class TilingTextureMakerGui : MonoBehaviour {
 		this.gameObject.SetActive (false);
 	}
 	
-	void CleanupTexture( RenderTexture _Texture ) {		
+		// All working buffers come from RenderTexture.GetTemporary (Materialize CE).
+	void CleanupTexture( RenderTexture _Texture ) {
 		if (_Texture != null) {
-			_Texture.Release();
-			_Texture = null;
+			RenderTexture.ReleaseTemporary (_Texture);
 		}
+	}
+
+	RenderTexture Rent (int width, int height, RenderTextureFormat format) {
+		var rt = RenderTexture.GetTemporary (width, height, 0, format, RenderTextureReadWrite.Linear);
+		rt.wrapMode = TextureWrapMode.Repeat;
+		rt.filterMode = FilterMode.Bilinear;
+		return rt;
 	}
 
 	void CleanupTexture( Texture2D _Texture ) {		
@@ -574,22 +647,29 @@ public class TilingTextureMakerGui : MonoBehaviour {
 		CleanupTexture( _EdgeMapTemp );
 		CleanupTexture( _AOMapTemp );
 
-		CleanupTexture( _TileTemp );
-		CleanupTexture( _SplatTemp );
-		CleanupTexture( _SplatTempAlt );
-		
+				_HDHeightMapTemp = _HeightMapTemp = _DiffuseMapTemp = _DiffuseMapOriginalTemp = null;
+		_MetallicMapTemp = _SmoothnessMapTemp = _NormalMapTemp = _EdgeMapTemp = _AOMapTemp = null;
+
+		foreach (var rt in sourceCache.Values) {
+			if (rt != null) {
+				rt.Release ();
+				Destroy (rt);
+			}
+		}
+		sourceCache.Clear ();
 	}
 
 	// need an overload to turn Texture2D into RenderTexture;
 	RenderTexture TileTexture ( Texture2D textureToTile, RenderTexture textureTarget, string TexName ) {
 		
-		CleanupTexture( _TileTemp );
-		_TileTemp = new RenderTexture (textureToTile.width, textureToTile.height, 0, RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Linear);
-		_TileTemp.wrapMode = TextureWrapMode.Repeat;
-		blitMaterial.SetTexture ("_MainTex", textureToTile);
-		Graphics.Blit( textureToTile, _TileTemp );
-
-		return TileTexture (_TileTemp, textureTarget, TexName);
+				RenderTexture source;
+		if (!sourceCache.TryGetValue (textureToTile, out source) || source == null) {
+			source = new RenderTexture (textureToTile.width, textureToTile.height, 0, RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Linear);
+			source.wrapMode = TextureWrapMode.Repeat;
+			Graphics.Blit (textureToTile, source);
+			sourceCache[textureToTile] = source;
+		}
+		return TileTexture (source, textureTarget, TexName);
 
 	}
 
@@ -611,32 +691,12 @@ public class TilingTextureMakerGui : MonoBehaviour {
 
 	RenderTexture TileTextureSplat ( RenderTexture textureToTile, RenderTexture textureTarget, string TexName ) {
 
-		if (textureTarget != null) {
-			textureTarget.Release ();
-			textureTarget = null;
-		}
-
-		//Transform transHelper = new GameObject ().transform;
-
-		CleanupTexture( _SplatTemp );
-		CleanupTexture( _SplatTempAlt );
-
-		if (TexName == "_HDDisplacementMap") {
-			_SplatTemp = new RenderTexture (NewTexSizeX, NewTexSizeY, 0, RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Linear);
-			_SplatTemp.wrapMode = TextureWrapMode.Repeat;
-			_SplatTempAlt = new RenderTexture (NewTexSizeX, NewTexSizeY, 0, RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Linear);
-			_SplatTempAlt.wrapMode = TextureWrapMode.Repeat;
-			textureTarget = new RenderTexture( NewTexSizeX, NewTexSizeY, 0, RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Linear);
-			textureTarget.wrapMode = TextureWrapMode.Repeat;
-		} else {
-			_SplatTemp = new RenderTexture (NewTexSizeX, NewTexSizeY, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
-			_SplatTemp.wrapMode = TextureWrapMode.Repeat;
-			_SplatTempAlt = new RenderTexture (NewTexSizeX, NewTexSizeY, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
-			_SplatTempAlt.wrapMode = TextureWrapMode.Repeat;
-			textureTarget = new RenderTexture( NewTexSizeX, NewTexSizeY, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
-			textureTarget.wrapMode = TextureWrapMode.Repeat;
-		}
-		textureTarget.wrapMode = TextureWrapMode.Repeat;
+				CleanupTexture (textureTarget);
+		// The splat buffers keep the depth of each piece in alpha: half floats (ARGB32 lost precision there).
+		RenderTextureFormat format = TexName == "_HDDisplacementMap" ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
+		_SplatTemp = Rent (workX, workY, RenderTextureFormat.ARGBHalf);
+		_SplatTempAlt = Rent (workX, workY, RenderTextureFormat.ARGBHalf);
+		textureTarget = Rent (workX, workY, format);
 
 		blitMaterial.SetTexture ("_MainTex", textureToTile);
 		blitMaterial.SetTexture ("_HeightTex", MGS._HeightMap);
@@ -661,8 +721,8 @@ public class TilingTextureMakerGui : MonoBehaviour {
 			texAR.y = texARHeight;
 		}
             
-        float targetARWidth = (float)NewTexSizeX / (float)NewTexSizeY;
-        float targetARHeight = (float)NewTexSizeY / (float)NewTexSizeX;
+        		float targetARWidth = (float)workX / (float)workY;
+        float targetARHeight = (float)workY / (float)workX;
         targetAR = Vector2.one;
         if (targetARWidth < targetARHeight) {
             targetAR.x = targetARWidth;
@@ -709,8 +769,9 @@ public class TilingTextureMakerGui : MonoBehaviour {
 
 		thisMaterial.SetTexture ( TexName, textureTarget );
 
-		CleanupTexture( _SplatTemp );
+				CleanupTexture( _SplatTemp );
 		CleanupTexture( _SplatTempAlt );
+		_SplatTemp = _SplatTempAlt = null;
 
 		return textureTarget;
 
@@ -719,19 +780,8 @@ public class TilingTextureMakerGui : MonoBehaviour {
 
 	RenderTexture TileTextureOverlap ( RenderTexture textureToTile, RenderTexture textureTarget, string TexName ) {
 		
-		if (textureTarget != null) {
-			textureTarget.Release ();
-			textureTarget = null;
-		}
-
-		if (TexName == "_HDDisplacementMap") {
-			textureTarget = new RenderTexture (NewTexSizeX, NewTexSizeY, 0, RenderTextureFormat.RHalf, RenderTextureReadWrite.Linear);
-			textureTarget.wrapMode = TextureWrapMode.Repeat;
-		} else {
-			textureTarget = new RenderTexture (NewTexSizeX, NewTexSizeY, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
-			textureTarget.wrapMode = TextureWrapMode.Repeat;
-		}
-		textureTarget.wrapMode = TextureWrapMode.Repeat;
+				CleanupTexture (textureTarget);
+		textureTarget = Rent (workX, workY, TexName == "_HDDisplacementMap" ? RenderTextureFormat.RHalf : RenderTextureFormat.ARGB32);
 
 		blitMaterial.SetTexture ("_MainTex", textureToTile);
 
@@ -743,17 +793,15 @@ public class TilingTextureMakerGui : MonoBehaviour {
 		
 	}
 
-	IEnumerator TileTextures () {
-
-		Debug.Log ("Processing Tile");
+		void TileTextures () {
 
 		blitMaterial.SetFloat ("_Falloff", 1.0f);
 		blitMaterial.SetFloat ("_Falloff", Falloff);
 		blitMaterial.SetFloat ("_OverlapX", OverlapX);
 		blitMaterial.SetFloat ("_OverlapY", OverlapY);
 
-		if (MGS._HeightMap == null) {
-				yield break; 
+				if (MGS._HeightMap == null) {
+				return;
 		} else {
 			blitMaterial.SetTexture ("_HeightTex", MGS._HeightMap);
 			blitMaterial.SetFloat ( "_IsHeight", 1.0f );
@@ -807,8 +855,5 @@ public class TilingTextureMakerGui : MonoBehaviour {
 			thisMaterial.SetTexture ("_AOMap", _AOMapTemp);
 		}
 
-		Resources.UnloadUnusedAssets ();
-
-		yield return new WaitForSeconds(0.1f);
-	}
+			}
 }

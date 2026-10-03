@@ -1,8 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.ComponentModel;
 
 public class NormalFromHeightSettings {
+
+	// Materialize CE: centred Scharr slopes (cleaner); false = the original one-sided difference.
+	public bool UseScharr = true;
 
 	[DefaultValueAttribute(20.0f)]
 	public float Blur0Contrast;
@@ -273,15 +276,16 @@ public class NormalFromHeightGui : MonoBehaviour {
 	}
 
 	void DoMyWindow ( int windowID ) {
+		UiHelp.Panel = "Normal";
 		
 		int offsetX = 10;
 		int offsetY = 30;
 
-		//GUI.Label (new Rect (offsetX, offsetY, 250, 30), "Pre Contrast");
+		//GUI.Label (new Rect (offsetX, offsetY, 250, 30), UiHelp.Content ("Pre Contrast"));
 		//offsetY += 30;
 		//Blur0Contrast = GUI.HorizontalSlider( new Rect( offsetX, offsetY, 280, 10 ),Blur0Contrast,5.0f, 50.0f );
 
-		GUI.Label (new Rect (offsetX, offsetY, 250, 30), "Normal Reveal Slider" );
+		GUI.Label (new Rect (offsetX, offsetY, 250, 30), UiHelp.Content ("Normal Reveal Slider"));
 		Slider = GUI.HorizontalSlider( new Rect( offsetX, offsetY + 20, 280, 10 ),Slider,0.0f, 1.0f );
 
 		offsetY += 40;
@@ -291,18 +295,18 @@ public class NormalFromHeightGui : MonoBehaviour {
 		}
 		offsetY += 50;
 		
-		GUI.Label (new Rect (offsetX, offsetY, 250, 30), "Frequency Equalizer" );
-		GUI.Label (new Rect (offsetX + 225, offsetY, 100, 30), "Presets" );
-		if ( GUI.Button (new Rect (offsetX + 215, offsetY + 30, 60, 20), "Default") ) {
+		GUI.Label (new Rect (offsetX, offsetY, 250, 30), UiHelp.Content ("Frequency Equalizer"));
+		GUI.Label (new Rect (offsetX + 225, offsetY, 100, 30), UiHelp.Content ("Presets"));
+		if ( GUI.Button (new Rect (offsetX + 215, offsetY + 30, 60, 20), UiHelp.Content ("Default")) ) {
 			SetWeightEQDefault ();
 		}
-		if ( GUI.Button (new Rect (offsetX + 215, offsetY + 60, 60, 20), "Smooth") ) {
+		if ( GUI.Button (new Rect (offsetX + 215, offsetY + 60, 60, 20), UiHelp.Content ("Smooth")) ) {
 			SetWeightEQSmooth ();
 		}
-		if ( GUI.Button (new Rect (offsetX + 215, offsetY + 90, 60, 20), "Crisp") ) {
+		if ( GUI.Button (new Rect (offsetX + 215, offsetY + 90, 60, 20), UiHelp.Content ("Crisp")) ) {
 			SetWeightEQCrisp ();
 		}
-		if ( GUI.Button (new Rect (offsetX + 215, offsetY + 120, 60, 20), "Mids") ) {
+		if ( GUI.Button (new Rect (offsetX + 215, offsetY + 120, 60, 20), UiHelp.Content ("Mids")) ) {
 			SetWeightEQMids ();
 		}
 		offsetY += 30;
@@ -317,11 +321,11 @@ public class NormalFromHeightGui : MonoBehaviour {
 		offsetX -= 10;
 		offsetY += 120;
 
-		GUI.Label (new Rect (offsetX, offsetY, 250, 30), "Angular Intensity");
+		GUI.Label (new Rect (offsetX, offsetY, 250, 30), UiHelp.Content ("Angular Intensity"));
 		offsetY += 25;
 		GuiHelper.Slider( new Rect( offsetX, offsetY, 280, 50 ), NFHS.AngularIntensity, NFHS.AngularIntensityText, out NFHS.AngularIntensity, out NFHS.AngularIntensityText, 0.0f, 1.0f );
 		offsetY += 25;
-		GUI.Label (new Rect (offsetX, offsetY, 250, 30), "Angularity Amount");
+		GUI.Label (new Rect (offsetX, offsetY, 250, 30), UiHelp.Content ("Angularity Amount"));
 		offsetY += 25;
 		GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), NFHS.Angularity, NFHS.AngularityText, out NFHS.Angularity, out NFHS.AngularityText, 0.0f, 1.0f);
 
@@ -335,15 +339,22 @@ public class NormalFromHeightGui : MonoBehaviour {
 		}
 
 		bool tempBool = NFHS.UseDiffuse;
-		NFHS.UseDiffuse = GUI.Toggle (new Rect (offsetX, offsetY, 280, 30), NFHS.UseDiffuse, " Shape from Diffuse (Uncheked from Height)");
+		NFHS.UseDiffuse = GUI.Toggle (new Rect (offsetX, offsetY, 280, 30), NFHS.UseDiffuse, UiHelp.Content (" Shape from Albedo (Uncheked from Height)"));
 		if( tempBool != NFHS.UseDiffuse ){
+			doStuff = true;
+		}
+		offsetY += 30;
+
+		tempBool = NFHS.UseScharr;
+		NFHS.UseScharr = GUI.Toggle (new Rect (offsetX, offsetY, 280, 30), NFHS.UseScharr, UiHelp.Content (" Precise slopes (Scharr filter)"));
+		if( tempBool != NFHS.UseScharr ){
 			doStuff = true;
 		}
 		offsetY += 30;
 
 		GUI.enabled = true;
 
-		GUI.Label (new Rect (offsetX, offsetY, 280, 30), " Shape Recognition, Rotation, Spread, Bias");
+		GUI.Label (new Rect (offsetX, offsetY, 280, 30), UiHelp.Content (" Shape Recognition, Rotation, Spread, Bias"));
 		offsetY += 30;
 		if ( GuiHelper.Slider( new Rect( offsetX, offsetY, 280, 50 ), NFHS.ShapeRecognition, NFHS.ShapeRecognitionText, out NFHS.ShapeRecognition, out NFHS.ShapeRecognitionText, 0.0f, 1.0f ) ) {
 			doStuff = true;
@@ -365,20 +376,27 @@ public class NormalFromHeightGui : MonoBehaviour {
 		GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Final Contrast", NFHS.FinalContrast, NFHS.FinalContrastText, out NFHS.FinalContrast, out NFHS.FinalContrastText, 0.0f, 10.0f);
 		offsetY += 50;
 		
-		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), "Set as Normal Map" ) ){
+		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), UiHelp.Content ("Set as Normal Map")) ){
 			StartCoroutine( ProcessNormal () );
 		}
+
+		Tips.Capture (true);
 
 		GUI.DragWindow();
 
 	}
 
 	void OnGUI () {
+		Theme.Apply ();
 
 		windowRect.width = 300;
-		windowRect.height = 630;
+		windowRect.height = 660;
 		
-		windowRect = GUI.Window(16, windowRect, DoMyWindow, "Normal From Height");
+		windowRect = UiShell.Dock (windowRect);
+		
+		windowRect = UiShell.Window(16, windowRect, DoMyWindow, L.T("Normal From Height"));
+		
+		Tips.Block (windowRect);
 
 	}
 
@@ -494,10 +512,8 @@ public class NormalFromHeightGui : MonoBehaviour {
 			Destroy (MGS._NormalMap);
 		}
 
-		RenderTexture.active = _TempNormalMap;
-		MGS._NormalMap = new Texture2D( _TempNormalMap.width, _TempNormalMap.height, TextureFormat.ARGB32, true, true );
-		MGS._NormalMap.ReadPixels(new Rect(0, 0, _TempNormalMap.width, _TempNormalMap.height), 0, 0);
-		MGS._NormalMap.Apply();
+		// Materialize CE: read back without freezing, mipmaps made on the GPU.
+		yield return StartCoroutine (GpuReadback.Into (_TempNormalMap, t => MGS._NormalMap = t));
 		
 		yield return new WaitForSeconds(0.1f);
 		
@@ -510,6 +526,7 @@ public class NormalFromHeightGui : MonoBehaviour {
 	public IEnumerator ProcessHeight () {
 
 		busy = true;
+		blitMaterial.SetFloat ("_ScharrNormal", NFHS.UseScharr ? 1.0f : 0.0f);
 		
 		Debug.Log ("Processing Height");
 		

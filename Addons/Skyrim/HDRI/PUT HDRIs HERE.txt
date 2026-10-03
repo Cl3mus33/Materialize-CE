@@ -1,0 +1,1 @@
+Put the Skyrim cubemap HDRIs (.png) here - see README.txt.

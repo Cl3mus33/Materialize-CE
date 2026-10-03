@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public static class GuiHelper {
@@ -22,7 +22,8 @@ public static class GuiHelper {
 		int offsetX = (int)rect.x;
 		int offsetY = (int)rect.y;
 		
-		GUI.Label (new Rect (rect.x, rect.y, 250, 30), title);
+		// Materialize CE: the explanation shows anywhere on the row (title, slider, value).
+		GUI.Label (new Rect (rect.x, rect.y, rect.width, 34), UiHelp.Content (title));
 		offsetY += 20;
 		
 		bool isChanged = false;
@@ -61,7 +62,8 @@ public static class GuiHelper {
 		int offsetX = (int)rect.x;
 		int offsetY = (int)rect.y;
 		
-		GUI.Label (new Rect (rect.x, rect.y, 250, 30), title);
+		// Materialize CE: the explanation shows anywhere on the row (title, slider, value).
+		GUI.Label (new Rect (rect.x, rect.y, rect.width, 34), UiHelp.Content (title));
 		offsetY += 20;
 		
 		bool isChanged = false;
@@ -190,7 +192,7 @@ public static class GuiHelper {
 		bool isChanged = false;
 		
 		bool tempValue = value;
-		value = GUI.Toggle (rect, value, Text);
+		value = GUI.Toggle (rect, value, UiHelp.Content (Text));
 		if ( value != tempValue || doStuff ) {
 			isChanged = true;
 		}

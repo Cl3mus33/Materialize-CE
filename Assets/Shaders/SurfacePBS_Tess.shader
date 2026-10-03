@@ -1,4 +1,4 @@
-﻿Shader "Custom/SurfacePBS_Tess" {
+Shader "Custom/SurfacePBS_Tess" {
 	Properties {
 		_DiffuseMap("Diffuse", 2D) = "grey" {}
 		_NormalMap("Normal", 2D) = "bump" {}
@@ -65,6 +65,12 @@
 		//float _TopProj;
 
 		float _Parallax;
+		// Materialize CE: Adjust's reveal slider. Left of _AdjustReveal (along U) the adjusted map is shown flat,
+		// right of it the lit material; a thin accent line marks the cut.
+		uniform float _AdjustReveal;
+		uniform float _AdjustRevealInvert;
+		uniform sampler2D _AdjustRevealMap;
+
 		float _DispOffset;
 		float _EdgeLength;
 
@@ -204,6 +210,18 @@
 			o.Occlusion = pow( texAO, max( _AOPower, 0.001 ) );
 			half3 ambIBL = texCUBElod(_ProbeCubemap, half4( normalize( worldNormal ), 7 ) ).xyz;
 			o.Emission = texDiffuse.xyz * ambIBL * o.Occlusion * 0.5;
+
+			float cut = IN.uv_DiffuseMap.x;
+			if ( _AdjustReveal > 0.0 && cut < _AdjustReveal ) {
+				half3 m = tex2D( _AdjustRevealMap, UV ).rgb;
+				if ( _AdjustRevealInvert > 0.5 ) m = 1.0 - m;
+				o.Albedo = 0; o.Metallic = 0; o.Smoothness = 0; o.Occlusion = 1;
+				o.Emission = m;
+			}
+			if ( _AdjustReveal > 0.0 && _AdjustReveal < 1.0 && abs( cut - _AdjustReveal ) < 0.0015 ) {
+				o.Albedo = 0; o.Metallic = 0; o.Smoothness = 0;
+				o.Emission = half3( 0.24, 0.55, 0.99 );
+			}
 		}
 		ENDCG
 	}

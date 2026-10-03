@@ -1,4 +1,4 @@
-﻿
+
 using System;
 using System.Net;
 using System.IO;
@@ -31,7 +31,7 @@ public enum PropChannelMap {
 }
 
 
-public class MainGui : MonoBehaviour {
+public partial class MainGui : MonoBehaviour {
 
 	public static MainGui instance;
 
@@ -140,6 +140,7 @@ public class MainGui : MonoBehaviour {
 	bool pngSelected = true;
 	bool tgaSelected = false;
 	bool tiffSelected = false;
+	bool ddsSelected = false;
 
 	public bool hideGui = false;
 	Camera thisCamera;
@@ -168,9 +169,11 @@ public class MainGui : MonoBehaviour {
 	public PropChannelMap propRed = PropChannelMap.None;
 	public PropChannelMap propGreen = PropChannelMap.None;
 	public PropChannelMap propBlue = PropChannelMap.None;
+	public PropChannelMap propAlpha = PropChannelMap.None;
 	bool propRedChoose = false;
 	bool propGreenChoose = false;
 	bool propBlueChoose = false;
+	bool propAlphaChoose = false;
 
 	private ClipboardImageHelper.ClipboardImage CIH;
 
@@ -412,8 +415,25 @@ public class MainGui : MonoBehaviour {
 
 	}
 
-	void Update() {
+	bool environmentRestored;
 
+	void Update() {
+		if (!environmentRestored) { environmentRestored = true; RestoreEnvironment (); }
+		MapAdjust.Tick (this);
+		if (UiShell.Active && MaterialGuiScript != null && !MaterialGuiObject.activeSelf) MaterialGuiScript.ApplySettings ();
+		Workflow.Tick (this);
+		SendViewGlobals ();
+		FollowSun ();
+	}
+
+	/// <summary>Camera position and pixel size, and the preview shape's texture density: the displacement's level of detail.</summary>
+	void SendViewGlobals() {
+		var cam = Camera.main;
+		if (cam == null || testObject == null) return;
+		float pixel = 2f * Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad) / Mathf.Max(1, cam.pixelHeight);
+		Shader.SetGlobalVector ("_MceCamPos", new Vector4 (cam.transform.position.x, cam.transform.position.y, cam.transform.position.z, pixel));
+		var size = testObject.GetComponent<Renderer> ().bounds.size;
+		Shader.SetGlobalFloat ("_MceUvPerWorld", 1f / Mathf.Max (0.001f, Mathf.Max (size.x, Mathf.Max (size.y, size.z))));
 	}
 
 	void ShowFullMaterial() {
@@ -424,54 +444,59 @@ public class MainGui : MonoBehaviour {
 	}
 
 	void Fullscreen() {
-		if (Screen.fullScreen) {
-			Screen.fullScreen = false;
-		} else {
-			Screen.fullScreen = true;
-		}
+		WindowMode.Toggle ();
 	}
 
 	void SetFileMaskImage() {
-		fileBrowser.fileMasks = "*.png;*.jpg;*.jpeg;*.tga;*.bmp;*.tif";
+		fileBrowser.fileMasks = FastImageLoader.ImageMasks;
 	}
 	void SetFileMaskProject() {
 		fileBrowser.fileMasks = "*.mtz";
 	}
 	
 	void OnGUI () {
+		Theme.Apply ();
+		if (UiShell.Active) {
+			DrawShell ();
+		} else {
+			DrawMainGui ();
+		}
+		SupportLinks.Draw ();
+		ChannelPacker.DrawWindow (this);
+		ExportWindow.Draw (this);
+		Tips.Capture ();
+	}
+
+	void DrawMainGui () {
 
 		//==================================================//
 		// 					Unhidable Buttons				//
 		//==================================================//
 
-		if (GUI.Button (new Rect(Screen.width - 80, Screen.height - 40, 70, 30), "Quit")) {
+		if (GUI.Button (new Rect(Screen.width - 80, Screen.height - 40, 70, 30), L.G("Quit", "Closes Materialize."))) {
 			Application.Quit();
 		}
 
-		GUI.enabled = false;
-		if (Screen.fullScreen) {
-			if (GUI.Button (new Rect (Screen.width - 190, Screen.height - 40, 100, 30), "Windowed")) {
-				Fullscreen();
-			}
-		} else {
-			if (GUI.Button (new Rect (Screen.width - 190, Screen.height - 40, 100, 30), "Full Screen")) {
-				Fullscreen();
-			}
+		// Was disabled in the original, which left no way out of full screen. F11 toggles too.
+		bool f11 = Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.F11;
+		if (GUI.Button (new Rect (Screen.width - 190, Screen.height - 40, 100, 30), WindowMode.IsFullScreen ? "Windowed" : "Full Screen") || f11) {
+			Fullscreen();
+			if (f11) Event.current.Use ();
 		}
-		GUI.enabled = true;
 
-		if (GUI.Button (new Rect(Screen.width - 260, 10, 140, 30), "Make Suggestion")) {
+		// Suggestions used to be posted over plain HTTP to the original author's server, which is gone.
+		if (false && GUI.Button (new Rect(Screen.width - 260, 10, 140, 30), L.T("Make Suggestion"))) {
 			SuggestionGuiObject.SetActive(true);
 		}
 
 		if( hideGui == false ){
-			if (GUI.Button (new Rect(Screen.width - 110, 10, 100, 30), "Hide Gui")) {
+			if (GUI.Button (new Rect(Screen.width - 110, 10, 100, 30), L.G("Hide Gui", "Hides the panels to look at the preview."))) {
 				hideGui = true;
 				HideWindows();
 				//CameraTargetPos = new Vector3(0,0,-10);
 			}
 		} else {
-			if (GUI.Button (new Rect(Screen.width - 110, 10, 100, 30), "Show Gui")) {
+			if (GUI.Button (new Rect(Screen.width - 110, 10, 100, 30), L.G("Show Gui", "Shows the panels again."))) {
 				hideGui = false;
 				for( int i = 0; i< objectsToUnhide.Count; i++ ){
 					objectsToUnhide[i].SetActive(true);
@@ -497,14 +522,14 @@ public class MainGui : MonoBehaviour {
 		// 			Height Map			//
 		//==============================//
 
-		GUI.Box( new Rect (offsetX, offsetY, 110, 250), "Height Map" );
+		GUI.Box( new Rect (offsetX, offsetY, 110, 250), L.T("Height Map") );
 		
 		if ( _HeightMap != null ) {
 			GUI.DrawTexture (new Rect(offsetX + 5, offsetY + 25, 100, 100), _HeightMap );
 		}
 
 		// Paste 
-		if (GUI.Button (new Rect(offsetX + 5, offsetY + 130, 20, 20), "P")) {
+		if (GUI.Button (new Rect(offsetX + 5, offsetY + 130, 20, 20), L.G("P", "Paste: puts the image from the clipboard into this map."))) {
 			mapTypeToLoad = MapType.height;
 			PasteFile ();
 		}
@@ -512,7 +537,7 @@ public class MainGui : MonoBehaviour {
 		if (_HeightMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
 
 		// Copy
-		if (GUI.Button (new Rect(offsetX + 30, offsetY + 130, 20, 20), "C")) {
+		if (GUI.Button (new Rect(offsetX + 30, offsetY + 130, 20, 20), L.G("C", "Copy: puts this map on the clipboard, to paste it in another program."))) {
 			textureToSave = _HeightMap;
 			CopyFile ();
 		}
@@ -520,7 +545,7 @@ public class MainGui : MonoBehaviour {
 		GUI.enabled = true;
 
 		// Open
-		if (GUI.Button (new Rect(offsetX + 60, offsetY + 130, 20, 20), "O")) {
+		if (GUI.Button (new Rect(offsetX + 60, offsetY + 130, 20, 20), L.G("O", "Open: loads an image file into this map (PNG, JPG, TGA, TIFF, EXR, DDS...)."))) {
 			mapTypeToLoad = MapType.height;
 			SetFileMaskImage();
 			fileBrowser.ShowBrowser( "Open Height Map", this.OpenFile);
@@ -529,7 +554,7 @@ public class MainGui : MonoBehaviour {
 		if (_HeightMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
 
 		// Save
-		if (GUI.Button (new Rect(offsetX + 85, offsetY + 130, 20, 20), "S")) {
+		if (GUI.Button (new Rect(offsetX + 85, offsetY + 130, 20, 20), L.G("S", "Save: saves this map to a file, in the format chosen in Saving Options."))) {
 			textureToSave = _HeightMap;
 			mapType = "_height";
 			SetFileMaskImage();
@@ -540,21 +565,21 @@ public class MainGui : MonoBehaviour {
 		if (_HeightMap == null || QuicksavePathHeight == "") { GUI.enabled = false; } else { GUI.enabled = true; }
 
 		// Quick Save
-		if (GUI.Button (new Rect(offsetX + 15, offsetY + 160, 80, 20), "Quick Save")) {
+		if (GUI.Button (new Rect(offsetX + 15, offsetY + 160, 80, 20), L.G("Quick Save", "Saves this map again to the last file you saved it to, without asking."))) {
 			textureToSave = _HeightMap;
 			mapType = "_height";
-			SaveFile(QuicksavePathProperty);
+			SaveFile(QuicksavePathHeight);
 		}
 
 		if (_HeightMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX + 15, offsetY + 190, 80, 20), "Preview")) {
+		if (GUI.Button (new Rect(offsetX + 15, offsetY + 190, 80, 20), L.G("Preview", "Shows this map alone on the preview plane."))) {
 			SetPreviewMaterial( _HeightMap );
 			//SetPreviewMaterial( _HDHeightMap );
 		}
 		GUI.enabled = true;
 
 		if (_DiffuseMapOriginal == null && _DiffuseMap == null && _NormalMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX + 5, offsetY + 220, 50, 20), "Create")) {
+		if (GUI.Button (new Rect(offsetX + 5, offsetY + 220, 50, 20), L.G("Create", "Create the height map from the albedo: bright = high. Adjust the frequencies to keep the right details."))) {
 			CloseWindows();
 			FixSize();
 			HeightFromDiffuseGuiObject.SetActive(true);
@@ -564,7 +589,7 @@ public class MainGui : MonoBehaviour {
 		GUI.enabled = true;
 
 		if (_HeightMap == null ){ GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX + 60, offsetY + 220, 45, 20), "Clear")) {
+		if (GUI.Button (new Rect(offsetX + 60, offsetY + 220, 45, 20), L.G("Clear", "Empties this map."))) {
 			ClearTexture(MapType.height);
 			CloseWindows ();
 			SetMaterialValues ();
@@ -577,7 +602,7 @@ public class MainGui : MonoBehaviour {
 		// 			Diffuse Map			//
 		//==============================//
 
-		GUI.Box( new Rect (offsetX + spacingX, offsetY, 110, 250), "Diffuse Map" );
+		GUI.Box( new Rect (offsetX + spacingX, offsetY, 110, 250), L.T("Albedo Map") );
 
 		if (_DiffuseMap != null) {
 			GUI.DrawTexture (new Rect (offsetX + spacingX + 5, offsetY + 25, 100, 100), _DiffuseMap);
@@ -586,7 +611,7 @@ public class MainGui : MonoBehaviour {
 		}
 
 		// Paste 
-		if (GUI.Button (new Rect(offsetX + spacingX  + 5, offsetY + 130, 20, 20), "P")) {
+		if (GUI.Button (new Rect(offsetX + spacingX  + 5, offsetY + 130, 20, 20), L.G("P", "Paste: puts the image from the clipboard into this map."))) {
 			mapTypeToLoad = MapType.diffuseOriginal;
 			PasteFile ();
 		}
@@ -594,7 +619,7 @@ public class MainGui : MonoBehaviour {
 		if ( _DiffuseMapOriginal == null && _DiffuseMap == null ) { GUI.enabled = false; } else { GUI.enabled = true; }
 
 		// Copy
-		if (GUI.Button (new Rect(offsetX + spacingX  + 30, offsetY + 130, 20, 20), "C")) {
+		if (GUI.Button (new Rect(offsetX + spacingX  + 30, offsetY + 130, 20, 20), L.G("C", "Copy: puts this map on the clipboard, to paste it in another program."))) {
 			if( _DiffuseMap != null ){
 				textureToSave = _DiffuseMap;
 			}else{
@@ -606,16 +631,16 @@ public class MainGui : MonoBehaviour {
 		GUI.enabled = true;
 
 		// Open
-		if (GUI.Button (new Rect(offsetX + spacingX + 60, offsetY + 130, 20, 20), "O")) {
+		if (GUI.Button (new Rect(offsetX + spacingX + 60, offsetY + 130, 20, 20), L.G("O", "Open: loads an image file into this map (PNG, JPG, TGA, TIFF, EXR, DDS...)."))) {
 			mapTypeToLoad = MapType.diffuseOriginal;
 			SetFileMaskImage();
-			fileBrowser.ShowBrowser( "Open Diffuse Map", this.OpenFile );
+			fileBrowser.ShowBrowser( "Open Albedo Map", this.OpenFile );
 		}
 		
 		if ( _DiffuseMapOriginal == null && _DiffuseMap == null ) { GUI.enabled = false; } else { GUI.enabled = true; }
 
 		// Save
-		if (GUI.Button (new Rect(offsetX + spacingX + 85, offsetY + 130, 20, 20), "S")) {
+		if (GUI.Button (new Rect(offsetX + spacingX + 85, offsetY + 130, 20, 20), L.G("S", "Save: saves this map to a file, in the format chosen in Saving Options."))) {
 			if( _DiffuseMap != null ){
 				textureToSave = _DiffuseMap;
 			}else{
@@ -623,13 +648,13 @@ public class MainGui : MonoBehaviour {
 			}
 			mapType = "_diffuse";
 			SetFileMaskImage();
-			fileBrowser.ShowBrowser( "Save Diffuse Map", this.SaveFile );
+			fileBrowser.ShowBrowser( "Save Albedo Map", this.SaveFile );
 		}
 
 		if ( ( _DiffuseMapOriginal == null && _DiffuseMap == null ) || QuicksavePathDiffuse == "") { GUI.enabled = false; } else { GUI.enabled = true; }
 		
 		// Quick Save
-		if (GUI.Button (new Rect(offsetX + spacingX + 15, offsetY + 160, 80, 20), "Quick Save")) {
+		if (GUI.Button (new Rect(offsetX + spacingX + 15, offsetY + 160, 80, 20), L.G("Quick Save", "Saves this map again to the last file you saved it to, without asking."))) {
 			if( _DiffuseMap != null ){
 				textureToSave = _DiffuseMap;
 			}else{
@@ -640,7 +665,7 @@ public class MainGui : MonoBehaviour {
 		}
 
 		if ( _DiffuseMapOriginal == null && _DiffuseMap == null ) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX + spacingX + 15, offsetY + 190, 80, 20), "Preview")) {
+		if (GUI.Button (new Rect(offsetX + spacingX + 15, offsetY + 190, 80, 20), L.G("Preview", "Shows this map alone on the preview plane."))) {
 			if( _DiffuseMap != null ){
 				SetPreviewMaterial( _DiffuseMap );
 			}else{
@@ -649,7 +674,7 @@ public class MainGui : MonoBehaviour {
 		}
 
 		if ( _DiffuseMapOriginal == null ) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX + spacingX + 5, offsetY + 220, 50, 20), "Edit")) {
+		if (GUI.Button (new Rect(offsetX + spacingX + 5, offsetY + 220, 50, 20), L.G("Edit", "Edit the albedo: remove baked lighting and shadows, adjust colours and contrast."))) {
 			CloseWindows();
 			FixSize();
 			EditDiffuseGuiObject.SetActive(true);
@@ -658,7 +683,7 @@ public class MainGui : MonoBehaviour {
 		}
 
 		if ( _DiffuseMapOriginal == null && _DiffuseMap == null ) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX + spacingX + 60, offsetY + 220, 45, 20), "Clear")) {
+		if (GUI.Button (new Rect(offsetX + spacingX + 60, offsetY + 220, 45, 20), L.G("Clear", "Empties this map."))) {
 			ClearTexture(MapType.diffuse);
 			CloseWindows ();
 			SetMaterialValues ();
@@ -671,14 +696,14 @@ public class MainGui : MonoBehaviour {
 		// 			Normal Map			//
 		//==============================//
 		
-		GUI.Box( new Rect (offsetX + spacingX * 2, offsetY, 110, 250), "Normal Map" );
+		GUI.Box( new Rect (offsetX + spacingX * 2, offsetY, 110, 250), L.T("Normal Map") );
 		
 		if ( _NormalMap != null ) {
 			GUI.DrawTexture (new Rect(offsetX + spacingX * 2 + 5, offsetY + 25, 100, 100), _NormalMap );
 		}
 
 		// Paste 
-		if (GUI.Button (new Rect(offsetX + spacingX * 2  + 5, offsetY + 130, 20, 20), "P")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 2  + 5, offsetY + 130, 20, 20), L.G("P", "Paste: puts the image from the clipboard into this map."))) {
 			mapTypeToLoad = MapType.normal;
 			PasteFile ();
 		}
@@ -686,7 +711,7 @@ public class MainGui : MonoBehaviour {
 		if (_NormalMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
 
 		// Copy
-		if (GUI.Button (new Rect(offsetX + spacingX * 2  + 30, offsetY + 130, 20, 20), "C")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 2  + 30, offsetY + 130, 20, 20), L.G("C", "Copy: puts this map on the clipboard, to paste it in another program."))) {
 			textureToSave = _NormalMap;
 			CopyFile ();
 		}
@@ -694,7 +719,7 @@ public class MainGui : MonoBehaviour {
 		GUI.enabled = true;
 
 		//Open
-		if (GUI.Button (new Rect(offsetX + spacingX * 2 + 60, offsetY + 130, 20, 20), "O")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 2 + 60, offsetY + 130, 20, 20), L.G("O", "Open: loads an image file into this map (PNG, JPG, TGA, TIFF, EXR, DDS...)."))) {
 			mapTypeToLoad = MapType.normal;
 			SetFileMaskImage();
 			fileBrowser.ShowBrowser( "Open Normal Map", this.OpenFile );
@@ -703,7 +728,7 @@ public class MainGui : MonoBehaviour {
 		if (_NormalMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
 		
 		// Save
-		if (GUI.Button (new Rect(offsetX + spacingX * 2 + 85, offsetY + 130, 20, 20), "S")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 2 + 85, offsetY + 130, 20, 20), L.G("S", "Save: saves this map to a file, in the format chosen in Saving Options."))) {
 			textureToSave = _NormalMap;
 			mapType = "_normal";
 			SetFileMaskImage();
@@ -713,19 +738,19 @@ public class MainGui : MonoBehaviour {
 		if (_NormalMap == null || QuicksavePathNormal == "") { GUI.enabled = false; } else { GUI.enabled = true; }
 		
 		// Quick Save
-		if (GUI.Button (new Rect(offsetX + spacingX * 2 + 15, offsetY + 160, 80, 20), "Quick Save")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 2 + 15, offsetY + 160, 80, 20), L.G("Quick Save", "Saves this map again to the last file you saved it to, without asking."))) {
 			textureToSave = _NormalMap;
 			mapType = "_normal";
 			SaveFile(QuicksavePathNormal);
 		}
 		
 		if (_NormalMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX + spacingX * 2 + 15, offsetY + 190, 80, 20), "Preview")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 2 + 15, offsetY + 190, 80, 20), L.G("Preview", "Shows this map alone on the preview plane."))) {
 			SetPreviewMaterial( _NormalMap );
 		}
 
 		if (_HeightMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect (offsetX + spacingX * 2 + 5, offsetY + 220, 50, 20), "Create")) {
+		if (GUI.Button (new Rect (offsetX + spacingX * 2 + 5, offsetY + 220, 50, 20), L.G("Create", "Create the normal map from the height map."))) {
 			CloseWindows ();
 			FixSize ();
 			NormalFromHeightGuiObject.SetActive (true);
@@ -734,7 +759,7 @@ public class MainGui : MonoBehaviour {
 		}
 
 		if (_NormalMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX + spacingX * 2 + 60, offsetY + 220, 45, 20), "Clear")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 2 + 60, offsetY + 220, 45, 20), L.G("Clear", "Empties this map."))) {
 			ClearTexture(MapType.normal);
 			CloseWindows ();
 			SetMaterialValues ();
@@ -747,14 +772,14 @@ public class MainGui : MonoBehaviour {
 		// 			Metallic Map		//
 		//==============================//
 		
-		GUI.Box( new Rect (offsetX + spacingX * 3, offsetY, 110, 250), "Metallic Map" );
+		GUI.Box( new Rect (offsetX + spacingX * 3, offsetY, 110, 250), L.T("Metallic Map") );
 		
 		if ( _MetallicMap != null ) {
 			GUI.DrawTexture (new Rect(offsetX + spacingX * 3 + 5, offsetY + 25, 100, 100), _MetallicMap );
 		}
 
 		// Paste 
-		if (GUI.Button (new Rect(offsetX + spacingX * 3  + 5, offsetY + 130, 20, 20), "P")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 3  + 5, offsetY + 130, 20, 20), L.G("P", "Paste: puts the image from the clipboard into this map."))) {
 			mapTypeToLoad = MapType.metallic;
 			PasteFile ();
 		}
@@ -762,7 +787,7 @@ public class MainGui : MonoBehaviour {
 		if (_MetallicMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
 
 		// Copy
-		if (GUI.Button (new Rect(offsetX + spacingX * 3  + 30, offsetY + 130, 20, 20), "C")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 3  + 30, offsetY + 130, 20, 20), L.G("C", "Copy: puts this map on the clipboard, to paste it in another program."))) {
 			textureToSave = _MetallicMap;
 			CopyFile ();
 		}
@@ -770,7 +795,7 @@ public class MainGui : MonoBehaviour {
 		GUI.enabled = true;
 
 		//Open
-		if (GUI.Button (new Rect(offsetX + spacingX * 3 + 60, offsetY + 130, 20, 20), "O")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 3 + 60, offsetY + 130, 20, 20), L.G("O", "Open: loads an image file into this map (PNG, JPG, TGA, TIFF, EXR, DDS...)."))) {
 			mapTypeToLoad = MapType.metallic;
 			SetFileMaskImage();
 			fileBrowser.ShowBrowser( "Open Metallic Map", this.OpenFile );
@@ -780,7 +805,7 @@ public class MainGui : MonoBehaviour {
 		if (_MetallicMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
 		
 		// Save
-		if (GUI.Button (new Rect(offsetX + spacingX * 3 + 85, offsetY + 130, 20, 20), "S")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 3 + 85, offsetY + 130, 20, 20), L.G("S", "Save: saves this map to a file, in the format chosen in Saving Options."))) {
 			textureToSave = _MetallicMap;
 			mapType = "_metallic";
 			SetFileMaskImage();
@@ -791,19 +816,19 @@ public class MainGui : MonoBehaviour {
 		if (_MetallicMap == null || QuicksavePathMetallic == "") { GUI.enabled = false; } else { GUI.enabled = true; }
 		
 		// Quick Save
-		if (GUI.Button (new Rect(offsetX + spacingX * 3 + 15, offsetY + 160, 80, 20), "Quick Save")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 3 + 15, offsetY + 160, 80, 20), L.G("Quick Save", "Saves this map again to the last file you saved it to, without asking."))) {
 			textureToSave = _MetallicMap;
 			mapType = "_metallic";
 			SaveFile(QuicksavePathMetallic);
 		}
 		
 		if (_MetallicMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX + spacingX * 3 + 15, offsetY + 190, 80, 20), "Preview")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 3 + 15, offsetY + 190, 80, 20), L.G("Preview", "Shows this map alone on the preview plane."))) {
 			SetPreviewMaterial( _MetallicMap );
 		}
 
 		if ( _DiffuseMapOriginal == null && _DiffuseMap == null ){ GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect (offsetX + spacingX * 3 + 5, offsetY + 220, 50, 20), "Create")) {
+		if (GUI.Button (new Rect (offsetX + spacingX * 3 + 5, offsetY + 220, 50, 20), L.G("Create", "Create the metallic map by picking the colour of the metal in the albedo."))) {
 			CloseWindows();
 			FixSize();
 
@@ -813,7 +838,7 @@ public class MainGui : MonoBehaviour {
 		}
 
 		if (_MetallicMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX + spacingX * 3 + 60, offsetY + 220, 45, 20), "Clear")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 3 + 60, offsetY + 220, 45, 20), L.G("Clear", "Empties this map."))) {
 			ClearTexture(MapType.metallic);
 			CloseWindows ();
 			SetMaterialValues ();
@@ -826,14 +851,14 @@ public class MainGui : MonoBehaviour {
 		// 		Smoothness Map			//
 		//==============================//
 		
-		GUI.Box( new Rect (offsetX + spacingX * 4, offsetY, 110, 250), "Smoothness Map" );
+		GUI.Box( new Rect (offsetX + spacingX * 4, offsetY, 110, 250), L.T("Smoothness Map") );
 		
 		if ( _SmoothnessMap != null ) {
 			GUI.DrawTexture (new Rect(offsetX + spacingX * 4 + 5, offsetY + 25, 100, 100), _SmoothnessMap );
 		}
 
 		// Paste 
-		if (GUI.Button (new Rect(offsetX + spacingX * 4  + 5, offsetY + 130, 20, 20), "P")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 4  + 5, offsetY + 130, 20, 20), L.G("P", "Paste: puts the image from the clipboard into this map."))) {
 			mapTypeToLoad = MapType.smoothness;
 			PasteFile ();
 		}
@@ -841,7 +866,7 @@ public class MainGui : MonoBehaviour {
 		if (_SmoothnessMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
 
 		// Copy
-		if (GUI.Button (new Rect(offsetX + spacingX * 4  + 30, offsetY + 130, 20, 20), "C")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 4  + 30, offsetY + 130, 20, 20), L.G("C", "Copy: puts this map on the clipboard, to paste it in another program."))) {
 			textureToSave = _SmoothnessMap;
 			CopyFile ();
 		}
@@ -849,7 +874,7 @@ public class MainGui : MonoBehaviour {
 		GUI.enabled = true;
 
 		//Open
-		if (GUI.Button (new Rect(offsetX + spacingX * 4 + 60, offsetY + 130, 20, 20), "O")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 4 + 60, offsetY + 130, 20, 20), L.G("O", "Open: loads an image file into this map (PNG, JPG, TGA, TIFF, EXR, DDS...)."))) {
 			mapTypeToLoad = MapType.smoothness;
 			SetFileMaskImage();
 			fileBrowser.ShowBrowser( "Open Smoothness Map", this.OpenFile );
@@ -858,7 +883,7 @@ public class MainGui : MonoBehaviour {
 		if (_SmoothnessMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
 
 		// Save
-		if (GUI.Button (new Rect(offsetX + spacingX * 4 + 85, offsetY + 130, 20, 20), "S")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 4 + 85, offsetY + 130, 20, 20), L.G("S", "Save: saves this map to a file, in the format chosen in Saving Options."))) {
 			textureToSave = _SmoothnessMap;
 			mapType = "_smoothness";
 			SetFileMaskImage();
@@ -868,19 +893,19 @@ public class MainGui : MonoBehaviour {
 		if (_SmoothnessMap == null || QuicksavePathSmoothness == "") { GUI.enabled = false; } else { GUI.enabled = true; }
 		
 		// Quick Save
-		if (GUI.Button (new Rect(offsetX + spacingX * 4 + 15, offsetY + 160, 80, 20), "Quick Save")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 4 + 15, offsetY + 160, 80, 20), L.G("Quick Save", "Saves this map again to the last file you saved it to, without asking."))) {
 			textureToSave = _SmoothnessMap;
 			mapType = "_smoothness";
 			SaveFile(QuicksavePathSmoothness);
 		}
 		
 		if (_SmoothnessMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX + spacingX * 4 + 15, offsetY + 190, 80, 20), "Preview")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 4 + 15, offsetY + 190, 80, 20), L.G("Preview", "Shows this map alone on the preview plane."))) {
 			SetPreviewMaterial( _SmoothnessMap );
 		}
 
 		if ( _DiffuseMapOriginal == null && _DiffuseMap == null ){ GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect (offsetX + spacingX * 4 + 5, offsetY + 220, 50, 20), "Create")) {
+		if (GUI.Button (new Rect (offsetX + spacingX * 4 + 5, offsetY + 220, 50, 20), L.G("Create", "Create the smoothness (gloss) map from the albedo, the metallic and picked colours. Roughness is its inverse."))) {
 			CloseWindows();
 			FixSize();
 			SmoothnessGuiObject.SetActive(true);
@@ -889,7 +914,7 @@ public class MainGui : MonoBehaviour {
 		}
 
 		if (_SmoothnessMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX + spacingX * 4 + 60, offsetY + 220, 45, 20), "Clear")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 4 + 60, offsetY + 220, 45, 20), L.G("Clear", "Empties this map."))) {
 			ClearTexture(MapType.smoothness);
 			CloseWindows ();
 			SetMaterialValues ();
@@ -902,14 +927,14 @@ public class MainGui : MonoBehaviour {
 		// 			Edge Map			//
 		//==============================//
 		
-		GUI.Box( new Rect (offsetX + spacingX * 5, offsetY, 110, 250), "Edge Map" );
+		GUI.Box( new Rect (offsetX + spacingX * 5, offsetY, 110, 250), L.T("Edge Map") );
 		
 		if ( _EdgeMap != null ) {
 			GUI.DrawTexture (new Rect(offsetX + spacingX * 5 + 5, offsetY + 25, 100, 100), _EdgeMap );
 		}
 
 		// Paste 
-		if (GUI.Button (new Rect(offsetX + spacingX * 5  + 5, offsetY + 130, 20, 20), "P")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 5  + 5, offsetY + 130, 20, 20), L.G("P", "Paste: puts the image from the clipboard into this map."))) {
 			mapTypeToLoad = MapType.edge;
 			PasteFile ();
 		}
@@ -917,7 +942,7 @@ public class MainGui : MonoBehaviour {
 		if (_EdgeMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
 
 		// Copy
-		if (GUI.Button (new Rect(offsetX + spacingX * 5  + 30, offsetY + 130, 20, 20), "C")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 5  + 30, offsetY + 130, 20, 20), L.G("C", "Copy: puts this map on the clipboard, to paste it in another program."))) {
 			textureToSave = _EdgeMap;
 			CopyFile ();
 		}
@@ -925,7 +950,7 @@ public class MainGui : MonoBehaviour {
 		GUI.enabled = true;
 		
 		//Open
-		if (GUI.Button (new Rect(offsetX + spacingX * 5 +60, offsetY + 130, 20, 20), "O")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 5 +60, offsetY + 130, 20, 20), L.G("O", "Open: loads an image file into this map (PNG, JPG, TGA, TIFF, EXR, DDS...)."))) {
 			mapTypeToLoad = MapType.edge;
 			SetFileMaskImage();
 			fileBrowser.ShowBrowser( "Open Edge Map", this.OpenFile );
@@ -934,7 +959,7 @@ public class MainGui : MonoBehaviour {
 		if (_EdgeMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
 		
 		// Save
-		if (GUI.Button (new Rect(offsetX + spacingX * 5 + 85, offsetY + 130, 20, 20), "S")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 5 + 85, offsetY + 130, 20, 20), L.G("S", "Save: saves this map to a file, in the format chosen in Saving Options."))) {
 			textureToSave = _EdgeMap;
 			mapType = "_edge";
 			SetFileMaskImage();
@@ -944,19 +969,19 @@ public class MainGui : MonoBehaviour {
 		if (_EdgeMap == null || QuicksavePathEdge == "") { GUI.enabled = false; } else { GUI.enabled = true; }
 		
 		// Quick Save
-		if (GUI.Button (new Rect(offsetX + spacingX * 5 + 15, offsetY + 160, 80, 20), "Quick Save")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 5 + 15, offsetY + 160, 80, 20), L.G("Quick Save", "Saves this map again to the last file you saved it to, without asking."))) {
 			textureToSave = _EdgeMap;
 			mapType = "_edge";
 			SaveFile(QuicksavePathEdge);
 		}
 		
 		if (_EdgeMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX + spacingX * 5 + 15, offsetY + 190, 80, 20), "Preview")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 5 + 15, offsetY + 190, 80, 20), L.G("Preview", "Shows this map alone on the preview plane."))) {
 			SetPreviewMaterial( _EdgeMap );
 		}
 
 		if ( _NormalMap == null ){ GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX + spacingX * 5 + 5, offsetY + 220, 50, 20), "Create")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 5 + 5, offsetY + 220, 50, 20), L.G("Create", "Create the edge map from the normal map: edges and ridges bright, hollows dark."))) {
 			CloseWindows();
 			FixSize();
 			EdgeFromNormalGuiObject.SetActive(true);
@@ -965,7 +990,7 @@ public class MainGui : MonoBehaviour {
 		}
 
 		if (_EdgeMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX + spacingX * 5 + 60, offsetY + 220, 45, 20), "Clear")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 5 + 60, offsetY + 220, 45, 20), L.G("Clear", "Empties this map."))) {
 			ClearTexture(MapType.edge);
 			CloseWindows ();
 			SetMaterialValues ();
@@ -977,7 +1002,7 @@ public class MainGui : MonoBehaviour {
 		// 			AO Map				//
 		//==============================//
 		
-		GUI.Box( new Rect (offsetX + spacingX * 6, offsetY, 110, 250), "AO Map" );
+		GUI.Box( new Rect (offsetX + spacingX * 6, offsetY, 110, 250), L.T("AO Map") );
 		
 		if ( _AOMap != null ) {
 			GUI.DrawTexture (new Rect(offsetX + spacingX * 6 + 5, offsetY + 25, 100, 100), _AOMap );
@@ -985,7 +1010,7 @@ public class MainGui : MonoBehaviour {
 
 
 		// Paste 
-		if (GUI.Button (new Rect(offsetX + spacingX * 6  + 5, offsetY + 130, 20, 20), "P")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 6  + 5, offsetY + 130, 20, 20), L.G("P", "Paste: puts the image from the clipboard into this map."))) {
 			mapTypeToLoad = MapType.ao;
 			PasteFile ();
 		}
@@ -993,7 +1018,7 @@ public class MainGui : MonoBehaviour {
 		if (_AOMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
 
 		// Copy
-		if (GUI.Button (new Rect(offsetX + spacingX * 6  + 30, offsetY + 130, 20, 20), "C")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 6  + 30, offsetY + 130, 20, 20), L.G("C", "Copy: puts this map on the clipboard, to paste it in another program."))) {
 			textureToSave = _AOMap;
 			CopyFile ();
 		}
@@ -1001,7 +1026,7 @@ public class MainGui : MonoBehaviour {
 		GUI.enabled = true;
 		
 		//Open
-		if (GUI.Button (new Rect(offsetX + spacingX * 6 + 60, offsetY + 130, 20, 20), "O")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 6 + 60, offsetY + 130, 20, 20), L.G("O", "Open: loads an image file into this map (PNG, JPG, TGA, TIFF, EXR, DDS...)."))) {
 			mapTypeToLoad = MapType.ao;
 			SetFileMaskImage();
 			fileBrowser.ShowBrowser( "Open AO Map", this.OpenFile );
@@ -1010,7 +1035,7 @@ public class MainGui : MonoBehaviour {
 		if (_AOMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
 
 		// Save
-		if (GUI.Button (new Rect(offsetX + spacingX * 6 + 85, offsetY + 130, 20, 20), "S")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 6 + 85, offsetY + 130, 20, 20), L.G("S", "Save: saves this map to a file, in the format chosen in Saving Options."))) {
 			textureToSave = _AOMap;
 			mapType = "_ao";
 			SetFileMaskImage();
@@ -1020,19 +1045,19 @@ public class MainGui : MonoBehaviour {
 		if (_AOMap == null || QuicksavePathAO == "") { GUI.enabled = false; } else { GUI.enabled = true; }
 		
 		// Quick Save
-		if (GUI.Button (new Rect(offsetX + spacingX * 6 + 15, offsetY + 160, 80, 20), "Quick Save")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 6 + 15, offsetY + 160, 80, 20), L.G("Quick Save", "Saves this map again to the last file you saved it to, without asking."))) {
 			textureToSave = _AOMap;
 			mapType = "_ao";
 			SaveFile(QuicksavePathAO);
 		}
 		
 		if (_AOMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX + spacingX * 6 + 15, offsetY + 190, 80, 20), "Preview")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 6 + 15, offsetY + 190, 80, 20), L.G("Preview", "Shows this map alone on the preview plane."))) {
 			SetPreviewMaterial( _AOMap );
 		}
 
 		if ( _NormalMap == null && _HeightMap == null ){ GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX + spacingX * 6 + 5, offsetY + 220, 50, 20), "Create")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 6 + 5, offsetY + 220, 50, 20), L.G("Create", "Create the ambient occlusion from the normal and height maps: crevices darker."))) {
 			CloseWindows();
 			FixSize();
 			AOFromNormalGuiObject.SetActive(true);
@@ -1041,7 +1066,7 @@ public class MainGui : MonoBehaviour {
 		}
 
 		if (_AOMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX + spacingX * 6 + 60, offsetY + 220, 45, 20), "Clear")) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 6 + 60, offsetY + 220, 45, 20), L.G("Clear", "Empties this map."))) {
 			ClearTexture(MapType.ao);
 			CloseWindows ();
 			SetMaterialValues ();
@@ -1056,154 +1081,36 @@ public class MainGui : MonoBehaviour {
 
 		offsetX = offsetX + spacingX * 7;
 
-		GUI.Box( new Rect (offsetX, offsetY, 230, 250), "Saving Options" );
+		// Materialize CE: one place for exporting, as in Quixel Mixer; the details live in the Export window.
+		GUI.Box( new Rect (offsetX, offsetY, 230, 250), L.T("Export & Project") );
 
-		GUI.Label (new Rect (offsetX + 20, offsetY + 20, 100, 25), "File Format");
+		var oldColor = GUI.backgroundColor;
+		GUI.backgroundColor = new Color (0.55f, 0.8f, 1f);
+		if (GUI.Button (new Rect (offsetX + 10, offsetY + 26, 210, 44), L.G("Export…", "Writes all the files for your engine in one go: Skyrim, Unreal, Unity, glTF… with your own saved profiles."))) {
+			ExportWindow.Toggle ();
+		}
+		GUI.backgroundColor = oldColor;
 
-		bmpSelected = GUI.Toggle (new Rect (offsetX + 30, offsetY + 40, 80, 20), bmpSelected, "BMP");
-		if (bmpSelected) {
-			SetFormat (FileFormat.bmp);
+		GUI.Label (new Rect (offsetX + 12, offsetY + 80, 120, 22), L.G("Single map format", "Format used by the S (save) button of each map."));
+		if (GUI.Button (new Rect (offsetX + 140, offsetY + 80, 80, 22), L.G(selectedFormat.ToString ().ToUpperInvariant (), "Click to change: PNG, TGA, TIFF, JPG, BMP, DDS."))) {
+			FileFormat[] order = { FileFormat.png, FileFormat.tga, FileFormat.tiff, FileFormat.jpg, FileFormat.bmp, FileFormat.dds };
+			SetFormat (order[(System.Array.IndexOf (order, selectedFormat) + 1) % order.Length]);
 		}
 
-		jpgSelected = GUI.Toggle (new Rect (offsetX + 30, offsetY + 60, 80, 20), jpgSelected, "JPG");
-		if (jpgSelected) {
-			SetFormat (FileFormat.jpg);
-		}
-
-		pngSelected = GUI.Toggle (new Rect (offsetX + 30, offsetY + 80, 80, 20), pngSelected, "PNG");
-		if (pngSelected) {
-			SetFormat (FileFormat.png);
-		}
-
-		tgaSelected = GUI.Toggle (new Rect (offsetX + 30, offsetY + 100, 80, 20), tgaSelected, "TGA");
-		if (tgaSelected) {
-			SetFormat (FileFormat.tga);
-		}
-
-		tiffSelected = GUI.Toggle (new Rect (offsetX + 30, offsetY + 120, 80, 20), tiffSelected, "TIFF");
-		if (tiffSelected) {
-			SetFormat (FileFormat.tiff);
-		}
-
-		// Flip Normal Map Y
 		if ( _NormalMap == null ){ GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX + 10, offsetY + 145, 100, 25), "Flip Normal Y")) {
+		if (GUI.Button (new Rect(offsetX + 10, offsetY + 116, 210, 26), L.G("Flip Normal Y", "Flips the green channel of the normal map: switches between OpenGL (Maya style) and DirectX (Max style) normals."))) {
 			FlipNormalMapY();
 		}
 		GUI.enabled = true;
 
-		//Save Project
-		if (GUI.Button (new Rect(offsetX + 10, offsetY + 180, 100, 25), "Save Project")) {
+		if (GUI.Button (new Rect(offsetX + 10, offsetY + 170, 102, 30), L.G("Save Project", "Saves every map and every setting as a Materialize project (.mtz) with its images."))) {
 			SetFileMaskProject();
 			fileBrowser.ShowBrowser( "Save Project", this.SaveProject );
 		}
-
-		//Load Project
-		if (GUI.Button (new Rect(offsetX + 10, offsetY + 215, 100, 25), "Load Project")) {
+		if (GUI.Button (new Rect(offsetX + 118, offsetY + 170, 102, 30), L.G("Load Project", "Opens a Materialize project (.mtz)."))) {
 			SetFileMaskProject();
 			fileBrowser.ShowBrowser( "Load Project", this.LoadProject );
 		}
-
-		//======================================//
-		//			Property Map Settings		//
-		//======================================//
-
-		GUI.Label (new Rect (offsetX + 130, offsetY + 20, 100, 25), "Property Map");
-
-		if (propRedChoose) { GUI.enabled = false; } else { GUI.enabled = true; }
-		GUI.Label( new Rect (offsetX + 100, offsetY + 45, 20, 20), "R:" );
-		if (GUI.Button ( new Rect (offsetX + 120, offsetY + 45, 100, 25), PCM2String( propRed, "Red None" ) ) ) {
-			propRedChoose = true;
-			propGreenChoose = false;
-			propBlueChoose = false;
-		}
-
-		if (propGreenChoose) { GUI.enabled = false; } else { GUI.enabled = true; }
-		GUI.Label( new Rect (offsetX + 100, offsetY + 80, 20, 20), "G:" );
-		if (GUI.Button ( new Rect (offsetX + 120, offsetY + 80, 100, 25), PCM2String( propGreen, "Green None" ) ) ) {
-			propRedChoose = false;
-			propGreenChoose = true;
-			propBlueChoose = false;
-		}
-
-		if (propBlueChoose) { GUI.enabled = false; } else { GUI.enabled = true; }
-		GUI.Label( new Rect (offsetX + 100, offsetY + 115, 20, 20), "B:" );
-		if (GUI.Button ( new Rect (offsetX + 120, offsetY + 115, 100, 25), PCM2String( propBlue, "Blue None" ) ) ) {
-			propRedChoose = false;
-			propGreenChoose = false;
-			propBlueChoose = true;
-		}
-
-		GUI.enabled = true;
-
-		int propBoxOffsetX = offsetX + 250;
-		int propBoxOffsetY = 20;
-		if (propRedChoose || propGreenChoose || propBlueChoose) {
-			GUI.Box( new Rect (propBoxOffsetX, propBoxOffsetY, 150, 245), "Map for Channel" );
-			bool chosen = false;
-			PropChannelMap chosenPCM = PropChannelMap.None;
-
-			if (GUI.Button (new Rect (propBoxOffsetX + 10, propBoxOffsetY + 30, 130, 25), "None")) {
-				chosen = true;
-				chosenPCM = PropChannelMap.None;
-			}
-			if (GUI.Button (new Rect (propBoxOffsetX + 10, propBoxOffsetY + 60, 130, 25), "Height")) {
-				chosen = true;
-				chosenPCM = PropChannelMap.Height;
-			}
-			if (GUI.Button (new Rect (propBoxOffsetX + 10, propBoxOffsetY + 90, 130, 25), "Metallic")) {
-				chosen = true;
-				chosenPCM = PropChannelMap.Metallic;
-			}
-			if (GUI.Button (new Rect (propBoxOffsetX + 10, propBoxOffsetY + 120, 130, 25), "Smoothness")) {
-				chosen = true;
-				chosenPCM = PropChannelMap.Smoothness;
-			}
-			if (GUI.Button (new Rect (propBoxOffsetX + 10, propBoxOffsetY + 150, 130, 25), "Edge")) {
-				chosen = true;
-				chosenPCM = PropChannelMap.Edge;
-			}
-			if (GUI.Button (new Rect (propBoxOffsetX + 10, propBoxOffsetY + 180, 130, 25), "Ambient Occlusion")) {
-				chosen = true;
-				chosenPCM = PropChannelMap.Ao;
-			}
-			if (GUI.Button (new Rect (propBoxOffsetX + 10, propBoxOffsetY + 210, 130, 25), "AO + Edge")) {
-				chosen = true;
-				chosenPCM = PropChannelMap.AoEdge;
-			}
-
-			if( chosen ){
-				if( propRedChoose ){
-					propRed = chosenPCM;
-				}
-				if( propGreenChoose ){
-					propGreen = chosenPCM;
-				}
-				if( propBlueChoose ){
-					propBlue = chosenPCM;
-				}
-				propRedChoose = false;
-				propGreenChoose = false;
-				propBlueChoose = false;
-			}
-		}
-
-		if (GUI.Button (new Rect(offsetX + 120, offsetY + 150, 100, 40), "Save\r\nProperty Map")) {
-			ProcessPropertyMap();
-			textureToSave = _PropertyMap;
-			mapType = "_msao";
-			SetFileMaskImage();
-			fileBrowser.ShowBrowser( "Save Property Map", this.SaveFile );
-		}
-
-		if( QuicksavePathProperty == "" ){ GUI.enabled = false; }
-		if (GUI.Button (new Rect(offsetX + 120, offsetY + 200, 100, 40), "Quick Save\r\nProperty Map")) {
-			ProcessPropertyMap();
-			textureToSave = _PropertyMap;
-			mapType = "_msao";
-			SaveFile(QuicksavePathProperty);
-		}
-		GUI.enabled = true;
 
 
 		//==========================//
@@ -1213,7 +1120,7 @@ public class MainGui : MonoBehaviour {
 		offsetX = 430;
 		offsetY = 280;
 
-		if (GUI.Button (new Rect(offsetX, offsetY, 100, 40), "Post Process")) {
+		if (GUI.Button (new Rect(offsetX, offsetY, 100, 40), L.G("Post Process", "Bloom, vignette and other effects of the 3D preview."))) {
 			if( PostProcessGuiObject.activeSelf == true ){
 				PostProcessGuiObject.SetActive(false);
 			}else{
@@ -1223,7 +1130,7 @@ public class MainGui : MonoBehaviour {
 
 		offsetX += 110;
 
-		if (GUI.Button (new Rect(offsetX, offsetY, 80, 40), "Show Full\r\nMaterial")) {
+		if (GUI.Button (new Rect(offsetX, offsetY, 80, 40), L.G("Show Full\r\nMaterial", "Shows every map together on the preview: the finished material."))) {
 			CloseWindows();
 			FixSize();
 			MaterialGuiObject.SetActive(true);
@@ -1232,7 +1139,7 @@ public class MainGui : MonoBehaviour {
 
 		offsetX += 90;
 
-		if (GUI.Button (new Rect(offsetX, offsetY, 80, 40), "Next\r\nCube Map")) {
+		if (GUI.Button (new Rect(offsetX, offsetY, 80, 40), L.G("Next\r\nCube Map", "Changes the environment lighting the preview."))) {
 			selectedCubemap += 1;
 			if( selectedCubemap >= CubeMaps.Length ){
 				selectedCubemap = 0;
@@ -1246,7 +1153,7 @@ public class MainGui : MonoBehaviour {
 		offsetX += 90;
 
 		if (_HeightMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX, offsetY, 60, 40), "Tile\r\nMaps")) {
+		if (GUI.Button (new Rect(offsetX, offsetY, 60, 40), L.G("Tile\r\nMaps", "Makes the maps tile without visible seams, and sets their repetition."))) {
 			CloseWindows();
 			FixSize();
 			TilingTextureMakerGuiObject.SetActive(true);
@@ -1257,7 +1164,7 @@ public class MainGui : MonoBehaviour {
 		offsetX += 70;
 
 		if (_HeightMap == null && _DiffuseMapOriginal == null && _MetallicMap == null && _SmoothnessMap == null && _EdgeMap == null && _AOMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX, offsetY, 90, 40), "Adjust\r\nAlignment")) {
+		if (GUI.Button (new Rect(offsetX, offsetY, 90, 40), L.G("Adjust\r\nAlignment", "Straightens a photo taken at an angle, and corrects lens distortion."))) {
 			CloseWindows();
 			FixSize();
 			//AlignmentGuiScript.gameObject.SetActive(true);
@@ -1267,7 +1174,7 @@ public class MainGui : MonoBehaviour {
 
 		offsetX += 100;
 
-		if (GUI.Button (new Rect(offsetX, offsetY, 120, 40), "Clear All\r\nTexture Maps")) {
+		if (GUI.Button (new Rect(offsetX, offsetY, 120, 40), L.G("Clear All\r\nTexture Maps", "Empties every map to start again."))) {
 			clearTextures = true;
 		}
 
@@ -1275,9 +1182,9 @@ public class MainGui : MonoBehaviour {
 
 			offsetY += 60;
 
-			GUI.Box( new Rect (offsetX, offsetY, 120, 60), "Are You Sure?" );
+			GUI.Box( new Rect (offsetX, offsetY, 120, 60), L.T("Are You Sure?") );
 
-			if (GUI.Button (new Rect (offsetX + 10, offsetY + 30, 45, 20), "Yes")) {
+			if (GUI.Button (new Rect (offsetX + 10, offsetY + 30, 45, 20), L.T("Yes"))) {
 				clearTextures = false;
 				ClearAllTextures ();
 				CloseWindows ();
@@ -1285,13 +1192,64 @@ public class MainGui : MonoBehaviour {
 				FixSizeSize( 1024.0f, 1024.0f );
 			}
 
-			if (GUI.Button (new Rect (offsetX + 65, offsetY + 30, 45, 20), "No")) {
+			if (GUI.Button (new Rect (offsetX + 65, offsetY + 30, 45, 20), L.T("No"))) {
 				clearTextures = false;
 			}
 		}
 
 		GUI.enabled = true;
 
+	}
+
+	GUIStyle smallLabel, smallToggle;
+
+	void DrawDdsOptions ( int x, int y ) {
+		if (smallLabel == null) smallLabel = new GUIStyle (GUI.skin.label) { fontSize = 10, wordWrap = true };
+		if (smallToggle == null) smallToggle = new GUIStyle (GUI.skin.toggle) { fontSize = 10 };
+		GUI.Box (new Rect (x, y, 160, 250), L.T("DDS Options"));
+		string[] encoders = { "Microsoft texconv", "NVIDIA Texture Tools", "Custom tool" };
+		for (int i = 0; i < encoders.Length; i++) {
+			bool on = GUI.Toggle (new Rect (x + 8, y + 22 + i * 17, 150, 18), (int)DdsExport.Encoder == i, encoders[i], smallToggle);
+			if (on && (int)DdsExport.Encoder != i) {
+				DdsExport.Encoder = (DdsEncoder)i;
+				DdsExport.ToolPath = "";
+				SettingsGui.instance.SaveDdsSettings ();
+			}
+		}
+		GUI.Label (new Rect (x + 8, y + 73, 150, 30), DdsExport.ToolStatus (), smallLabel);
+		if (GUI.Button (new Rect (x + 8, y + 100, 144, 18), L.T("Pick the tool's .exe…"))) {
+			StartCoroutine (PickDdsTool ());
+		}
+		GUI.Label (new Rect (x + 8, y + 120, 150, 18), L.T("Compression"));
+		for (int i = 0; i < DdsExport.FormatLabels.Length; i++) {
+			int col = i % 2, row = i / 2;
+			bool on = GUI.Toggle (new Rect (x + 8 + col * 75, y + 138 + row * 17, 75, 18), (int)DdsExport.Format == i,
+				L.G(DdsExport.FormatLabels[i], DdsExport.FormatHelp[i]), smallToggle);
+			if (on && (int)DdsExport.Format != i) {
+				DdsExport.Format = (DdsFormat)i;
+				SettingsGui.instance.SaveDdsSettings ();
+			}
+		}
+		bool high = GUI.Toggle (new Rect (x + 8, y + 192, 150, 18), DdsExport.HighQuality, L.T("Best quality (slower)"), smallToggle);
+		if (high != DdsExport.HighQuality) {
+			DdsExport.HighQuality = high;
+			SettingsGui.instance.SaveDdsSettings ();
+		}
+		GUI.Label (new Rect (x + 8, y + 210, 150, 40), GUI.tooltip.Length > 0 ? GUI.tooltip : DdsExport.FormatHelp[(int)DdsExport.Format], smallLabel);
+	}
+
+	IEnumerator PickDdsTool () {
+		yield return null;
+		string path = null;
+		try {
+			path = NativeFileDialog.Show ("DDS tool (.exe)", "*.exe", false);
+		} catch (System.Exception e) {
+			Notifications.Error ("Could not open the file dialog: " + e.Message);
+		}
+		if (path != null) {
+			DdsExport.ToolPath = path;
+			SettingsGui.instance.SaveDdsSettings ();
+		}
 	}
 
 	string PCM2String ( PropChannelMap pcm, string defaultName ){
@@ -1464,6 +1422,7 @@ public class MainGui : MonoBehaviour {
 		pngSelected = false;
 		tgaSelected = false;
 		tiffSelected = false;
+		ddsSelected = false;
 
 		switch (newFormat) {
 		case FileFormat.bmp:
@@ -1481,6 +1440,9 @@ public class MainGui : MonoBehaviour {
 		case FileFormat.tiff:
 			tiffSelected = true;
 			break;
+		case FileFormat.dds:
+			ddsSelected = true;
+			break;
 		}
 
 		selectedFormat = newFormat;
@@ -1493,7 +1455,8 @@ public class MainGui : MonoBehaviour {
 		pngSelected = false;
 		tgaSelected = false;
 		tiffSelected = false;
-		
+		ddsSelected = false;
+
 		switch (newFormat) {
 		case "bmp":
 			bmpSelected = true;
@@ -1514,6 +1477,10 @@ public class MainGui : MonoBehaviour {
 		case "tiff":
 			tiffSelected = true;
 			selectedFormat = FileFormat.tiff;
+			break;
+		case "dds":
+			ddsSelected = true;
+			selectedFormat = FileFormat.dds;
 			break;
 		}
 
@@ -1574,6 +1541,9 @@ public class MainGui : MonoBehaviour {
 		case FileFormat.tiff:
 			extension = "tiff";
 			break;
+		case FileFormat.dds:
+			extension = "dds";
+			break;
 		}
 
 		return extension;
@@ -1623,11 +1593,59 @@ public class MainGui : MonoBehaviour {
 
 	}
 
+	GUIStyle summaryStyle;
+	GUIStyle smallStyle => summaryStyle ?? (summaryStyle = new GUIStyle (GUI.skin.label) { fontSize = 10, wordWrap = false, clipping = TextClipping.Clip });
+
+	// Name of the last packed save, without extension or suffix: Quick Save reuses it (Materialize CE).
+	string packedBase;
+	public bool HasQuickSavePath => packedBase != null;
+
+	Texture2D BuildPacked () {
+		string missing;
+		Texture2D packed = ChannelPacker.Pack (this, out missing);
+		if (missing != null) {
+			Notifications.Error ("Empty maps, black in the packed texture: " + missing + ". Create or open them first.");
+		}
+		if (_PropertyMap != null) {
+			Destroy (_PropertyMap);
+		}
+		_PropertyMap = packed;
+		return packed;
+	}
+
+	public void PreviewPacked () {
+		SetPreviewMaterial (BuildPacked ());
+	}
+
+	public void SavePacked (bool quick) {
+		if (quick && packedBase != null) {
+			textureToSave = BuildPacked ();
+			SaveLoadProjectScript.SaveFile (packedBase + ChannelPacker.Suffix, selectedFormat, textureToSave, "");
+			return;
+		}
+		SetFileMaskImage ();
+		fileBrowser.ShowBrowser ("Save Packed Map", path => {
+			string name = System.IO.Path.Combine (System.IO.Path.GetDirectoryName (path), System.IO.Path.GetFileNameWithoutExtension (path));
+			if (ChannelPacker.Suffix.Length > 0 && name.EndsWith (ChannelPacker.Suffix, System.StringComparison.OrdinalIgnoreCase)) {
+				name = name.Substring (0, name.Length - ChannelPacker.Suffix.Length);
+			}
+			packedBase = name;
+			textureToSave = BuildPacked ();
+			SaveLoadProjectScript.SaveFile (packedBase + ChannelPacker.Suffix, selectedFormat, textureToSave, "");
+		});
+	}
+
 	public void ProcessPropertyMap () {
+		BuildPacked ();
+	}
+
+	void ProcessPropertyMapOriginal () {
 
 		SetPropertyMapChannel ("_Red", propRed);
 		SetPropertyMapChannel ("_Green", propGreen);
 		SetPropertyMapChannel ("_Blue", propBlue);
+		SetPropertyMapChannel ("_Alpha", propAlpha);
+		PropertyCompMaterial.SetFloat ("_UseAlpha", propAlpha == PropChannelMap.None ? 0f : 1f);
 
 		Vector2 size = GetSize ();
 		RenderTexture _TempMap = RenderTexture.GetTemporary ((int)size.x, (int)size.y, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
@@ -1639,7 +1657,8 @@ public class MainGui : MonoBehaviour {
 			_PropertyMap = null;
 		}
 
-		_PropertyMap = new Texture2D (_TempMap.width, _TempMap.height, TextureFormat.RGB24, false);
+		// RGBA when an alpha map is chosen; the savers write 24-bit files when alpha is fully opaque.
+		_PropertyMap = new Texture2D (_TempMap.width, _TempMap.height, propAlpha == PropChannelMap.None ? TextureFormat.RGB24 : TextureFormat.RGBA32, false);
 		_PropertyMap.ReadPixels (new Rect (0, 0, _TempMap.width, _TempMap.height), 0, 0);
 		_PropertyMap.Apply ();
 
@@ -1653,15 +1672,27 @@ public class MainGui : MonoBehaviour {
 	//==================================================//
 
 	void SaveProject (string pathToFile) {
+		if (string.IsNullOrEmpty (pathToFile)) return;
 		SaveLoadProjectScript.SaveProject (pathToFile, selectedFormat);
+		RememberProject (pathToFile);
 	}
 
 	void LoadProject (string pathToFile) {
+		if (string.IsNullOrEmpty (pathToFile)) return;
 		SaveLoadProjectScript.LoadProject (pathToFile);
+		RememberProject (pathToFile);
 	}
 	
 	void SaveFile (string pathToFile) {
 		SaveLoadProjectScript.SaveFile(pathToFile,selectedFormat,textureToSave, "" );
+		// Materialize CE: Quick Save now works after a first save (it only did from command lists before).
+		if (textureToSave == _HeightMap) QuicksavePathHeight = pathToFile;
+		else if (textureToSave == _DiffuseMap || textureToSave == _DiffuseMapOriginal) QuicksavePathDiffuse = pathToFile;
+		else if (textureToSave == _NormalMap) QuicksavePathNormal = pathToFile;
+		else if (textureToSave == _MetallicMap) QuicksavePathMetallic = pathToFile;
+		else if (textureToSave == _SmoothnessMap) QuicksavePathSmoothness = pathToFile;
+		else if (textureToSave == _EdgeMap) QuicksavePathEdge = pathToFile;
+		else if (textureToSave == _AOMap) QuicksavePathAO = pathToFile;
 	}
 
 	void CopyFile() {

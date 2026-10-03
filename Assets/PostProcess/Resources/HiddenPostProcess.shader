@@ -1,4 +1,4 @@
-﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
 
 Shader "Hidden/PostProcess" {
 
@@ -48,6 +48,8 @@ Shader "Hidden/PostProcess" {
 	
 	sampler2D	_NoiseTex;
 	float		_NoiseAmount;
+	float		_Tonemap;
+	float		_Exposure;
 	
 	sampler2D	_BloomTex;
 	float		_AGBlendSpeed;
@@ -178,6 +180,14 @@ Shader "Hidden/PostProcess" {
 		
 		Final *= lerp( float4(1,1,1,1), VignetteTex, _VignetteAmount );
 		Final *= lerp( float4(1,1,1,1), NoiseTex + 0.5, _NoiseAmount );
+
+		// Materialize CE: ACES filmic tone mapping (Narkowicz fit) in linear light. Highlights roll off
+		// smoothly instead of clipping flat to white; the exposure scales the scene before the curve.
+		if( _Tonemap > 0.5 ){
+			float3 lin = pow( max( Final.xyz, 0.0 ), 2.2 ) * _Exposure;
+			lin = saturate( ( lin * ( 2.51 * lin + 0.03 ) ) / ( lin * ( 2.43 * lin + 0.59 ) + 0.14 ) );
+			Final.xyz = pow( lin, 1.0 / 2.2 );
+		}
 		Final.w = 1.0; 
 
 		Final.xyz *= rand( ScreenUV ) * 0.04 + 0.98;

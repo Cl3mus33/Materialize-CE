@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class CameraPanZoom : MonoBehaviour {
@@ -16,6 +16,11 @@ public class CameraPanZoom : MonoBehaviour {
 	public KeyCode[] keyToHold;
 	
 	int mouseDownCount = 0;
+	Vector3 startPos;
+	public static CameraPanZoom main;
+
+	/// <summary>Back to the starting framing (Mixer's F).</summary>
+	public void Focus () { targetPos = startPos; }
 	
 	public int MouseButtonPan = 0;
 
@@ -23,6 +28,8 @@ public class CameraPanZoom : MonoBehaviour {
 	void Start () {
 	
 		targetPos = this.transform.position;
+		startPos = targetPos;
+		main = this;
 
 	}
 	
@@ -65,6 +72,12 @@ public class CameraPanZoom : MonoBehaviour {
             targetPos += new Vector3(0, 0, 1) * Input.GetAxis("Mouse ScrollWheel") * 3.0f;
         }
 
+
+		// Materialize CE: Alt + right drag up / down zooms, as in Quixel Mixer.
+		bool alt = Input.GetKey (KeyCode.LeftAlt) || Input.GetKey (KeyCode.RightAlt);
+		if (alt && Input.GetMouseButton (1) && mouseOffset.sqrMagnitude < 10000f) {
+			targetPos += new Vector3 (0, 0, 1) * mouseOffset.y * 0.03f;
+		}
 
 		this.transform.position += ( targetPos - this.transform.position ) * 0.05f;
 		

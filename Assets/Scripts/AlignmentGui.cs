@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class AlignmentGui : MonoBehaviour {
@@ -231,6 +231,7 @@ public class AlignmentGui : MonoBehaviour {
 	}
 
 	void DoMyWindow ( int windowID ) {
+		UiHelp.Panel = "Alignment";
 		
 		int spacingX = 0;
 		int spacingY = 50;
@@ -239,21 +240,21 @@ public class AlignmentGui : MonoBehaviour {
 		int offsetX = 10;
 		int offsetY = 30;
 
-		GUI.Label (new Rect (offsetX, offsetY, 250, 30), "Alignment Reveal Slider" );
+		GUI.Label (new Rect (offsetX, offsetY, 250, 30), UiHelp.Content ("Alignment Reveal Slider"));
 		Slider = GUI.HorizontalSlider( new Rect( offsetX, offsetY + 20, 280, 10 ),Slider,0.0f, 1.0f );
 		offsetY += 40;
 
-		GUI.Label (new Rect (offsetX, offsetY, 250, 30), "Preview Map" );
+		GUI.Label (new Rect (offsetX, offsetY, 250, 30), UiHelp.Content ("Preview Map"));
 		offsetY += 30;
 
 		if (MGS._DiffuseMapOriginal == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect (offsetX, offsetY, 130, 30), "Original Diffuse Map")) {
+		if (GUI.Button (new Rect (offsetX, offsetY, 130, 30), UiHelp.Content ("Original Albedo Map"))) {
 			textureToAlign = MGS._DiffuseMapOriginal;
 			doStuff = true;
 		}
 
 		if (MGS._DiffuseMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), "Diffuse Map")) {
+		if (GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), UiHelp.Content ("Albedo Map"))) {
 			textureToAlign = MGS._DiffuseMap;
 			doStuff = true;
 		}
@@ -261,33 +262,33 @@ public class AlignmentGui : MonoBehaviour {
 
 
 		if (MGS._HeightMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect (offsetX, offsetY, 130, 30), "Height Map")) {
+		if (GUI.Button (new Rect (offsetX, offsetY, 130, 30), UiHelp.Content ("Height Map"))) {
 			textureToAlign = MGS._HeightMap;
 			doStuff = true;
 		}
 		offsetY += 40;
 
 		if (MGS._MetallicMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect (offsetX, offsetY, 130, 30), "Metallic Map")) {
+		if (GUI.Button (new Rect (offsetX, offsetY, 130, 30), UiHelp.Content ("Metallic Map"))) {
 			textureToAlign = MGS._MetallicMap;
 			doStuff = true;
 		}
 		
 		if (MGS._SmoothnessMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), "Smoothness Map")) {
+		if (GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), UiHelp.Content ("Smoothness Map"))) {
 			textureToAlign = MGS._SmoothnessMap;
 			doStuff = true;
 		}
 		offsetY += 40;
 
 		if (MGS._EdgeMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect (offsetX, offsetY, 130, 30), "Edge Map")) {
+		if (GUI.Button (new Rect (offsetX, offsetY, 130, 30), UiHelp.Content ("Edge Map"))) {
 			textureToAlign = MGS._EdgeMap;
 			doStuff = true;
 		}
 		
 		if (MGS._AOMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), "AO Map")) {
+		if (GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), UiHelp.Content ("AO Map"))) {
 			textureToAlign = MGS._AOMap;
 			doStuff = true;
 		}
@@ -312,17 +313,25 @@ public class AlignmentGui : MonoBehaviour {
 		}
 		offsetY += 50;
 
-		if( GUI.Button (new Rect (offsetX, offsetY, 130, 30), "Reset Points" ) ){
+		if( GUI.Button (new Rect (offsetX, offsetY, 130, 30), UiHelp.Content ("Reset Points")) ){
 			pointTL = new Vector2(0.0f,1.0f);
 			pointTR = new Vector2(1.0f,1.0f);
 			pointBL = new Vector2(0.0f,0.0f);
 			pointBR = new Vector2(1.0f,0.0f);
+			// Materialize CE: the corrections too, so Reset really goes back to the photo as it was.
+			LensDistort = 0.0f; LensDistortText = "0";
+			PerspectiveX = 0.0f; PerspectiveXText = "0";
+			PerspectiveY = 0.0f; PerspectiveYText = "0";
+			doStuff = true;
 		}
 
 		
-		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), "Set All Maps" ) ){
+		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), UiHelp.Content ("Set All Maps")) ){
 			StartCoroutine( SetMaps ( ) );
 		}
+		
+		
+		Tips.Capture (true);
 		
 		
 		GUI.DragWindow();
@@ -330,11 +339,16 @@ public class AlignmentGui : MonoBehaviour {
 	}
 	
 	void OnGUI () {
+		Theme.Apply ();
 		
 		windowRect.width = 300;
 		windowRect.height = 430;
 		
-		windowRect = GUI.Window (21, windowRect, DoMyWindow, "Texture Alignment Adjuster");
+		windowRect = UiShell.Dock (windowRect);
+		
+		windowRect = UiShell.Window(21, windowRect, DoMyWindow, L.T("Texture Alignment Adjuster"));
+		
+		Tips.Block (windowRect);
 	}
 
 	void ProcessMap ( Texture2D textureTarget ){

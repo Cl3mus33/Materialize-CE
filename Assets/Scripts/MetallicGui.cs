@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.ComponentModel;
 
@@ -275,6 +275,7 @@ public class MetallicGui : MonoBehaviour {
 	}
 
 	void DoMyWindow ( int windowID ) {
+		UiHelp.Panel = "Metallic";
 
 		int spacingX = 0;
 		int spacingY = 50;
@@ -284,42 +285,42 @@ public class MetallicGui : MonoBehaviour {
 		int offsetY = 30;
 
 		if (_DiffuseMap != null) { GUI.enabled = true; } else { GUI.enabled = false; }
-		if( GUI.Toggle (new Rect (offsetX, offsetY, 140, 30), MS.useAdjustedDiffuse, " Use Edited Diffuse")) {
+		if( GUI.Toggle (new Rect (offsetX, offsetY, 140, 30), MS.useAdjustedDiffuse, UiHelp.Content (" Use Edited Albedo"))) {
 			MS.useAdjustedDiffuse = true;
 			MS.useOriginalDiffuse = false;
 		}
 		GUI.enabled = true;
-		if (GUI.Toggle (new Rect (offsetX + 150, offsetY, 140, 30), MS.useOriginalDiffuse, " Use Original Diffuse")) {
+		if (GUI.Toggle (new Rect (offsetX + 150, offsetY, 140, 30), MS.useOriginalDiffuse, UiHelp.Content (" Use Original Albedo"))) {
 			MS.useAdjustedDiffuse = false;
 			MS.useOriginalDiffuse = true;
 		}
 
 		offsetY += 30;
 
-		GUI.Label (new Rect (offsetX, offsetY, 250, 30), "Metalic Reveal Slider" );
+		GUI.Label (new Rect (offsetX, offsetY, 250, 30), UiHelp.Content ("Metalic Reveal Slider"));
 		Slider = GUI.HorizontalSlider( new Rect( offsetX, offsetY + 20, 280, 10 ),Slider,0.0f, 1.0f );
 		
 		offsetY += 40;
 
-		if (GUI.Button (new Rect (offsetX, offsetY + 10, 80, 30), "Pick Color")) {
+		if (GUI.Button (new Rect (offsetX, offsetY + 10, 80, 30), UiHelp.Content ("Pick Color"))) {
 			selectingColor = true;
 		}
 
 		GUI.DrawTexture( new Rect (offsetX, offsetY + 50, 80, 80), _MetalColorMap );
 		
-		GUI.Label (new Rect (offsetX + 90, offsetY, 250, 30), "Hue");
+		GUI.Label (new Rect (offsetX + 90, offsetY, 250, 30), UiHelp.Content ("Hue"));
 		MS.HueWeight = GUI.VerticalSlider( new Rect( offsetX + 95, offsetY + 30, 10, 100 ),MS.HueWeight,1.0f, 0.0f );
 
-		GUI.Label (new Rect (offsetX + 130, offsetY, 250, 30), "Sat" );
+		GUI.Label (new Rect (offsetX + 130, offsetY, 250, 30), UiHelp.Content ("Sat"));
 		MS.SatWeight = GUI.VerticalSlider( new Rect( offsetX + 135, offsetY + 30, 10, 100 ),MS.SatWeight,1.0f, 0.0f );
 
-		GUI.Label (new Rect (offsetX + 170, offsetY, 250, 30), "Lum" );
+		GUI.Label (new Rect (offsetX + 170, offsetY, 250, 30), UiHelp.Content ("Lum"));
 		MS.LumWeight = GUI.VerticalSlider( new Rect( offsetX + 175, offsetY + 30, 10, 100 ),MS.LumWeight,1.0f, 0.0f );
 
-		GUI.Label (new Rect (offsetX + 220, offsetY, 250, 30), "Low" );
+		GUI.Label (new Rect (offsetX + 220, offsetY, 250, 30), UiHelp.Content ("Low"));
 		MS.MaskLow = GUI.VerticalSlider( new Rect( offsetX + 225, offsetY + 30, 10, 100 ),MS.MaskLow,1.0f, 0.0f );
 
-		GUI.Label (new Rect (offsetX + 250, offsetY, 250, 30), "High" );
+		GUI.Label (new Rect (offsetX + 250, offsetY, 250, 30), UiHelp.Content ("High"));
 		MS.MaskHigh = GUI.VerticalSlider( new Rect( offsetX + 255, offsetY + 30, 10, 100 ),MS.MaskHigh,1.0f, 0.0f );
 
 		offsetY += 150;
@@ -343,9 +344,12 @@ public class MetallicGui : MonoBehaviour {
 		GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Final Bias", MS.FinalBias, MS.FinalBiasText, out MS.FinalBias, out MS.FinalBiasText, -0.5f, 0.5f );
 		offsetY += 50;
 		
-		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), "Set as Metallic" ) ){
+		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), UiHelp.Content ("Set as Metallic")) ){
 			StartCoroutine( ProcessMetallic() );
 		}
+
+
+		Tips.Capture (true);
 
 
 		GUI.DragWindow();
@@ -353,11 +357,16 @@ public class MetallicGui : MonoBehaviour {
 	}
 
 	void OnGUI () {
+		Theme.Apply ();
 
 		windowRect.width = 300;
 		windowRect.height = 500;
 
-		windowRect = GUI.Window(15, windowRect, DoMyWindow, "Metallic From Diffuse");
+		windowRect = UiShell.Dock (windowRect);
+
+		windowRect = UiShell.Window(15, windowRect, DoMyWindow, L.T("Metallic From Albedo"));
+
+		Tips.Block (windowRect);
 
 	}
 
@@ -464,9 +473,8 @@ public class MetallicGui : MonoBehaviour {
 			Destroy (MainGuiScript._MetallicMap);
 		}
 
-		MainGuiScript._MetallicMap = new Texture2D (_TempMap.width, _TempMap.height, TextureFormat.ARGB32, true, true);
-		MainGuiScript._MetallicMap.ReadPixels (new Rect (0, 0, _TempMap.width, _TempMap.height), 0, 0);
-		MainGuiScript._MetallicMap.Apply ();
+		// Materialize CE: read back without freezing, mipmaps made on the GPU.
+		yield return StartCoroutine (GpuReadback.Into (_TempMap, t => MainGuiScript._MetallicMap = t));
 		
 		yield return new WaitForSeconds(0.01f);
 		

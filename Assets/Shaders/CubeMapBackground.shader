@@ -1,4 +1,4 @@
-﻿Shader "Custom/CubeMapBackground" {
+Shader "Custom/CubeMapBackground" {
 	Properties {
 		_MainTex ("Base (RGB)", 2D) = "white" {}
 		_CubeMap ("Cube Map", CUBE) = "" {}
@@ -25,6 +25,16 @@
 			
 			uniform samplerCUBE _GlobalCubemap;
 			uniform samplerCUBE _ProbeCubemap;
+			// Materialize CE: background as the environment (blur, brightness) or a plain colour.
+			uniform float _BgSolid;
+			uniform float4 _BgColor;
+			uniform float _BgBlur;
+			uniform float _BgBrightness;
+			// Your own / bundled HDRI, read directly at its full resolution (sharper than through the probe).
+			uniform sampler2D _GlobalEquirect;
+			uniform float _EnvEquirect;
+			uniform float _EnvRotation;
+			uniform float _EnvExposure;
 
 			// vertex-to-fragment interpolation data
 			struct v2f {
@@ -89,11 +99,30 @@
 				
 				fixed3 worldNormal = normalize( IN.worldNormal.xyz );
 
+				if ( _BgSolid > 0.5 ) return float4( _BgColor.rgb, 1.0 );
+
+				if ( _EnvEquirect > 0.5 ) {
+					float s = sin( _EnvRotation ), c = cos( _EnvRotation );
+					float3 n = worldNormal;
+					float3 dir = float3( c * n.x - s * n.z, n.y, s * n.x + c * n.z );
+					float2 uv = float2( atan2( dir.x, dir.z ) / 6.2831853 + 0.5, asin( clamp( dir.y, -1.0, 1.0 ) ) / 3.1415927 + 0.5 );
+					// Blur through the mipmaps: 0 = the full 4K, 1 = very soft.
+					float blurE = _BgBrightness > 0.0 ? _BgBlur : 0.25;
+					float3 e = tex2Dlod( _GlobalEquirect, float4( uv, 0, blurE * 9.0 ) ).rgb * ( _EnvExposure > 0.0 ? _EnvExposure : 1.0 );
+					if ( _BgBrightness > 0.0 ) e *= _BgBrightness / 0.7;
+					return float4( e * _Factor, 1.0 );
+				}
+
+				// _BgBlur: 0 sharp .. 1 very soft (the original look is about 0.25). Unset (0) keeps the original.
+				float blur = _BgBrightness > 0.0 ? _BgBlur : 0.25;
+				float lod = blur * 4.0;
+				float spread = 0.1 * blur;
 				float3 ambIBL = 0.0;
 				for( int i = 0; i < BlurKernelSamples; i++ ){
-					ambIBL += texCUBElod(_ProbeCubemap, half4( worldNormal + BlurKernel[i] * 0.025 , 1.0 ) ).xyz;
+					ambIBL += texCUBElod(_ProbeCubemap, half4( worldNormal + BlurKernel[i] * spread , lod ) ).xyz;
 				}
 				ambIBL *= 1.0 / BlurKernelSamples;
+				if ( _BgBrightness > 0.0 ) ambIBL *= _BgBrightness / 0.7;
 
 				//ambIBL = texCUBElod(_ProbeCubemap, half4( worldNormal, 1.0 ) ).xyz;
 				

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class PostProcessGui : MonoBehaviour {
@@ -10,6 +10,9 @@ public class PostProcessGui : MonoBehaviour {
 	PostProcess ppScript;
 
 	bool EnablePostProcess = true;
+	bool FilmicTonemap = true;
+	float Exposure = 1.0f;
+	string ExposureText = "1";
 
 	bool UseTAA = true;
 
@@ -70,6 +73,8 @@ public class PostProcessGui : MonoBehaviour {
 		ppScript.lensFlareAmount = LensFlareAmount;
 		ppScript.lensDirtAmount = LensDirtAmount;
 		ppScript.vignetteAmount = VignetteAmount;
+		ppScript.filmicTonemap = FilmicTonemap;
+		ppScript.exposure = Exposure;
 
 
 		if (DOFMaxBlur > 12) {
@@ -112,6 +117,7 @@ public class PostProcessGui : MonoBehaviour {
 	}
 
 	void DoMyWindow ( int windowID ) {
+		UiHelp.Panel = "PostProcess";
 		
 		int spacingX = 0;
 		int spacingY = 50;
@@ -120,7 +126,7 @@ public class PostProcessGui : MonoBehaviour {
 		int offsetX = 10;
 		int offsetY = 30;
 		
-		EnablePostProcess = GUI.Toggle (new Rect (offsetX, offsetY, 280, 30), EnablePostProcess, "Enable Post Process");
+		EnablePostProcess = GUI.Toggle (new Rect (offsetX, offsetY, 280, 30), EnablePostProcess, UiHelp.Content ("Enable Post Process"));
 		offsetY += 40;
 
 
@@ -139,6 +145,11 @@ public class PostProcessGui : MonoBehaviour {
 		offsetY += 40;
 
 		GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Vignette Amount", VignetteAmount, VignetteAmountText, out VignetteAmount, out VignetteAmountText, 0.0f, 1.0f );
+		offsetY += 40;
+
+		FilmicTonemap = GUI.Toggle (new Rect (offsetX, offsetY, 280, 25), FilmicTonemap, UiHelp.Content ("Filmic tone mapping (ACES)"));
+		offsetY += 30;
+		GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Exposure", Exposure, ExposureText, out Exposure, out ExposureText, 0.25f, 4.0f );
 		offsetY += 60;
 
 		
@@ -151,23 +162,30 @@ public class PostProcessGui : MonoBehaviour {
 		GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "DOF Max Distance", DOFMaxDistance, DOFMaxDistanceText, out DOFMaxDistance, out DOFMaxDistanceText, 5.0f, 200.0f );
 		offsetY += 50;
 
-		AutoFocus = GUI.Toggle (new Rect (offsetX, offsetY, 150, 20), AutoFocus, "Use Auto Focus");
+		AutoFocus = GUI.Toggle (new Rect (offsetX, offsetY, 150, 20), AutoFocus, UiHelp.Content ("Use Auto Focus"));
 		offsetY += 30;
 
-		if (GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), "Close")) {
+		if (GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), UiHelp.Content ("Close"))) {
 			this.gameObject.SetActive(false);
 		}
+		
+		Tips.Capture (true);
 		
 		GUI.DragWindow();
 		
 	}
 	
 	void OnGUI () {
+		Theme.Apply ();
 		
 		windowRect.width = 300;
-		windowRect.height = 510;
+		windowRect.height = 580;
 		
-		windowRect = GUI.Window(19, windowRect, DoMyWindow, "Post Process");
+		windowRect = UiShell.Dock (windowRect, 1);
+		
+		windowRect = GUI.Window(19, windowRect, DoMyWindow, L.T("Post Process"));
+		
+		Tips.Block (windowRect);
 		
 	}
 }
