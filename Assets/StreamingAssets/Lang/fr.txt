@@ -27,7 +27,9 @@ Windowed ==> Fenêtré
 Full screen or window (F11). ==> Plein écran ou fenêtre (F11).
 Export… ==> Exporter…
 Write all the files for your engine in one go: Skyrim, Unreal, Unity, glTF… with your own profiles. ==> Écrit tous les fichiers pour ton moteur en une fois : Skyrim, Unreal, Unity, glTF… avec tes propres profils.
-Support Materialize CE: PayPal, Patreon, GitHub. ==> Soutenir Materialize CE : PayPal, Patreon, GitHub.
+Support Materialize CE: PayPal, Ko-fi, GitHub. ==> Soutenir Materialize CE : PayPal, Ko-fi, GitHub.
+Buy me a coffee (Ko-fi) ==> M'offrir un café (Ko-fi)
+A tip or regular support through Ko-fi. ==> Un pourboire ou un soutien régulier via Ko-fi.
 Help ==> Aide
 Mouse and keyboard controls. ==> Commandes souris et clavier.
 Settings ==> Réglages

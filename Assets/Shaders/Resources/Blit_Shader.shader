@@ -391,10 +391,13 @@ Shader "Hidden/Blit_Shader" {
 
 		// Materialize CE, horizon AO: the occlusion is measured against the surface's own tilt in this
 		// direction (a plain slope no longer darkens itself), and far samples count less than near ones.
-		float px1 = 1.0;
+		float px1 = 2.0;   // over 4 pixels: a 2-pixel slope is too noisy on sharp edges (dotted outlines)
 		float slopeAhead = ( tex2Dlod(_HeightTex, float4( UV.xy + pixelSize.xy * direction * px1, 0, 0 ) ).x
 		                   - tex2Dlod(_HeightTex, float4( UV.xy - pixelSize.xy * direction * px1, 0, 0 ) ).x ) * _Depth / ( 2.0 * px1 );
 		float sinTangent = slopeAhead / sqrt( 1.0 + slopeAhead * slopeAhead );
+		// Only a rising slope is discounted. Looking downhill (the rim of a hollow), the far side of the hollow
+		// rose above the downward tangent and counted as occlusion: a dark outline around every engraving.
+		sinTangent = max( sinTangent, 0.0 );
 		float horizon = sinTangent;
 		
 		for( i = 1; i <= AOSamples; i++ ){

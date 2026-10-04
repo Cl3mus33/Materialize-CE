@@ -301,7 +301,7 @@ public partial class MainGui
         GUI.backgroundColor = old;
         float supportW = heartButton.CalcSize(new GUIContent("♥  " + L.T("Support"))).x + 24;
         rx -= supportW + 6;
-        if (GUI.Button(new Rect(rx, by, supportW, bh), new GUIContent("<color=#FF6B7A>♥</color>  " + L.T("Support"), L.T("Support Materialize CE: PayPal, Patreon, GitHub.")), heartButton)) SupportLinks.Show();
+        if (GUI.Button(new Rect(rx, by, supportW, bh), new GUIContent("<color=#FF6B7A>♥</color>  " + L.T("Support"), L.T("Support Materialize CE: PayPal, Ko-fi, GitHub.")), heartButton)) SupportLinks.Show();
         rx -= 16;
         float hw = GUI.skin.button.CalcSize(L.G("Help")).x + 18;
         rx -= hw;
