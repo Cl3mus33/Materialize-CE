@@ -536,7 +536,7 @@ public class MaterialGui : MonoBehaviour {
 		if (GUI.Button (new Rect (offsetX + 220, offsetY, 60, 30), UiHelp.Content ("Sphere"))) SetShape (3);
 		offsetY += 34;
 		// Materialize CE: your own model, in place of the cube.
-		if (GUI.Button (new Rect (offsetX, offsetY, 280, 24), new GUIContent (customMeshName.Length > 0 ? L.T ("Mesh: ") + customMeshName : L.T ("Load a mesh (.obj)…"), L.T ("Shows the material on your own model (Wavefront .obj with UVs). It replaces the cube; the Cube button brings the cube back.")))) StartCoroutine (PickMesh ());
+		if (GUI.Button (new Rect (offsetX, offsetY, 280, 24), new GUIContent (customMeshName.Length > 0 ? L.T ("Mesh: ") + customMeshName : L.T ("Load a mesh (.obj, .nif)…"), L.T ("Shows the material on your own model: a Wavefront .obj, or a game mesh (.nif of Skyrim LE / SE or Fallout 4), with UVs. It replaces the cube; the Cube button brings the cube back.")))) StartCoroutine (PickMesh ());
 
 		return offsetY + 30;
 
@@ -554,9 +554,10 @@ public class MaterialGui : MonoBehaviour {
 	IEnumerator PickMesh () {
 		yield return null;   // out of OnGUI before the native dialog
 		string path = null;
-		try { path = NativeFileDialog.Show ("Open a mesh (.obj)", "*.obj", false); } catch (System.Exception e) { Notifications.Error (e.Message); }
+		try { path = NativeFileDialog.Show ("Open a mesh (.obj, .nif)", "*.obj;*.nif", false); } catch (System.Exception e) { Notifications.Error (e.Message); }
 		if (string.IsNullOrEmpty (path)) yield break;
-		var mesh = ObjLoader.Load (path, out string error);
+		string error;
+		var mesh = path.EndsWith (".nif", System.StringComparison.OrdinalIgnoreCase) ? NifLoader.Load (path, out error) : ObjLoader.Load (path, out error);
 		if (mesh == null) { Notifications.Error (error); yield break; }
 		var filter = testObjectCube.GetComponentInChildren<MeshFilter> (true);
 		if (filter == null) { Notifications.Error ("No mesh slot on the preview cube."); yield break; }

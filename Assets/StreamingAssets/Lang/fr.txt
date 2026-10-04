@@ -873,9 +873,9 @@ T: tiling ×3, to see the seams. ==> T : répétition ×3, pour voir les couture
 Keeps the retouch on every map. ==> Garde la retouche sur toutes les maps.
 Leaves the maps as they were. ==> Laisse les maps telles qu'elles étaient.
 Retouch applied to {0} maps. ==> Retouche appliquée à {0} maps.
-Load a mesh (.obj)… ==> Charger un mesh (.obj)…
+Load a mesh (.obj, .nif)… ==> Charger un mesh (.obj, .nif)…
 Mesh:  ==> Mesh : 
-Shows the material on your own model (Wavefront .obj with UVs). It replaces the cube; the Cube button brings the cube back. ==> Affiche le matériau sur ton propre modèle (Wavefront .obj avec UV). Il remplace le cube ; le bouton Cube ramène le cube.
+Shows the material on your own model: a Wavefront .obj, or a game mesh (.nif of Skyrim LE / SE or Fallout 4), with UVs. It replaces the cube; the Cube button brings the cube back. ==> Affiche le matériau sur ton propre modèle : un .obj Wavefront, ou un mesh du jeu (.nif de Skyrim LE / SE ou Fallout 4), avec UV. Il remplace le cube ; le bouton Cube ramène le cube.
 Remove Shading (normal) ==> Retirer l'ombrage (normale)
 Light Angle ==> Angle de la lumière
 Light Height ==> Hauteur de la lumière

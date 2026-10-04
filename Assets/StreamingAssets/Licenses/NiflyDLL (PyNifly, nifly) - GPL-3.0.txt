@@ -1,0 +1,9 @@
+NiflyDLL.dll, shipped with Materialize CE to read .nif meshes
+============================================================
+
+NiflyDLL is part of PyNifly by BadDogSkyrim: https://github.com/BadDogSkyrim/PyNifly
+(release V29.1.0, unmodified), built on nifly by ousnius: https://github.com/ousnius/nifly
+
+Both are released under the GNU General Public License, version 3 (GPL-3.0), the licence of Materialize CE
+itself: see LICENSE.txt next to the application, or https://www.gnu.org/licenses/gpl-3.0.html
+Their source code is available at the addresses above.
