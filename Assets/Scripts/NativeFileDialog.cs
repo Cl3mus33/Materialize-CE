@@ -56,7 +56,7 @@ public static class NativeFileDialog
     {
         var patterns = (masks ?? "*.*").Replace(',', ';').Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(m => m.Trim()).ToArray();
         string kind = patterns.Contains("*.mtz") ? "Projects" : "Images";
-        string description = kind == "Projects" ? "Materialize projects" : "Images";
+        string description = kind == "Projects" ? "Materialize projects" : patterns.Contains("*.obj") ? "Meshes" : "Images";
         string filter = description + " (" + string.Join(", ", patterns) + ")\0" + string.Join(";", patterns) + "\0All files (*.*)\0*.*\0\0";
         string key = "MaterializeCE.LastFolder." + kind;
         string initial = PlayerPrefs.GetString(key, "");

@@ -531,11 +531,14 @@ public class MaterialGui : MonoBehaviour {
 		}
 
 		if (GUI.Button (new Rect (offsetX, offsetY, 60, 30), UiHelp.Content ("Plane"))) SetShape (0);
-		if (GUI.Button (new Rect (offsetX + 70, offsetY, 60, 30), UiHelp.Content ("Cube"))) SetShape (1);
+		if (GUI.Button (new Rect (offsetX + 70, offsetY, 60, 30), UiHelp.Content ("Cube"))) { RestoreCube (); SetShape (1); }
 		if (GUI.Button (new Rect (offsetX + 140, offsetY, 70, 30), UiHelp.Content ("Cylinder"))) SetShape (2);
 		if (GUI.Button (new Rect (offsetX + 220, offsetY, 60, 30), UiHelp.Content ("Sphere"))) SetShape (3);
+		offsetY += 34;
+		// Materialize CE: your own model, in place of the cube.
+		if (GUI.Button (new Rect (offsetX, offsetY, 280, 24), new GUIContent (customMeshName.Length > 0 ? L.T ("Mesh: ") + customMeshName : L.T ("Load a mesh (.obj)…"), L.T ("Shows the material on your own model (Wavefront .obj with UVs). It replaces the cube; the Cube button brings the cube back.")))) StartCoroutine (PickMesh ());
 
-		return offsetY + 36;
+		return offsetY + 30;
 
 	}
 
@@ -545,6 +548,37 @@ public class MaterialGui : MonoBehaviour {
 	float parallaxBeforeOff = -1, tilingBeforeX = -1, tilingBeforeY = -1;
 
 	/// <summary>0 plane, 1 cube, 2 cylinder, 3 sphere.</summary>
+	Mesh originalCubeMesh, customMesh;
+	string customMeshName = "";
+
+	IEnumerator PickMesh () {
+		yield return null;   // out of OnGUI before the native dialog
+		string path = null;
+		try { path = NativeFileDialog.Show ("Open a mesh (.obj)", "*.obj", false); } catch (System.Exception e) { Notifications.Error (e.Message); }
+		if (string.IsNullOrEmpty (path)) yield break;
+		var mesh = ObjLoader.Load (path, out string error);
+		if (mesh == null) { Notifications.Error (error); yield break; }
+		var filter = testObjectCube.GetComponentInChildren<MeshFilter> (true);
+		if (filter == null) { Notifications.Error ("No mesh slot on the preview cube."); yield break; }
+		if (originalCubeMesh == null) originalCubeMesh = filter.sharedMesh;
+		// Same size on screen as the cube it replaces.
+		var cubeSize = originalCubeMesh != null ? originalCubeMesh.bounds.size : Vector3.one;
+		ObjLoader.Fit (mesh, Mathf.Max (cubeSize.x, Mathf.Max (cubeSize.y, cubeSize.z)));
+		if (customMesh != null) Destroy (customMesh);
+		customMesh = mesh;
+		filter.sharedMesh = mesh;
+		customMeshName = mesh.name;
+		SetShape (1);
+		Notifications.Info ("Mesh loaded: " + mesh.name + " (" + mesh.vertexCount + " vertices).");
+	}
+
+	void RestoreCube () {
+		if (originalCubeMesh == null) return;
+		var filter = testObjectCube.GetComponentInChildren<MeshFilter> (true);
+		if (filter != null) filter.sharedMesh = originalCubeMesh;
+		customMeshName = "";
+	}
+
 	public void SetShape (int s) {
 		shape = ((s % 4) + 4) % 4;
 		planeShown = shape == 0; cubeShown = shape == 1; cylinderShown = shape == 2; sphereShown = shape == 3;
@@ -561,6 +595,8 @@ public class MaterialGui : MonoBehaviour {
 	public void NextShape () { SetShape (shape + 1); }
 
 	/// <summary>Displacement off and back on (the previous depth is kept).</summary>
+	public bool DisplacementOn { get { InitializeSettings (); return MatS.Parallax > 0.0001f; } }
+
 	public void ToggleDisplacement () {
 		InitializeSettings ();
 		if (MatS.Parallax > 0.0001f) { parallaxBeforeOff = MatS.Parallax; MatS.Parallax = 0; }

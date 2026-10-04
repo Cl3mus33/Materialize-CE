@@ -433,6 +433,7 @@ public partial class MainGui : MonoBehaviour {
 		MapAdjust.Tick (this);
 		if (UiShell.Active && MaterialGuiScript != null && !MaterialGuiObject.activeSelf) MaterialGuiScript.ApplySettings ();
 		Workflow.Tick (this);
+		RetouchTool.Tick (this);
 		SendViewGlobals ();
 		FollowSun ();
 	}
@@ -476,6 +477,7 @@ public partial class MainGui : MonoBehaviour {
 		ChannelPacker.DrawWindow (this);
 		ExportWindow.Draw (this);
 		BatchExport.Draw (this);
+		RetouchTool.Draw (this);
 		Tips.Capture ();
 	}
 

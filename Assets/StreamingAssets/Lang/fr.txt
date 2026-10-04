@@ -861,6 +861,21 @@ Back to the starting framing, keeping the angle. ==> Revient au cadrage de dépa
 Grid at level 0 (G) ==> Grille au niveau 0 (G)
 A reference grid at the plane's zero level: what the displacement raises covers it, what sinks shows under it. ==> Une grille de référence au niveau zéro du plane : ce que le displacement monte la recouvre, ce qui descend passe dessous.
 Grid at level 0 ==> Grille au niveau 0
+Retouch ==> Retouche
+Clone stamp on the plane: paint a clean area over a seam or a repeated detail, on every map at once. ==> Tampon de clonage sur le plan : peins une zone propre par-dessus une couture ou un détail répété, sur toutes les maps à la fois.
+Retouch (clone stamp) ==> Retouche (tampon)
+Drag on the plane to paint the source there. Ctrl + click picks another source. ==> Glisse sur le plan pour y peindre la source. Ctrl + clic choisit une autre source.
+Ctrl + click on the plane to pick the source (a clean area). ==> Ctrl + clic sur le plan pour choisir la source (une zone propre).
+Brush size ==> Taille du pinceau
+Hardness ==> Dureté
+Opacity ==> Opacité
+T: tiling ×3, to see the seams. ==> T : répétition ×3, pour voir les coutures.
+Keeps the retouch on every map. ==> Garde la retouche sur toutes les maps.
+Leaves the maps as they were. ==> Laisse les maps telles qu'elles étaient.
+Retouch applied to {0} maps. ==> Retouche appliquée à {0} maps.
+Load a mesh (.obj)… ==> Charger un mesh (.obj)…
+Mesh:  ==> Mesh : 
+Shows the material on your own model (Wavefront .obj with UVs). It replaces the cube; the Cube button brings the cube back. ==> Affiche le matériau sur ton propre modèle (Wavefront .obj avec UV). Il remplace le cube ; le bouton Cube ramène le cube.
 Remove Shading (normal) ==> Retirer l'ombrage (normale)
 Light Angle ==> Angle de la lumière
 Light Height ==> Hauteur de la lumière

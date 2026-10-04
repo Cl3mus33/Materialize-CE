@@ -120,6 +120,24 @@ public partial class MainGui
             CreateTip = "The colour of the light that goes through the material (leaves, wax, skin): black = opaque. Open an image, then adjust it." },
     };
 
+    /// <summary>
+    /// Retouch paints where the pointer hits the plane: the plane is shown, and flat (no displacement) meanwhile.
+    /// Returns whether the displacement was on (to put it back with flat = false).
+    /// </summary>
+    public bool RetouchFlatPlane(bool flat)
+    {
+        if (MaterialGuiScript == null) return false;
+        if (flat)
+        {
+            MaterialGuiScript.SetShape(0);
+            if (!MaterialGuiScript.DisplacementOn) return false;
+            MaterialGuiScript.ToggleDisplacement();
+            return true;
+        }
+        if (!MaterialGuiScript.DisplacementOn) MaterialGuiScript.ToggleDisplacement();
+        return false;
+    }
+
     /// <summary>Is this row's creation tool open? (Emission and Subsurface have none.)</summary>
     bool ToolOpen(MapEntry e) => e.Tool != null && e.Tool(this).activeSelf;
 
@@ -284,6 +302,10 @@ public partial class MainGui
 
         if (Tool("Tile maps", "Make every map seamless (tiling).")) RunMenu("Tools", "Tile maps (seamless)");
         if (Tool("Align / perspective", "Straighten a photo taken at an angle.")) RunMenu("Tools", "Adjust alignment / perspective");
+        var retouchTint = GUI.backgroundColor;
+        if (RetouchTool.Active) GUI.backgroundColor = new Color(0.55f, 0.8f, 1f);
+        if (Tool("Retouch", "Clone stamp on the plane: paint a clean area over a seam or a repeated detail, on every map at once.")) RetouchTool.Toggle(this);
+        GUI.backgroundColor = retouchTint;
         Gap();
         if (Tool("Full material", "Show every map together on the preview.")) RunMenu("View", "Full material");
         float viewX = x;
