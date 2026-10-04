@@ -1,4 +1,4 @@
-﻿Shader "Custom/Edit_Diffuse_Preview" {
+Shader "Custom/Edit_Diffuse_Preview" {
 	Properties {
 		_MainTex ("Base (RGB)", 2D) = "white" {}
 		_BlurTex ("Base (RGB)", 2D) = "white" {}
@@ -25,6 +25,7 @@
 			float _BlurContrast;
 
 			sampler2D _AvgTex;
+			sampler2D _CompareTex;   // Materialize CE: the untouched photo, for the reveal slider
 			
 			float _LightMaskPow;
 			float _LightPow;
@@ -130,7 +131,7 @@
 				mainTex.xyz = lerp( mainTex.x * 0.3 + mainTex.y * 0.5 + mainTex.z * 0.2, mainTex.xyz, _Saturation );
 
 				// Slider
-				float3 finalColor = lerp( mainTexOriginal, mainTex, smoothstep( _Slider - 0.01, _Slider + 0.01, UV.x ) );
+				float3 finalColor = lerp( tex2Dlod( _CompareTex, float4( UV, 0, 0 ) ).xyz, mainTex, smoothstep( _Slider - 0.01, _Slider + 0.01, UV.x ) );
 
 				return float4( finalColor, 1 );
 			}
@@ -170,6 +171,7 @@
 			float _BlurContrast;
 
 			sampler2D _AvgTex;
+			sampler2D _CompareTex;   // Materialize CE: the untouched photo, for the reveal slider
 			
 			float _LightMaskPow;
 			float _LightPow;
@@ -263,7 +265,7 @@
 				mainTex.xyz = lerp( mainTex.x * 0.3 + mainTex.y * 0.5 + mainTex.z * 0.2, mainTex.xyz, _Saturation );
 
 				// Slider
-				float3 finalColor = lerp( mainTexOriginal, mainTex, smoothstep( _Slider - 0.01, _Slider + 0.01, UV.x ) );
+				float3 finalColor = lerp( tex2Dlod( _CompareTex, float4( UV, 0, 0 ) ).xyz, mainTex, smoothstep( _Slider - 0.01, _Slider + 0.01, UV.x ) );
 
 				//finalColor = desaturateMask;
 

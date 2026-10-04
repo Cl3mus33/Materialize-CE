@@ -96,6 +96,11 @@ public static class UiHelp
 
         // ---------- Edit diffuse ----------
         { "EditDiffuse|Albedo Reveal Slider", "Drag to compare the edited albedo with the original." },
+        { "EditDiffuse|Remove Shading (normal)", "Divides out the light and shade the relief had in the photo, using the normal map: slopes facing the light are darkened, the others brightened. Needs a normal map." },
+        { "EditDiffuse|Light Angle", "Where the light of the photo came from, around the texture: 0 = from the right, 90 = from the top. Detect Light finds it." },
+        { "EditDiffuse|Light Height", "How high the light was above the surface: low = long shadows in the photo." },
+        { "EditDiffuse|Detect Light", "Finds the direction of the light of the photo by comparing its brightness with the slopes of the normal map." },
+        { "EditDiffuse|Remove Occlusion (AO)", "Brightens the hollows back, using the AO map: removes the occlusion baked in the photo. Needs an AO map." },
         { "EditDiffuse|Average Color Blur Size", "Size of the blur that estimates the lighting of the photo. Larger = removes broad light gradients." },
         { "EditDiffuse|Overlay Blur Size", "Size of the details kept while the lighting is removed." },
         { "EditDiffuse|Overlay Blur Contrast", "Contrast of those kept details." },

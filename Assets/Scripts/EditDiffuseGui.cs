@@ -108,7 +108,18 @@ public class EditDiffuseSettings {
 
 		this.Saturation = 1.0f;
 		this.SaturationText = "1";
+
+		this.ShadeRemoval = 0f; this.ShadeRemovalText = "0";
+		this.LightAngle = 135f; this.LightAngleText = "135";
+		this.LightHeight = 45f; this.LightHeightText = "45";
+		this.AORemoval = 0f; this.AORemovalText = "0";
 	}
+
+	// Materialize CE: shading removal guided by the normal and AO maps (see Blit_Delight).
+	public float ShadeRemoval; public string ShadeRemovalText;
+	public float LightAngle; public string LightAngleText;
+	public float LightHeight; public string LightHeightText;
+	public float AORemoval; public string AORemovalText;
 
 }
 
@@ -123,6 +134,8 @@ public class EditDiffuseGui : MonoBehaviour {
 	RenderTexture _BlurMap;
 	RenderTexture _AvgTempMap;
 	RenderTexture _AvgMap;
+	RenderTexture _DelitMap;   // the photo with its shading divided out, when that tool is used
+	Material delightMaterial;
 
 	public Material thisMaterial;
 	Material blitMaterial;
@@ -251,6 +264,23 @@ public class EditDiffuseGui : MonoBehaviour {
 		Slider = GUI.HorizontalSlider( new Rect( offsetX, offsetY + 20, 280, 10 ),Slider,0.0f, 1.0f );		
 		offsetY += 50;
 
+		// Materialize CE: shading removal from the normal and AO maps.
+		if (EDS.ShadeRemovalText == null) { EDS.ShadeRemovalText = "0"; EDS.LightAngle = 135f; EDS.LightAngleText = "135"; EDS.LightHeight = 45f; EDS.LightHeightText = "45"; EDS.AORemovalText = "0"; }
+		bool hasNormal = MainGuiScript._NormalMap != null, hasAO = MainGuiScript._AOMap != null;
+		GUI.enabled = hasNormal;
+		if (GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Remove Shading (normal)", EDS.ShadeRemoval, EDS.ShadeRemovalText, out EDS.ShadeRemoval, out EDS.ShadeRemovalText, 0.0f, 1.0f)) doStuff = true;
+		offsetY += 40;
+		if (GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Light Angle", EDS.LightAngle, EDS.LightAngleText, out EDS.LightAngle, out EDS.LightAngleText, 0.0f, 360.0f)) doStuff = true;
+		offsetY += 40;
+		if (GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Light Height", EDS.LightHeight, EDS.LightHeightText, out EDS.LightHeight, out EDS.LightHeightText, 10.0f, 85.0f)) doStuff = true;
+		offsetY += 40;
+		if (GUI.Button (new Rect (offsetX, offsetY, 130, 24), UiHelp.Content ("Detect Light"))) DetectLight ();
+		GUI.enabled = hasAO;
+		offsetY += 30;
+		if (GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Remove Occlusion (AO)", EDS.AORemoval, EDS.AORemovalText, out EDS.AORemoval, out EDS.AORemovalText, 0.0f, 1.0f)) doStuff = true;
+		GUI.enabled = true;
+		offsetY += 50;
+
 		if( GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Average Color Blur Size", EDS.AvgColorBlurSize, EDS.AvgColorBlurSizeText, out EDS.AvgColorBlurSize, out EDS.AvgColorBlurSizeText, 5, 100) ) {
 			doStuff = true;
 		}
@@ -300,7 +330,7 @@ public class EditDiffuseGui : MonoBehaviour {
 		Theme.Apply ();
 		
 		windowRect.width = 300;
-		windowRect.height = 650;
+		windowRect.height = 850;
 
 		windowRect = UiShell.Dock (windowRect);
 
@@ -332,6 +362,8 @@ public class EditDiffuseGui : MonoBehaviour {
 		CleanupTexture( _TempMap );
 		CleanupTexture (_AvgMap);
 		CleanupTexture (_AvgTempMap);
+		CleanupTexture (_DelitMap);
+		_DelitMap = null;
 	}
 
 	void InitializeTextures() {
@@ -343,6 +375,7 @@ public class EditDiffuseGui : MonoBehaviour {
 		_DiffuseMapOriginal = MainGuiScript._DiffuseMapOriginal;
 
 		thisMaterial.SetTexture ("_MainTex", _DiffuseMapOriginal);
+		thisMaterial.SetTexture ("_CompareTex", _DiffuseMapOriginal);
 		
 		imageSizeX = _DiffuseMapOriginal.width;
 		imageSizeY = _DiffuseMapOriginal.height;
@@ -356,13 +389,70 @@ public class EditDiffuseGui : MonoBehaviour {
 		
 	}
 
+	/// <summary>The photo the tool works from: with its shading divided out when that is asked, else as loaded.</summary>
+	Texture Source () {
+		return _DelitMap != null ? (Texture)_DelitMap : _DiffuseMapOriginal;
+	}
+
+	bool WantsDelit () {
+		return (EDS.ShadeRemoval > 0.001f && MainGuiScript._NormalMap != null) || (EDS.AORemoval > 0.001f && MainGuiScript._AOMap != null);
+	}
+
+	Vector3 LightVector () {
+		float a = EDS.LightAngle * Mathf.Deg2Rad, e = Mathf.Clamp (EDS.LightHeight, 5f, 89f) * Mathf.Deg2Rad;
+		return new Vector3 (Mathf.Cos (a) * Mathf.Cos (e), Mathf.Sin (a) * Mathf.Cos (e), Mathf.Sin (e));
+	}
+
+	/// <summary>Renders (or drops) the shading-free photo; returns what the rest of the tool reads.</summary>
+	Texture RenderDelit () {
+		if (!WantsDelit ()) {
+			CleanupTexture (_DelitMap);
+			_DelitMap = null;
+			return _DiffuseMapOriginal;
+		}
+		if (delightMaterial == null) delightMaterial = new Material (Shader.Find ("Hidden/Blit_Delight"));
+		if (_DelitMap == null) {
+			_DelitMap = new RenderTexture (imageSizeX, imageSizeY, 0, RenderTextureFormat.ARGBHalf, RenderTextureReadWrite.Linear);
+			_DelitMap.wrapMode = TextureWrapMode.Repeat;
+		}
+		delightMaterial.SetTexture ("_NormalTex", MainGuiScript._NormalMap != null ? (Texture)MainGuiScript._NormalMap : Texture2D.normalTexture);
+		delightMaterial.SetTexture ("_AOTex", MainGuiScript._AOMap != null ? (Texture)MainGuiScript._AOMap : Texture2D.whiteTexture);
+		delightMaterial.SetFloat ("_HasNormal", MainGuiScript._NormalMap != null ? 1f : 0f);
+		delightMaterial.SetFloat ("_HasAO", MainGuiScript._AOMap != null ? 1f : 0f);
+		delightMaterial.SetVector ("_LightDir", LightVector ());
+		delightMaterial.SetFloat ("_ShadeStrength", EDS.ShadeRemoval);
+		delightMaterial.SetFloat ("_AOStrength", EDS.AORemoval);
+		delightMaterial.SetFloat ("_FlipNormalY", SettingsGui.instance != null && SettingsGui.instance.settings.normalMapMayaStyle ? 1f : 0f);
+		Graphics.Blit (_DiffuseMapOriginal, _DelitMap, delightMaterial, 0);
+		return _DelitMap;
+	}
+
+	/// <summary>
+	/// Finds where the photo's light came from: the brightness of the photo is fitted against the slopes of the
+	/// normal map (brighter on the slopes facing the light). Sets the angle and, when nothing was set, a strength.
+	/// </summary>
+	void DetectLight () {
+		var photo = MainGuiScript._DiffuseMapOriginal;
+		var normal = MainGuiScript._NormalMap;
+		if (photo == null || normal == null) return;
+		bool greenUp = SettingsGui.instance != null && SettingsGui.instance.settings.normalMapMayaStyle;
+		if (!DelightFit.Fit (photo, normal, greenUp, out float angle, out float strength)) {
+			Notifications.Error ("No light direction found: the photo's brightness does not follow the normal map's slopes.");
+			return;
+		}
+		EDS.LightAngle = angle; EDS.LightAngleText = angle.ToString ("0");
+		if (EDS.ShadeRemoval < 0.001f) { EDS.ShadeRemoval = strength; EDS.ShadeRemovalText = strength.ToString ("0.00"); }
+		doStuff = true;
+		Notifications.Info ("Light found at " + angle.ToString ("0") + "°.");
+	}
+
 	IEnumerator ProcessDiffuse( MapType whichTexture ) {
 		
 		Debug.Log ("Processing Diffuse");
 		
 		blitMaterial.SetVector ("_ImageSize", new Vector4 (imageSizeX, imageSizeY, 0, 0));
 		
-		blitMaterial.SetTexture ("_MainTex", _DiffuseMapOriginal);
+		blitMaterial.SetTexture ("_MainTex", Source ());
 
 		blitMaterial.SetTexture ("_BlurTex", _BlurMap);
 		blitMaterial.SetFloat ("_BlurContrast", EDS.BlurContrast);
@@ -390,7 +480,7 @@ public class EditDiffuseGui : MonoBehaviour {
 		_TempMap = new RenderTexture (imageSizeX, imageSizeY, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Linear);
 		_TempMap.wrapMode = TextureWrapMode.Repeat;
 		
-		Graphics.Blit(_DiffuseMapOriginal, _TempMap, blitMaterial, 11);
+		Graphics.Blit(Source (), _TempMap, blitMaterial, 11);
 		
 		RenderTexture.active = _TempMap;
 
@@ -420,19 +510,23 @@ public class EditDiffuseGui : MonoBehaviour {
 		blitMaterial.SetFloat ("_BlurContrast", 1.0f);
 		blitMaterial.SetFloat ("_BlurSpread", 1.0f);
 		
+		Texture source = RenderDelit ();
+		thisMaterial.SetTexture ("_MainTex", source);
+		thisMaterial.SetTexture ("_CompareTex", _DiffuseMapOriginal);
+
 		// Blur the image 1
 		blitMaterial.SetInt ("_BlurSamples", EDS.BlurSize);
 		blitMaterial.SetVector ("_BlurDirection", new Vector4(1,0,0,0) );
-		Graphics.Blit(_DiffuseMapOriginal, _TempMap, blitMaterial, 1);
+		Graphics.Blit(source, _TempMap, blitMaterial, 1);
 		blitMaterial.SetVector ("_BlurDirection", new Vector4(0,1,0,0) );
 		Graphics.Blit(_TempMap, _BlurMap, blitMaterial, 1);
 		thisMaterial.SetTexture ("_BlurTex", _BlurMap);
 
 
-		blitMaterial.SetTexture ("_MainTex", _DiffuseMapOriginal);
+		blitMaterial.SetTexture ("_MainTex", source);
 		blitMaterial.SetInt ("_BlurSamples", EDS.AvgColorBlurSize);
 		blitMaterial.SetVector ("_BlurDirection", new Vector4(1,0,0,0) );
-		Graphics.Blit(_DiffuseMapOriginal, _TempMap, blitMaterial, 1);
+		Graphics.Blit(source, _TempMap, blitMaterial, 1);
 		blitMaterial.SetVector ("_BlurDirection", new Vector4(0,1,0,0) );
 		Graphics.Blit(_TempMap, _AvgMap, blitMaterial, 1);
 

@@ -861,6 +861,16 @@ Back to the starting framing, keeping the angle. ==> Revient au cadrage de dépa
 Grid at level 0 (G) ==> Grille au niveau 0 (G)
 A reference grid at the plane's zero level: what the displacement raises covers it, what sinks shows under it. ==> Une grille de référence au niveau zéro du plane : ce que le displacement monte la recouvre, ce qui descend passe dessous.
 Grid at level 0 ==> Grille au niveau 0
+Remove Shading (normal) ==> Retirer l'ombrage (normale)
+Light Angle ==> Angle de la lumière
+Light Height ==> Hauteur de la lumière
+Detect Light ==> Détecter la lumière
+Remove Occlusion (AO) ==> Retirer l'occlusion (AO)
+Divides out the light and shade the relief had in the photo, using the normal map: slopes facing the light are darkened, the others brightened. Needs a normal map. ==> Retire la lumière et l'ombre que le relief avait sur la photo, grâce à la normal map : les pentes face à la lumière sont assombries, les autres éclaircies. Nécessite une normal map.
+Where the light of the photo came from, around the texture: 0 = from the right, 90 = from the top. Detect Light finds it. ==> D'où venait la lumière de la photo, autour de la texture : 0 = de la droite, 90 = du haut. Détecter la lumière la trouve.
+How high the light was above the surface: low = long shadows in the photo. ==> La hauteur de la lumière au-dessus de la surface : basse = longues ombres sur la photo.
+Finds the direction of the light of the photo by comparing its brightness with the slopes of the normal map. ==> Trouve la direction de la lumière de la photo en comparant sa luminosité aux pentes de la normal map.
+Brightens the hollows back, using the AO map: removes the occlusion baked in the photo. Needs an AO map. ==> Rééclaircit les creux grâce à la map AO : retire l'occlusion incrustée dans la photo. Nécessite une map AO.
 Batch export ==> Export par lot
 Batch: a folder of textures… ==> Lot : un dossier de textures…
 Exports every texture set of a folder (stone_albedo, stone_normal, stone_roughness…) with this profile, to this folder, each under its own name. ==> Exporte chaque jeu de textures d'un dossier (stone_albedo, stone_normal, stone_roughness…) avec ce profil, dans ce dossier, chacun sous son nom.
