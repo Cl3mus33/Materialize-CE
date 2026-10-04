@@ -98,6 +98,8 @@ public static class MapAdjust
             case MapType.smoothness: return gui._SmoothnessMap;
             case MapType.edge: return gui._EdgeMap;
             case MapType.ao: return gui._AOMap;
+            case MapType.emission: return gui._EmissionMap;
+            case MapType.subsurface: return gui._SubsurfaceMap;
         }
         return null;
     }
@@ -112,6 +114,8 @@ public static class MapAdjust
             case MapType.metallic: return "_MetallicMap";
             case MapType.smoothness: return "_SmoothnessMap";
             case MapType.edge: return "_EdgeMap";
+            case MapType.emission: return "_MceEmissionMap";   // globals, not material slots
+            case MapType.subsurface: return "_MceSubsurfaceMap";
             default: return "_AOMap";
         }
     }
@@ -127,6 +131,8 @@ public static class MapAdjust
             case MapType.smoothness: gui._SmoothnessMap = tex; break;
             case MapType.edge: gui._EdgeMap = tex; break;
             case MapType.ao: gui._AOMap = tex; break;
+            case MapType.emission: gui._EmissionMap = tex; break;
+            case MapType.subsurface: gui._SubsurfaceMap = tex; break;
         }
     }
 
@@ -191,7 +197,8 @@ public static class MapAdjust
         Shader.SetGlobalFloat("_AdjustReveal", reveal);
         if (Alone) { gui.SetPreviewMaterial(preview); return; }
         gui.SetMaterialValues();
-        gui.FullMaterial.SetTexture(Slot(type), preview);
+        if (Slot(type).StartsWith("_Mce")) Shader.SetGlobalTexture(Slot(type), preview);
+        else gui.FullMaterial.SetTexture(Slot(type), preview);
     }
 
     /// <summary>Called from MainGui.Update: rendering from OnGUI would draw the interface into the map.</summary>

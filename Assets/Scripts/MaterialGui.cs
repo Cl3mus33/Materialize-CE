@@ -27,6 +27,9 @@ public class MaterialSettings {
 	public bool CommunityShaders;
 	/// <summary>Community Shaders look: the game's light level against the preview's (weather, eye adaptation).</summary>
 	public float GameExposure = 1f;
+	/// <summary>Preview only: brightness of the emission map.</summary>
+	public float EmissionStrength = 1f;
+	public string EmissionStrengthText = "1";
 	public string GameExposureText = "1";
 	// Skyrim modes: the game's offset parallax instead of tessellated displacement.
 	public bool SkyrimParallax = true;
@@ -280,6 +283,7 @@ public class MaterialGui : MonoBehaviour {
 		Shader.SetGlobalFloat ("_QualitySet", 1f);
 		Shader.SetGlobalFloat ("_CsLook", MatS.CommunityShaders && MatS.RenderMode == 0 ? 1f : 0f);
 		Shader.SetGlobalFloat ("_CsExposure", Mathf.Max (0.05f, MatS.GameExposure));
+		Shader.SetGlobalFloat ("_MceEmissionStrength", MatS.EmissionStrength);
 		bool modern = MatS.EnhancedRender || MatS.RenderMode != 0;
 		if (shadowsFor != (modern ? 1 : 0)) {
 			shadowsFor = modern ? 1 : 0;
@@ -472,7 +476,7 @@ public class MaterialGui : MonoBehaviour {
 		GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Parallax Displacement", MatS.Parallax, MatS.ParallaxText, out MatS.Parallax, out MatS.ParallaxText, 0.0f, 2.0f );
 		offsetY += 40;
 
-		GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Edge Amount", MatS.EdgePower, MatS.EdgePowerText, out MatS.EdgePower, out MatS.EdgePowerText, 0.0f, 2.0f );
+		GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Curvature Amount", MatS.EdgePower, MatS.EdgePowerText, out MatS.EdgePower, out MatS.EdgePowerText, 0.0f, 2.0f );
 		offsetY += 40;
 
 		GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Ambient Occlusion Power", MatS.AOPower, MatS.AOPowerText, out MatS.AOPower, out MatS.AOPowerText, 0.0f, 2.0f );
@@ -481,6 +485,12 @@ public class MaterialGui : MonoBehaviour {
 		if (MatS.RenderMode == 0 && MatS.CommunityShaders) {
 			if (string.IsNullOrEmpty (MatS.GameExposureText)) MatS.GameExposureText = MatS.GameExposure.ToString ();
 			GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Game exposure", MatS.GameExposure, MatS.GameExposureText, out MatS.GameExposure, out MatS.GameExposureText, 0.25f, 4.0f );
+			offsetY += 40;
+		}
+
+		if (MainGuiScript != null && MainGuiScript._EmissionMap != null) {
+			if (string.IsNullOrEmpty (MatS.EmissionStrengthText)) MatS.EmissionStrengthText = MatS.EmissionStrength.ToString ();
+			GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Emission Strength", MatS.EmissionStrength, MatS.EmissionStrengthText, out MatS.EmissionStrength, out MatS.EmissionStrengthText, 0.0f, 4.0f );
 			offsetY += 40;
 		}
 

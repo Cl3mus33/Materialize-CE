@@ -26,11 +26,20 @@ public static class ExportTest
         gui._SmoothnessMap = Solid(new Color32(64, 64, 64, 255));
         gui._MetallicMap = Solid(new Color32(0, 0, 0, 255));
         gui._HeightMap = Solid(new Color32(90, 90, 90, 255));
+        gui._EmissionMap = Solid(new Color32(255, 80, 0, 255));
+        gui._SubsurfaceMap = Solid(new Color32(40, 200, 60, 255));
         new GameObject("Settings").AddComponent<SettingsGui>();   // normal style: Max (DirectX) by default
 
-        foreach (var name in new[] { "Skyrim SE (vanilla)", "Unity HDRP" })
+        var all = ExportProfiles.BuiltIn();
+        all.AddRange(ExportProfiles.LoadAddons(new System.Collections.Generic.List<string>()));
+        foreach (var name in new[] { "Skyrim SE", "Skyrim PBR (Community Shaders)", "Unity HDRP" })
         {
-            var profile = ExportProfiles.BuiltIn().First(p => p.Name == name);
+            var profile = all.First(p => p.Name == name);
+            // The size per file: the PBR parallax map is asked at a quarter of the 64-pixel test maps.
+            if (name.StartsWith("Skyrim PBR")) profile.Outputs.First(o => o.Suffix == "_p").MaxSize = 16;
+            foreach (var o in profile.Outputs) o.Enabled = true;   // the optional glow and subsurface files too
+            folder = Path.Combine(System.Environment.GetEnvironmentVariable("MATERIALIZE_OUT"), name.Split(' ')[0] + (name.Contains("PBR") ? "PBR" : ""));
+            Directory.CreateDirectory(folder);
             var routine = ExportWindow.ExportWith(gui, profile, folder, "stone");
             // Drive the coroutine: the saver runs on a worker thread; wait for it between steps.
             var stack = new System.Collections.Generic.Stack<System.Collections.IEnumerator>();
@@ -44,7 +53,7 @@ public static class ExportTest
             }
             Debug.Log("EXPORTTEST " + name + ": " + ExportWindow.LastStatus);
         }
-        foreach (var f in Directory.GetFiles(folder).OrderBy(f => f))
+        foreach (var f in Directory.GetFiles(System.Environment.GetEnvironmentVariable("MATERIALIZE_OUT"), "*", SearchOption.AllDirectories).OrderBy(f => f))
         {
             string info = new FileInfo(f).Length / 1024 + " KB";
             if (f.EndsWith(".png"))
@@ -57,9 +66,9 @@ public static class ExportTest
                 var b = File.ReadAllBytes(f);
                 string fourcc = System.Text.Encoding.ASCII.GetString(b, 84, 4);
                 int dxgi = fourcc == "DX10" ? System.BitConverter.ToInt32(b, 128) : 0;
-                info += $" | {fourcc}{(dxgi > 0 ? " dxgi " + dxgi : "")}";
+                info += $" | {fourcc}{(dxgi > 0 ? " dxgi " + dxgi : "")} | {System.BitConverter.ToInt32(b, 16)}x{System.BitConverter.ToInt32(b, 12)}";
             }
-            Debug.Log("EXPORTTEST file " + Path.GetFileName(f) + ": " + info);
+            Debug.Log("EXPORTTEST file " + Path.GetFileName(Path.GetDirectoryName(f)) + "/" + Path.GetFileName(f) + ": " + info);
         }
     }
 }

@@ -828,6 +828,11 @@ public class HeightFromDiffuseGui : MonoBehaviour {
 		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), UiHelp.Content ("Set as Height Map")) ){
             StartCoroutine( ProcessHeight () );
 		}
+		// Materialize CE: the exact height of a normal map, by integration (the settings above are not used).
+		GUI.enabled = !busy && MainGuiScript._NormalMap != null;
+		if( GUI.Button (new Rect (offsetX, offsetY, 140, 30), UiHelp.Content ("Precise from Normal")) ){
+            StartCoroutine( IntegrateNormal () );
+		}
 		GUI.enabled = true;
 
 		Tips.Capture (true);
@@ -945,6 +950,43 @@ public class HeightFromDiffuseGui : MonoBehaviour {
 		CleanupTexture( _AvgMap );
 		CleanupTexture( _AvgTempMap );
 
+	}
+
+	/// <summary>Materialize CE: the height map solved from the normal map (NormalIntegrator), set straight as the height.</summary>
+	public IEnumerator IntegrateNormal() {
+		var normalMap = MainGuiScript._NormalMap;
+		if (normalMap == null) yield break;
+		busy = true;
+		Notifications.Info ("Computing the height from the normal map…");
+		yield return null;
+		int w = normalMap.width, h = normalMap.height;
+		Color32[] px = normalMap.GetPixels32 ();
+		bool greenUp = SettingsGui.instance != null && SettingsGui.instance.settings.normalMapMayaStyle;
+		var task = System.Threading.Tasks.Task.Run (() => NormalIntegrator.Integrate (px, w, h, greenUp));
+		while (!task.IsCompleted) yield return null;
+		if (task.Exception != null) {
+			Notifications.Error ("Height from normal: " + (task.Exception.InnerException?.Message ?? task.Exception.Message));
+			busy = false;
+			yield break;
+		}
+		float[] grey = task.Result;
+		var bgra = new byte[w * h * 4];
+		for (int k = 0; k < grey.Length; k++) {
+			byte v = (byte)(grey[k] * 255f + 0.5f);
+			bgra[k * 4] = v; bgra[k * 4 + 1] = v; bgra[k * 4 + 2] = v; bgra[k * 4 + 3] = 255;
+		}
+		var pixels = new FastImageLoader.Pixels { Width = w, Height = h, Bgra = bgra, Grey = grey };
+		if (MainGuiScript._HeightMap != null) Destroy (MainGuiScript._HeightMap);
+		MainGuiScript._HeightMap = FastImageLoader.ToTexture (pixels);
+		if (MainGuiScript._HDHeightMap != null) {
+			MainGuiScript._HDHeightMap.Release ();
+			MainGuiScript._HDHeightMap = null;
+		}
+		MainGuiScript._HDHeightMap = FastImageLoader.ToHeightTexture (pixels);
+		busy = false;
+		Notifications.Info ("Height computed from the normal map. Adjust its strength in Adjust.");
+		MainGuiScript.CloseWindows ();
+		MainGuiScript.SetMaterialValues ();
 	}
 
 	public IEnumerator ProcessHeight() {

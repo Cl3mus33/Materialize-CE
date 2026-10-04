@@ -92,7 +92,7 @@ public static class UiHelp
         { "Edge|Crevice Amount", "Darkness of the hollows and crevices (where dirt gathers)." },
         { "Edge|Pinch", "Makes the edges thinner and sharper." },
         { "Edge|Pillow", "Makes the edges rounder and wider." },
-        { "Edge|Set as Edge Map", "Keeps this result as the edge map." },
+        { "Edge|Set as Curvature Map", "Keeps this result as the curvature map." },
 
         // ---------- Edit diffuse ----------
         { "EditDiffuse|Albedo Reveal Slider", "Drag to compare the edited albedo with the original." },
@@ -155,7 +155,7 @@ public static class UiHelp
         { "Alignment|Height Map", "Adjust while looking at the height map." },
         { "Alignment|Metallic Map", "Adjust while looking at the metallic map." },
         { "Alignment|Smoothness Map", "Adjust while looking at the smoothness map." },
-        { "Alignment|Edge Map", "Adjust while looking at the edge map." },
+        { "Alignment|Curvature Map", "Adjust while looking at the curvature map." },
         { "Alignment|AO Map", "Adjust while looking at the ambient occlusion map." },
         { "Alignment|Lens Distort Correction", "Straightens the curved lines of a wide-angle lens (barrel distortion)." },
         { "Alignment|Perspective Correction X", "Corrects a photo taken from the side." },
@@ -172,7 +172,9 @@ public static class UiHelp
         { "Material|Metallic Multiplier", "Preview only: strength of the metallic map." },
         { "Material|Smoothness Multiplier", "Preview only: strength of the smoothness map." },
         { "Material|Parallax Displacement", "Preview only: how deep the height map looks on the surface." },
-        { "Material|Edge Amount", "Preview only: how much the edge map brightens edges and darkens crevices." },
+        { "Height|Precise from Normal", "The exact height of the normal map, by integration: best with a clean normal map (bake, scan) that tiles. Replaces the height map at once; the sliders above are not used." },
+        { "Material|Emission Strength", "Preview only: brightness of the emission (glow) map." },
+        { "Material|Curvature Amount", "Preview only: how much the curvature map brightens edges and darkens crevices." },
         { "Material|Ambient Occlusion Power", "Preview only: strength of the ambient occlusion." },
         { "Material|Light Color", "Colour of the preview light (R, G, B sliders)." },
         { "Material|Intensity", "Brightness of the preview light." },

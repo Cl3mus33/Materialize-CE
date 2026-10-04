@@ -116,6 +116,66 @@
             "Format": 5,
             "Dds": 4,
             "Normal": 0
+        },
+        {
+            "Enabled": false,
+            "Suffix": "_g",
+            "Channels": [
+                {
+                    "Source": 22,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                },
+                {
+                    "Source": 23,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                },
+                {
+                    "Source": 24,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                },
+                {
+                    "Source": 0,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                }
+            ],
+            "Format": 5,
+            "Dds": 0,
+            "Normal": 0,
+            "MaxSize": 0
+        },
+        {
+            "Enabled": false,
+            "Suffix": "_s",
+            "Channels": [
+                {
+                    "Source": 25,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                },
+                {
+                    "Source": 26,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                },
+                {
+                    "Source": 27,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                },
+                {
+                    "Source": 0,
+                    "Invert": false,
+                    "MultiplyAO": 0.0
+                }
+            ],
+            "Format": 5,
+            "Dds": 6,
+            "Normal": 0,
+            "MaxSize": 0
         }
     ]
 }

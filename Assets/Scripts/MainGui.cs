@@ -105,6 +105,9 @@ public partial class MainGui : MonoBehaviour {
 	public Texture2D _MetallicMap;
 	public Texture2D _SmoothnessMap;
 	public Texture2D _EdgeMap;
+	// Materialize CE: colour maps that are only opened and adjusted (no creation tool).
+	public Texture2D _EmissionMap;
+	public Texture2D _SubsurfaceMap;
 	public Texture2D _AOMap;
 
 	public Texture2D _PropertyMap;
@@ -164,6 +167,8 @@ public partial class MainGui : MonoBehaviour {
 	public string QuicksavePathSmoothness = "";
 	public string QuicksavePathEdge = "";
 	public string QuicksavePathAO = "";
+	public string QuicksavePathEmission = "";
+	public string QuicksavePathSubsurface = "";
 	public string QuicksavePathProperty = "";
 
 	public PropChannelMap propRed = PropChannelMap.None;
@@ -211,6 +216,8 @@ public partial class MainGui : MonoBehaviour {
 		_SmoothnessMap = null;
 		_EdgeMap = null;
 		_AOMap = null;
+		_EmissionMap = null;
+		_SubsurfaceMap = null;
 
 		//fileBrowser = this.GetComponent<FileBrowser> ();
 
@@ -330,6 +337,10 @@ public partial class MainGui : MonoBehaviour {
 		} else {
 			FullMaterial.SetTexture ("_EdgeMap", _TextureGrey);
 		}
+
+		// Emission and subsurface are globals: every preview shader reads them, black when there is none.
+		Shader.SetGlobalTexture ("_MceEmissionMap", _EmissionMap != null ? (Texture)_EmissionMap : Texture2D.blackTexture);
+		Shader.SetGlobalTexture ("_MceSubsurfaceMap", _SubsurfaceMap != null ? (Texture)_SubsurfaceMap : Texture2D.blackTexture);
 
 		testObject.GetComponent<Renderer>().material = FullMaterial;
 
@@ -927,7 +938,7 @@ public partial class MainGui : MonoBehaviour {
 		// 			Edge Map			//
 		//==============================//
 		
-		GUI.Box( new Rect (offsetX + spacingX * 5, offsetY, 110, 250), L.T("Edge Map") );
+		GUI.Box( new Rect (offsetX + spacingX * 5, offsetY, 110, 250), L.T("Curvature Map") );
 		
 		if ( _EdgeMap != null ) {
 			GUI.DrawTexture (new Rect(offsetX + spacingX * 5 + 5, offsetY + 25, 100, 100), _EdgeMap );
@@ -953,7 +964,7 @@ public partial class MainGui : MonoBehaviour {
 		if (GUI.Button (new Rect(offsetX + spacingX * 5 +60, offsetY + 130, 20, 20), L.G("O", "Open: loads an image file into this map (PNG, JPG, TGA, TIFF, EXR, DDS...)."))) {
 			mapTypeToLoad = MapType.edge;
 			SetFileMaskImage();
-			fileBrowser.ShowBrowser( "Open Edge Map", this.OpenFile );
+			fileBrowser.ShowBrowser( "Open Curvature Map", this.OpenFile );
 		}
 
 		if (_EdgeMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
@@ -963,7 +974,7 @@ public partial class MainGui : MonoBehaviour {
 			textureToSave = _EdgeMap;
 			mapType = "_edge";
 			SetFileMaskImage();
-			fileBrowser.ShowBrowser( "Save Edge Map", this.SaveFile );
+			fileBrowser.ShowBrowser( "Save Curvature Map", this.SaveFile );
 		}
 
 		if (_EdgeMap == null || QuicksavePathEdge == "") { GUI.enabled = false; } else { GUI.enabled = true; }
@@ -981,7 +992,7 @@ public partial class MainGui : MonoBehaviour {
 		}
 
 		if ( _NormalMap == null ){ GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect(offsetX + spacingX * 5 + 5, offsetY + 220, 50, 20), L.G("Create", "Create the edge map from the normal map: edges and ridges bright, hollows dark."))) {
+		if (GUI.Button (new Rect(offsetX + spacingX * 5 + 5, offsetY + 220, 50, 20), L.G("Create", "Create the curvature map from the normal map: edges and ridges bright, hollows dark."))) {
 			CloseWindows();
 			FixSize();
 			EdgeFromNormalGuiObject.SetActive(true);
@@ -1398,6 +1409,18 @@ public partial class MainGui : MonoBehaviour {
 				_AOMap = null;
 			}
 			break;
+		case MapType.emission:
+			if (_EmissionMap) {
+				Destroy (_EmissionMap);
+				_EmissionMap = null;
+			}
+			break;
+		case MapType.subsurface:
+			if (_SubsurfaceMap) {
+				Destroy (_SubsurfaceMap);
+				_SubsurfaceMap = null;
+			}
+			break;
 		}
 
 		Resources.UnloadUnusedAssets();
@@ -1412,6 +1435,8 @@ public partial class MainGui : MonoBehaviour {
 		ClearTexture( MapType.smoothness );
 		ClearTexture( MapType.edge );
 		ClearTexture( MapType.ao );
+		ClearTexture( MapType.emission );
+		ClearTexture( MapType.subsurface );
 
 	}
 
@@ -1514,6 +1539,12 @@ public partial class MainGui : MonoBehaviour {
 			break;
 		case MapType.ao:
 			SetPreviewMaterial (_AOMap);
+			break;
+		case MapType.emission:
+			SetPreviewMaterial (_EmissionMap);
+			break;
+		case MapType.subsurface:
+			SetPreviewMaterial (_SubsurfaceMap);
 			break;
 		default:
 			break;
@@ -1693,6 +1724,8 @@ public partial class MainGui : MonoBehaviour {
 		else if (textureToSave == _SmoothnessMap) QuicksavePathSmoothness = pathToFile;
 		else if (textureToSave == _EdgeMap) QuicksavePathEdge = pathToFile;
 		else if (textureToSave == _AOMap) QuicksavePathAO = pathToFile;
+		else if (textureToSave == _EmissionMap) QuicksavePathEmission = pathToFile;
+		else if (textureToSave == _SubsurfaceMap) QuicksavePathSubsurface = pathToFile;
 	}
 
 	void CopyFile() {
@@ -1742,6 +1775,10 @@ public partial class MainGui : MonoBehaviour {
 				mapToUse = _EdgeMap;
 			} else if (_AOMap != null) {
 				mapToUse = _AOMap;
+			} else if (_EmissionMap != null) {
+				mapToUse = _EmissionMap;
+			} else if (_SubsurfaceMap != null) {
+				mapToUse = _SubsurfaceMap;
 			}
 			
 			if (mapToUse != null) {

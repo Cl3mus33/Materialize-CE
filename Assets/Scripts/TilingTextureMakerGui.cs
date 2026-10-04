@@ -19,6 +19,8 @@ public class TilingTextureMakerGui : MonoBehaviour {
 	RenderTexture _SmoothnessMapTemp;
 	RenderTexture _NormalMapTemp;
 	RenderTexture _EdgeMapTemp;
+	RenderTexture _EmissionMapTemp;
+	RenderTexture _SubsurfaceMapTemp;
 	RenderTexture _AOMapTemp;
 
 	RenderTexture _TileTemp;
@@ -572,6 +574,18 @@ public class TilingTextureMakerGui : MonoBehaviour {
 			MGS._AOMap = SetMap( MGS._AOMap, _AOMapTemp );
 		}
 
+		if (MGS._EmissionMap != null) {
+			Destroy (MGS._EmissionMap);
+			MGS._EmissionMap = null;
+			MGS._EmissionMap = SetMap( MGS._EmissionMap, _EmissionMapTemp );
+		}
+
+		if (MGS._SubsurfaceMap != null) {
+			Destroy (MGS._SubsurfaceMap);
+			MGS._SubsurfaceMap = null;
+			MGS._SubsurfaceMap = SetMap( MGS._SubsurfaceMap, _SubsurfaceMapTemp );
+		}
+
 		yield return new WaitForSeconds(0.1f);
 
 		if (MGS._HeightMap != null) { 
@@ -645,10 +659,12 @@ public class TilingTextureMakerGui : MonoBehaviour {
 		CleanupTexture( _SmoothnessMapTemp );
 		CleanupTexture( _NormalMapTemp );
 		CleanupTexture( _EdgeMapTemp );
+		CleanupTexture( _EmissionMapTemp );
+		CleanupTexture( _SubsurfaceMapTemp );
 		CleanupTexture( _AOMapTemp );
 
 				_HDHeightMapTemp = _HeightMapTemp = _DiffuseMapTemp = _DiffuseMapOriginalTemp = null;
-		_MetallicMapTemp = _SmoothnessMapTemp = _NormalMapTemp = _EdgeMapTemp = _AOMapTemp = null;
+		_MetallicMapTemp = _SmoothnessMapTemp = _NormalMapTemp = _EdgeMapTemp = _AOMapTemp = _EmissionMapTemp = _SubsurfaceMapTemp = null;
 
 		foreach (var rt in sourceCache.Values) {
 			if (rt != null) {
@@ -853,6 +869,16 @@ public class TilingTextureMakerGui : MonoBehaviour {
 		if (MGS._AOMap != null) { 
 			_AOMapTemp = TileTexture(MGS._AOMap, _AOMapTemp, "_AOMap");
 			thisMaterial.SetTexture ("_AOMap", _AOMapTemp);
+		}
+
+		if (MGS._EmissionMap != null) {
+			_EmissionMapTemp = TileTexture(MGS._EmissionMap, _EmissionMapTemp, "_MceEmissionMap");
+			Shader.SetGlobalTexture ("_MceEmissionMap", _EmissionMapTemp);
+		}
+
+		if (MGS._SubsurfaceMap != null) {
+			_SubsurfaceMapTemp = TileTexture(MGS._SubsurfaceMap, _SubsurfaceMapTemp, "_MceSubsurfaceMap");
+			Shader.SetGlobalTexture ("_MceSubsurfaceMap", _SubsurfaceMapTemp);
 		}
 
 			}

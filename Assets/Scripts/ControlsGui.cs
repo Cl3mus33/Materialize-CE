@@ -60,7 +60,7 @@ public class ControlsGui : MonoBehaviour {
 		{ "Normal", "5" },
 		{ "Displacement (height)", "6" },
 		{ "Ambient occlusion", "7" },
-		{ "Edge", "8" },
+		{ "Curvature", "8" },
 	};
 	GUIStyle keyStyle, headStyle, nameStyle;
 

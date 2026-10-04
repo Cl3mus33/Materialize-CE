@@ -86,13 +86,14 @@ Roughness ==> Rugosité
 Glossiness ==> Brillance
 Specular ==> Spéculaire
 Edge ==> Arêtes
+Curvature ==> Courbure
 Ambient occlusion ==> Occlusion ambiante
 Create the height map from the albedo: bright = high. ==> Crée la height map à partir de l'albedo : clair = haut.
 Edit the albedo: remove baked lighting and shadows, adjust colours. ==> Édite l'albedo : retire l'éclairage et les ombres incrustés, ajuste les couleurs.
 Create the normal map from the height map. ==> Crée la normal map à partir de la height map.
 Create the metallic mask by picking the colour of the metal. ==> Crée le masque métallique en choisissant la couleur du métal.
 Create the roughness / glossiness from the albedo. ==> Crée la rugosité / brillance à partir de l'albedo.
-Create the edge map (bright ridges, dark hollows) from the normal map. ==> Crée la map des arêtes (reliefs clairs, creux sombres) à partir de la normal map.
+Create the curvature map (convex edges bright, hollows dark, flat grey) from the normal map. ==> Crée la map de courbure (arêtes claires, creux sombres, plat en gris) à partir de la normal map.
 Create the ambient occlusion from the normal and height maps. ==> Crée l'occlusion ambiante à partir de la normal map et de la height map.
 an albedo or a normal map ==> un albedo ou une normal map
 an albedo (Open one first) ==> un albedo (ouvre-en un d'abord)
@@ -178,7 +179,8 @@ Preview only: strength of the smoothness map. ==> Aperçu seulement : force de l
 Parallax Displacement ==> Déplacement parallax
 Preview only: how deep the height map looks on the surface. ==> Aperçu seulement : profondeur apparente de la height map sur la surface.
 Edge Amount ==> Quantité d'arêtes
-Preview only: how much the edge map brightens edges and darkens crevices. ==> Aperçu seulement : à quel point la map des arêtes éclaircit les arêtes et assombrit les creux.
+Curvature Amount ==> Quantité de courbure
+Preview only: how much the curvature map brightens edges and darkens crevices. ==> Aperçu seulement : à quel point la map de courbure éclaircit les arêtes et assombrit les creux.
 Ambient Occlusion Power ==> Force de l'occlusion ambiante
 Preview only: strength of the ambient occlusion. ==> Aperçu seulement : force de l'occlusion ambiante.
 Light Color ==> Couleur de la lumière
@@ -362,7 +364,7 @@ Metallic map: white is metal. ==> Map métallique : blanc = métal.
 Smoothness (= gloss): white is shiny. Skyrim's gloss, Unity's smoothness. ==> Lissé (= brillance) : blanc = brillant. Le gloss de Skyrim, le smoothness d'Unity.
 Roughness = inverted smoothness: white is rough. Unreal, glTF, Skyrim PBR. ==> Rugosité = lissé inversé : blanc = rugueux. Unreal, glTF, Skyrim PBR.
 AO map: dark in the crevices, white in the open. ==> Map d'AO : sombre dans les creux, blanche à découvert.
-Edge map: bright on edges and ridges, dark in the hollows. ==> Map des arêtes : claire sur les arêtes et les reliefs, sombre dans les creux.
+Curvature map: bright on convex edges and ridges, dark in the hollows, mid grey where flat. ==> Map de courbure : claire sur les arêtes et les reliefs, sombre dans les creux, gris moyen sur le plat.
 Specular R ==> Spéculaire R
 Specular G ==> Spéculaire V
 Specular B ==> Spéculaire B
@@ -523,7 +525,7 @@ Set as AO Map ==> Définir comme map d'AO
 Keeps this result as the ambient occlusion map. ==> Garde ce résultat comme map d'occlusion ambiante.
 
 # ---------- Edge ----------
-Edge from Normal ==> Arêtes depuis la normale
+Curvature from Normal ==> Courbure depuis la normale
 Which scales of detail make edges, from the finest (left) to the largest (right). ==> Quelles échelles de détail font les arêtes, de la plus fine (gauche) à la plus large (droite).
 Preset for large shapes: edges of stones and bricks. ==> Preset pour les grandes formes : arêtes des pierres et briques.
 Preset for soft, wide edges. ==> Preset pour des arêtes douces et larges.
@@ -535,8 +537,8 @@ Pinch ==> Pincer
 Makes the edges thinner and sharper. ==> Rend les arêtes plus fines et nettes.
 Pillow ==> Arrondir
 Makes the edges rounder and wider. ==> Rend les arêtes plus rondes et larges.
-Set as Edge Map ==> Définir comme map d'arêtes
-Keeps this result as the edge map. ==> Garde ce résultat comme map d'arêtes.
+Set as Curvature Map ==> Définir comme map de courbure
+Keeps this result as the curvature map. ==> Garde ce résultat comme map de courbure.
 
 # ---------- Edit diffuse ----------
 Edit Albedo ==> Éditer l'albedo
@@ -645,7 +647,7 @@ Adjust while looking at the edited albedo. ==> Ajuster en regardant l'albedo éd
 Adjust while looking at the height map. ==> Ajuster en regardant la height map.
 Adjust while looking at the metallic map. ==> Ajuster en regardant la map métallique.
 Adjust while looking at the smoothness map. ==> Ajuster en regardant la map de lissé.
-Adjust while looking at the edge map. ==> Ajuster en regardant la map des arêtes.
+Adjust while looking at the curvature map. ==> Ajuster en regardant la map de courbure.
 Adjust while looking at the ambient occlusion map. ==> Ajuster en regardant la map d'occlusion ambiante.
 Lens Distort Correction ==> Correction de distorsion
 Straightens the curved lines of a wide-angle lens (barrel distortion). ==> Redresse les lignes courbées d'un grand-angle (distorsion en barillet).
@@ -709,7 +711,7 @@ Height Map ==> Height map
 Normal Map ==> Normal map
 Metallic Map ==> Map métallique
 Smoothness Map ==> Map de lissé
-Edge Map ==> Map des arêtes
+Curvature Map ==> Map de courbure
 AO Map ==> Map d'AO
 Hides the panels to look at the preview. ==> Masque les panneaux pour regarder l'aperçu.
 Shows the panels again. ==> Réaffiche les panneaux.
@@ -859,6 +861,26 @@ Back to the starting framing, keeping the angle. ==> Revient au cadrage de dépa
 Grid at level 0 (G) ==> Grille au niveau 0 (G)
 A reference grid at the plane's zero level: what the displacement raises covers it, what sinks shows under it. ==> Une grille de référence au niveau zéro du plane : ce que le displacement monte la recouvre, ce qui descend passe dessous.
 Grid at level 0 ==> Grille au niveau 0
+Precise from Normal ==> Précis depuis la normale
+The exact height of the normal map, by integration: best with a clean normal map (bake, scan) that tiles. Replaces the height map at once; the sliders above are not used. ==> La hauteur exacte de la normal map, par intégration : idéal avec une normal map propre (bake, scan) qui boucle. Remplace la height map aussitôt ; les curseurs au-dessus ne servent pas.
+Emission ==> Émission
+Subsurface ==> Subsurface
+The light the material gives off by itself (glow map): black = none. Open an image, then adjust it. ==> La lumière que le matériau émet de lui-même (glow map) : noir = aucune. Ouvre une image, puis ajuste-la.
+The colour of the light that goes through the material (leaves, wax, skin): black = opaque. Open an image, then adjust it. ==> La couleur de la lumière qui traverse la matière (feuilles, cire, peau) : noir = opaque. Ouvre une image, puis ajuste-la.
+Emission Strength ==> Force de l'émission
+Preview only: brightness of the emission (glow) map. ==> Aperçu seulement : luminosité de la map d'émission (glow).
+Emission R ==> Émission R
+Emission G ==> Émission V
+Emission B ==> Émission B
+Subsurface R ==> Subsurface R
+Subsurface G ==> Subsurface V
+Subsurface B ==> Subsurface B
+Red channel of the emission (glow) map. ==> Canal rouge de la map d'émission (glow).
+Green channel of the emission (glow) map. ==> Canal vert de la map d'émission (glow).
+Blue channel of the emission (glow) map. ==> Canal bleu de la map d'émission (glow).
+Red channel of the subsurface colour map. ==> Canal rouge de la map de couleur subsurface.
+Green channel of the subsurface colour map. ==> Canal vert de la map de couleur subsurface.
+Blue channel of the subsurface colour map. ==> Canal bleu de la map de couleur subsurface.
 Size ==> Taille
 Full ==> Pleine
 BC1 sRGB (colour) ==> BC1 sRGB (couleur)

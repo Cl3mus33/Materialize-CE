@@ -105,15 +105,23 @@ public partial class MainGui
             CreateTip = "Create the roughness / glossiness from the albedo.", Needs = "an albedo",
             CanCreate = g => g._DiffuseMapOriginal != null || g._DiffuseMap != null,
             Create = g => g.OpenTool(g.SmoothnessGuiObject, () => { g.SmoothnessGuiScript.NewTexture(); g.SmoothnessGuiScript.DoStuff(); }) },
-        new MapEntry { Name = "Edge", Type = MapType.edge, Get = g => g._EdgeMap, Tool = g => g.EdgeFromNormalGuiObject, CreateLabel = "Create",
-            CreateTip = "Create the edge map (bright ridges, dark hollows) from the normal map.", Needs = "a normal map",
+        new MapEntry { Name = "Curvature", Type = MapType.edge, Get = g => g._EdgeMap, Tool = g => g.EdgeFromNormalGuiObject, CreateLabel = "Create",
+            CreateTip = "Create the curvature map (convex edges bright, hollows dark, flat grey) from the normal map.", Needs = "a normal map",
             CanCreate = g => g._NormalMap != null,
             Create = g => g.OpenTool(g.EdgeFromNormalGuiObject, () => { g.EdgeFromNormalGuiScript.NewTexture(); g.EdgeFromNormalGuiScript.DoStuff(); }) },
         new MapEntry { Name = "Ambient occlusion", Type = MapType.ao, Get = g => g._AOMap, Tool = g => g.AOFromNormalGuiObject, CreateLabel = "Create",
             CreateTip = "Create the ambient occlusion from the normal and height maps.", Needs = "a normal or a height map",
             CanCreate = g => g._NormalMap != null || g._HeightMap != null,
             Create = g => g.OpenTool(g.AOFromNormalGuiObject, () => { g.AOFromNormalGuiScript.NewTexture(); g.AOFromNormalGuiScript.DoStuff(); }) },
+        // Opened and adjusted only (no Create): painted or baked elsewhere.
+        new MapEntry { Name = "Emission", Type = MapType.emission, Get = g => g._EmissionMap,
+            CreateTip = "The light the material gives off by itself (glow map): black = none. Open an image, then adjust it." },
+        new MapEntry { Name = "Subsurface", Type = MapType.subsurface, Get = g => g._SubsurfaceMap,
+            CreateTip = "The colour of the light that goes through the material (leaves, wax, skin): black = opaque. Open an image, then adjust it." },
     };
+
+    /// <summary>Is this row's creation tool open? (Emission and Subsurface have none.)</summary>
+    bool ToolOpen(MapEntry e) => e.Tool != null && e.Tool(this).activeSelf;
 
     /// <summary>The name a map row shows in the current workflow.</summary>
     static string DisplayName(MapEntry e)
@@ -412,7 +420,7 @@ public partial class MainGui
     {
         if (Event.current.type != EventType.Layout) return;
         for (int i = 0; i < mapEntries.Length; i++)
-            if (mapEntries[i].Tool(this).activeSelf)
+            if (ToolOpen(mapEntries[i]))
             {
                 if (selected != i || propTab != 0) { MapAdjust.End(this); selected = i; propTab = 0; }
                 return;
@@ -529,6 +537,7 @@ public partial class MainGui
         CloseWindows();
         selected = i;
         var e = mapEntries[i];
+        if (e.Create == null) propTab = 1;   // nothing to create: straight to Adjust
         if (e.Get(this) != null && propTab == 1) MapAdjust.Begin(this, e.Type, DisplayName(e));
         SetMaterialValues();
     }
@@ -719,8 +728,9 @@ public partial class MainGui
 
         float bx = 64, by = y + 27;
         bool derivedSpec = e.Type == MapType.metallic && Workflow.Specular;
-        GUI.enabled = e.CanCreate(this);
-        if (GUI.Button(new Rect(bx, by, 60, 22), L.G(e.CreateLabel, derivedSpec ? "The specular colour is made from the albedo and a metallic mask: create the mask by picking the metal." : e.CreateTip)))
+        GUI.enabled = e.Create != null && e.CanCreate(this);
+        if (e.Create == null) GUI.Label(new Rect(bx, by + 2, 60, 20), L.G("–", e.CreateTip), mapInfo);
+        else if (GUI.Button(new Rect(bx, by, 60, 22), L.G(e.CreateLabel, derivedSpec ? "The specular colour is made from the albedo and a metallic mask: create the mask by picking the metal." : e.CreateTip)))
         {
             e.Create(this);
             selected = i; propTab = 0;
@@ -809,6 +819,8 @@ public partial class MainGui
             case MapType.smoothness: return QuicksavePathSmoothness;
             case MapType.edge: return QuicksavePathEdge;
             case MapType.ao: return QuicksavePathAO;
+            case MapType.emission: return QuicksavePathEmission;
+            case MapType.subsurface: return QuicksavePathSubsurface;
         }
         return "";
     }
@@ -839,7 +851,9 @@ public partial class MainGui
             var tex = e.Get(this);
             GUI.Label(new Rect(x, y, w, 24), DisplayName(e), titleStyle);
             y += 30;
-            int tab = GUI.Toolbar(new Rect(x, y, w, 24), propTab, new[] {
+            int tab = 1;
+            if (e.Create == null) GUI.Label(new Rect(x, y, w, 24), L.T(e.CreateTip), wrapStyle);
+            else tab = GUI.Toolbar(new Rect(x, y, w, 24), propTab, new[] {
                 L.G(e.CreateLabel, "The settings that generate this map from the others."),
                 L.G("Adjust", "Levels, contrast, strength… of the map as it is, imported or created.") });
             if (tab != propTab)
@@ -850,7 +864,7 @@ public partial class MainGui
             }
             y = col.y + UiShell.PropsHeader;
 
-            if (propTab == 0 && !e.Tool(this).activeSelf)
+            if (propTab == 0 && !ToolOpen(e))
             {
                 // The tool window docks here when open; until then, what it does and how to start it.
                 bool derivedSpec = e.Type == MapType.metallic && Workflow.Specular;

@@ -88,6 +88,9 @@ Shader "Custom/Preview_Skyrim" {
 		// right of it the lit material; a thin accent line marks the cut.
 		float4 _DisplacementMap_TexelSize;
 		uniform float _AdjustReveal;
+		// Glow map (the game's _g): a global, black when the material has none.
+		uniform sampler2D _MceEmissionMap;
+		uniform float _MceEmissionStrength;
 		uniform float _AdjustRevealInvert;
 		uniform sampler2D _AdjustRevealMap;
 
@@ -314,7 +317,7 @@ Shader "Custom/Preview_Skyrim" {
 			// The environment as the game's ambient light: strong enough that a face turned away from the sun is
 			// in shade, not black (the light now follows the HDRI's sun, so it is often behind the material).
 			o.Ambient = ambIBL * 0.9;
-			o.Emission = 0;
+			o.Emission = tex2D( _MceEmissionMap, UV ).rgb * _MceEmissionStrength;
 
 			float cut = IN.uv_DiffuseMap.x;
 			if ( _AdjustReveal > 0.0 && cut < _AdjustReveal ) {

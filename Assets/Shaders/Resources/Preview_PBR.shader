@@ -69,6 +69,10 @@ Shader "Custom/Preview_PBR" {
 		uniform float _QualitySpecAA;
 		uniform float _QualitySet;          // 0 until the settings are sent: then the defaults below apply
 		uniform float _CsLook;              // 1: lit as Skyrim's Community Shaders light a True PBR material
+		// Emission and subsurface colour maps (globals: black when the material has none).
+		uniform sampler2D _MceEmissionMap;
+		uniform sampler2D _MceSubsurfaceMap;
+		uniform float _MceEmissionStrength;
 		uniform float _CsExposure;          // the game's light level (sun, ambient, eye adaptation) against the preview's
 
 		// Adjust's reveal slider.
@@ -93,6 +97,7 @@ Shader "Custom/Preview_PBR" {
 			half SelfShadow;       // height-map shadow towards the light, 1 = lit
 			float3 VertexNormal;   // the surface's own normal, for the horizon occlusion
 			half Revealed;         // 1: Adjust's reveal shows the map here, unlit
+			half3 Subsurface;      // colour of the light going through the material (black: opaque)
 		};
 
 		SurfaceOutputStandard ToStandard(SurfaceOutputPreview s)
@@ -178,6 +183,12 @@ Shader "Custom/Preview_PBR" {
 			half occ = lerp( s.Occlusion, specOcc * horizon * horizon, Q( _QualitySpecOcclusion, 1.0 ) );
 			half3 specularIBL = prefiltered * envSpec * energy * occ;
 
+			// Subsurface (thin: leaves, wax): light let through, stronger when looking towards the light. The shape
+			// of Community Shaders' term (PBR.hlsli), with no thickness map.
+			half forwardScatter = exp2( saturate( -dot( V, L ) ) * 12.234 - 12.234 );
+			half throughAmount = lerp( 0.5, 1.0, forwardScatter );
+			direct += ToLinear( s.Subsurface ) * throughAmount * light * ( 1.0 - F );
+
 			if ( _CsLook > 0.5 ) {
 				// Community Shaders, True PBR without linear lighting (Lighting.hlsl, PBR.hlsli, Color.hlsli):
 				// the base colour and the game's light and ambient values are used as they are (gamma), the
@@ -196,6 +207,7 @@ Shader "Custom/Preview_PBR" {
 				lin += min( D * Vis * Fg * nl * UNITY_PI, 2.0 ) * lightG * 0.65;
 				half3 reflG = pow( max( texCUBElod( _ProbeCubemap, half4( R0, lod ) ).rgb * gameExposure, 0 ), 1.6 );
 				lin += envSpecG * occ * reflG * 0.65;
+				lin += pow( max( s.Subsurface, 0 ), 1.6 ) * throughAmount * lightG * ( 1.0 - Fg ) * 0.65;
 				return half4( pow( max( lin, 0 ), 1.0 / 1.6 ), 1.0 );
 			}
 
@@ -396,7 +408,9 @@ Shader "Custom/Preview_PBR" {
 			o.Alpha = 1.0;
 			o.Revealed = 0;
 			o.VertexNormal = worldVertNormal;
-			o.Emission = 0;   // the environment's light is part of the lighting now (image-based)
+			// The environment's light is part of the lighting (image-based); the emission is the material's own.
+			o.Emission = tex2D( _MceEmissionMap, UV ).rgb * _MceEmissionStrength;
+			o.Subsurface = tex2D( _MceSubsurfaceMap, UV ).rgb;
 
 			// Height-map shadows towards the light: fine contact shadows the shadow map is too coarse for.
 			o.SelfShadow = 1.0;

@@ -282,7 +282,7 @@ public class AlignmentGui : MonoBehaviour {
 		offsetY += 40;
 
 		if (MGS._EdgeMap == null) { GUI.enabled = false; } else { GUI.enabled = true; }
-		if (GUI.Button (new Rect (offsetX, offsetY, 130, 30), UiHelp.Content ("Edge Map"))) {
+		if (GUI.Button (new Rect (offsetX, offsetY, 130, 30), UiHelp.Content ("Curvature Map"))) {
 			textureToAlign = MGS._EdgeMap;
 			doStuff = true;
 		}
@@ -509,6 +509,14 @@ public class AlignmentGui : MonoBehaviour {
 		if (MGS._AOMap != null) { 
 			Debug.Log ("Setting AO");
 			MGS._AOMap = SetMap( MGS._AOMap );
+		}
+
+		if (MGS._EmissionMap != null) {
+			MGS._EmissionMap = SetMap( MGS._EmissionMap );
+		}
+
+		if (MGS._SubsurfaceMap != null) {
+			MGS._SubsurfaceMap = SetMap( MGS._SubsurfaceMap );
 		}
 		
 		yield return new WaitForSeconds(0.1f);

@@ -307,7 +307,9 @@ Shader "Hidden/Blit_Shader" {
 			diffY *= -1;
 		}
 
-		half diff = ( diffX + 0.5 ) * ( diffY + 0.5 ) * 2.0;
+		// Materialize CE: curvature = divergence of the normal (convex above 0.5, concave below). The original
+		// multiplied the two terms: the same to first order, but skewed where both are strong (corners).
+		half diff = saturate( 0.5 + diffX + diffY );
 		
 		return float4( diff.xxx, 1.0 );
 	}
@@ -391,9 +393,17 @@ Shader "Hidden/Blit_Shader" {
 
 		// Materialize CE, horizon AO: the occlusion is measured against the surface's own tilt in this
 		// direction (a plain slope no longer darkens itself), and far samples count less than near ones.
-		float px1 = 2.0;   // over 4 pixels: a 2-pixel slope is too noisy on sharp edges (dotted outlines)
-		float slopeAhead = ( tex2Dlod(_HeightTex, float4( UV.xy + pixelSize.xy * direction * px1, 0, 0 ) ).x
-		                   - tex2Dlod(_HeightTex, float4( UV.xy - pixelSize.xy * direction * px1, 0, 0 ) ).x ) * _Depth / ( 2.0 * px1 );
+		// The slope is the broad one (measured across the whole spread): a ramp or a dome, not the wall of a
+		// narrow engraving, which must stay dark.
+		float px1 = max( 2.0, _Spread );
+		// Averaged over several distances: one pair of samples makes a visible line where it crosses a wall.
+		float slopeAhead = 0.0;
+		for( int t = 1; t <= 6; t++ ){
+			float reach = px1 * ( 0.5 + (float)t / 12.0 );
+			slopeAhead += ( tex2Dlod(_HeightTex, float4( UV.xy + pixelSize.xy * direction * reach, 0, 0 ) ).x
+			              - tex2Dlod(_HeightTex, float4( UV.xy - pixelSize.xy * direction * reach, 0, 0 ) ).x ) * _Depth / ( 2.0 * reach );
+		}
+		slopeAhead /= 6.0;
 		float sinTangent = slopeAhead / sqrt( 1.0 + slopeAhead * slopeAhead );
 		// Only a rising slope is discounted. Looking downhill (the rim of a hollow), the far side of the hollow
 		// rose above the downward tangent and counted as occlusion: a dark outline around every engraving.
@@ -425,7 +435,8 @@ Shader "Hidden/Blit_Shader" {
 			float sampleAO = saturate( dot( float3(0,0,1), normalize( samplePos ) ) );
 			AO.y = max( sampleAO * sampleDist, AO.y );
 
-			float sinHorizon = samplePos.z / max( length( samplePos ), 1e-4 );
+			// Half a pixel of height is ignored: the grain of the map is not relief.
+			float sinHorizon = ( samplePos.z - 0.5 ) / max( length( samplePos ), 1e-4 );
 			float falloff = 1.0 - progress * progress;
 			horizon = max( horizon, sinTangent + ( sinHorizon - sinTangent ) * falloff );
 		}

@@ -21,7 +21,10 @@ public enum MapType {
 	edge,
 	ao,
 	property,
-	blank
+	blank,
+	// Materialize CE (added at the end: the numbers of the others are stored in command lists)
+	emission,
+	subsurface
 }
 
 public enum FileFormat {
@@ -56,6 +59,10 @@ public class ProjectObject {
 
 	public AOSettings AOS;
 	public string aoMapPath;
+
+	// Materialize CE: maps without a creation tool (null in older projects).
+	public string emissionMapPath;
+	public string subsurfaceMapPath;
 
 	public MaterialSettings MatS;
 	
@@ -253,6 +260,9 @@ public class SaveLoadProject : MonoBehaviour {
 			thisProject.aoMapPath = "null";
 		}
 
+		thisProject.emissionMapPath = mainGui._EmissionMap != null ? projectName + "_emission." + extension : "null";
+		thisProject.subsurfaceMapPath = mainGui._SubsurfaceMap != null ? projectName + "_subsurface." + extension : "null";
+
 		materailGui.GetValues (thisProject);
 
 		try {
@@ -350,6 +360,7 @@ public class SaveLoadProject : MonoBehaviour {
 			(mainGui._HeightMap, "_height"), (mainGui._DiffuseMap, "_diffuse"), (mainGui._DiffuseMapOriginal, "_diffuseOriginal"),
 			(mainGui._NormalMap, "_normal"), (mainGui._MetallicMap, "_metallic"), (mainGui._SmoothnessMap, "_smoothness"),
 			(mainGui._EdgeMap, "_edge"), (mainGui._AOMap, "_ao"),
+			(mainGui._EmissionMap, "_emission"), (mainGui._SubsurfaceMap, "_subsurface"),
 		};
 		int count = 0;
 		foreach (var m in maps) if (m.Texture != null) count++;
@@ -457,6 +468,16 @@ public class SaveLoadProject : MonoBehaviour {
 		}
 		while( busy ){ yield return new WaitForSeconds( 0.01f ); }
 
+		if (!string.IsNullOrEmpty (thisProject.emissionMapPath) && thisProject.emissionMapPath != "null") {
+			StartCoroutine (LoadTexture (MapType.emission, pathToFile + thisProject.emissionMapPath));
+		}
+		while( busy ){ yield return new WaitForSeconds( 0.01f ); }
+
+		if (!string.IsNullOrEmpty (thisProject.subsurfaceMapPath) && thisProject.subsurfaceMapPath != "null") {
+			StartCoroutine (LoadTexture (MapType.subsurface, pathToFile + thisProject.subsurfaceMapPath));
+		}
+		while( busy ){ yield return new WaitForSeconds( 0.01f ); }
+
 		yield return new WaitForSeconds( 0.01f );
 	}
 
@@ -520,6 +541,12 @@ public class SaveLoadProject : MonoBehaviour {
 				break;
 			case MapType.ao:
 				mainGui._AOMap = newTexture;
+				break;
+			case MapType.emission:
+				mainGui._EmissionMap = newTexture;
+				break;
+			case MapType.subsurface:
+				mainGui._SubsurfaceMap = newTexture;
 				break;
 			default:
 				break;

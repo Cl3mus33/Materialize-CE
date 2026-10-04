@@ -68,7 +68,7 @@ public static class ExportProfiles
         new ExportProfile { Name = "All maps (PNG)", BuiltIn = true, Outputs = new List<ExportOutput> {
             O("_diffuse", Diffuse(), FileFormat.png), O("_normal", Normal(), FileFormat.png), O("_height", Grey(Source.Height), FileFormat.png),
             O("_metallic", Grey(Source.Metallic), FileFormat.png), O("_smoothness", Grey(Source.Smoothness), FileFormat.png),
-            O("_edge", Grey(Source.Edge), FileFormat.png), O("_ao", Grey(Source.AO), FileFormat.png) } },
+            O("_curvature", Grey(Source.Edge), FileFormat.png), O("_ao", Grey(Source.AO), FileFormat.png) } },
         new ExportProfile { Name = "Unreal Engine", BuiltIn = true, Outputs = new List<ExportOutput> {
             O("_BaseColor", Diffuse(), FileFormat.png), O("_Normal", Normal(), FileFormat.png, normal: NormalStyle.DirectX),
             O("_ORM", Rgb(Source.AO, Source.Roughness, Source.Metallic), FileFormat.png), O("_Height", Grey(Source.Height), FileFormat.png, enabled: false) } },

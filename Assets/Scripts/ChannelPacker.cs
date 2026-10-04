@@ -12,7 +12,8 @@ using UnityEngine;
 public static class ChannelPacker
 {
     public enum Source { None, White, DiffuseR, DiffuseG, DiffuseB, DiffuseGrey, DiffuseAlpha, NormalR, NormalG, NormalB, Height, Metallic, Smoothness, Roughness, AO, Edge,
-        SpecularR, SpecularG, SpecularB, DiffuseSpecR, DiffuseSpecG, DiffuseSpecB }
+        SpecularR, SpecularG, SpecularB, DiffuseSpecR, DiffuseSpecG, DiffuseSpecB,
+        EmissionR, EmissionG, EmissionB, SubsurfaceR, SubsurfaceG, SubsurfaceB }   // new ones at the end: profiles store the number
 
     struct SourceInfo { public string Label, Tip; }
 
@@ -36,13 +37,19 @@ public static class ChannelPacker
         { Source.Smoothness, new SourceInfo { Label = "Smoothness", Tip = "Smoothness (= gloss): white is shiny. Skyrim's gloss, Unity's smoothness." } },
         { Source.Roughness, new SourceInfo { Label = "Roughness", Tip = "Roughness = inverted smoothness: white is rough. Unreal, glTF, Skyrim PBR." } },
         { Source.AO, new SourceInfo { Label = "Ambient occlusion", Tip = "AO map: dark in the crevices, white in the open." } },
-        { Source.Edge, new SourceInfo { Label = "Edge", Tip = "Edge map: bright on edges and ridges, dark in the hollows." } },
+        { Source.Edge, new SourceInfo { Label = "Curvature", Tip = "Curvature map: bright on convex edges and ridges, dark in the hollows, mid grey where flat." } },
         { Source.SpecularR, new SourceInfo { Label = "Specular R", Tip = "Specular colour (Specular / Glossiness workflow): the albedo on metal, 4 % grey elsewhere. Red channel." } },
         { Source.SpecularG, new SourceInfo { Label = "Specular G", Tip = "Specular colour, green channel." } },
         { Source.SpecularB, new SourceInfo { Label = "Specular B", Tip = "Specular colour, blue channel." } },
         { Source.DiffuseSpecR, new SourceInfo { Label = "Diffuse (spec.) R", Tip = "Diffuse of the Specular / Glossiness workflow: the albedo, black on metal. Red channel." } },
         { Source.DiffuseSpecG, new SourceInfo { Label = "Diffuse (spec.) G", Tip = "Diffuse of the Specular / Glossiness workflow, green channel." } },
         { Source.DiffuseSpecB, new SourceInfo { Label = "Diffuse (spec.) B", Tip = "Diffuse of the Specular / Glossiness workflow, blue channel." } },
+        { Source.EmissionR, new SourceInfo { Label = "Emission R", Tip = "Red channel of the emission (glow) map." } },
+        { Source.EmissionG, new SourceInfo { Label = "Emission G", Tip = "Green channel of the emission (glow) map." } },
+        { Source.EmissionB, new SourceInfo { Label = "Emission B", Tip = "Blue channel of the emission (glow) map." } },
+        { Source.SubsurfaceR, new SourceInfo { Label = "Subsurface R", Tip = "Red channel of the subsurface colour map." } },
+        { Source.SubsurfaceG, new SourceInfo { Label = "Subsurface G", Tip = "Green channel of the subsurface colour map." } },
+        { Source.SubsurfaceB, new SourceInfo { Label = "Subsurface B", Tip = "Blue channel of the subsurface colour map." } },
     };
 
     [Serializable]
@@ -199,6 +206,12 @@ public static class ChannelPacker
             case Source.Roughness: name = "Smoothness"; forceInvert = true; return gui._SmoothnessMap;
             case Source.AO: return gui._AOMap;
             case Source.Edge: return gui._EdgeMap;
+            case Source.EmissionR: name = "Emission"; return gui._EmissionMap;
+            case Source.EmissionG: name = "Emission"; pick = new Vector4(0, 1, 0, 0); return gui._EmissionMap;
+            case Source.EmissionB: name = "Emission"; pick = new Vector4(0, 0, 1, 0); return gui._EmissionMap;
+            case Source.SubsurfaceR: name = "Subsurface"; return gui._SubsurfaceMap;
+            case Source.SubsurfaceG: name = "Subsurface"; pick = new Vector4(0, 1, 0, 0); return gui._SubsurfaceMap;
+            case Source.SubsurfaceB: name = "Subsurface"; pick = new Vector4(0, 0, 1, 0); return gui._SubsurfaceMap;
             case Source.SpecularR: case Source.SpecularG: case Source.SpecularB:
             case Source.DiffuseSpecR: case Source.DiffuseSpecG: case Source.DiffuseSpecB:
             {

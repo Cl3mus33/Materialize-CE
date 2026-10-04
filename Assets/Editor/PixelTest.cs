@@ -53,6 +53,13 @@ public static class PixelTest
         var rt = new RenderTexture(1280, 720, 24, RenderTextureFormat.ARGBHalf);
         cam.targetTexture = rt;
         Shader.SetGlobalFloat("_CsLook", System.Environment.GetEnvironmentVariable("MCE_CS") == "1" ? 1 : 0);
+        if (System.Environment.GetEnvironmentVariable("MCE_EMIS") == "1")
+        {
+            // Emission in the puddles' left half, subsurface (green) on the right half of the ground.
+            Shader.SetGlobalTexture("_MceEmissionMap", Make((x, y) => x < N / 2 && H(x, y) <= 0.4501f ? new Color(1f, 0.45f, 0.1f, 1) : Color.black, false));
+            Shader.SetGlobalTexture("_MceSubsurfaceMap", Make((x, y) => x >= N / 2 && H(x, y) > 0.4501f ? new Color(0.2f, 0.9f, 0.3f, 1) : Color.black, false));
+            Shader.SetGlobalFloat("_MceEmissionStrength", 1f);
+        }
         float pixel = 2f * Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad) / 720f;
         var camPos = cam.transform.position;
 
