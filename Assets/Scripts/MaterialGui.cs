@@ -538,7 +538,7 @@ public class MaterialGui : MonoBehaviour {
 		// Materialize CE: your own model, in place of the cube.
 		if (GUI.Button (new Rect (offsetX, offsetY, 280, 24), new GUIContent (customMeshName.Length > 0 ? L.T ("Mesh: ") + customMeshName : L.T ("Load a mesh (.obj, .nif)…"), L.T ("Shows the material on your own model: a Wavefront .obj, or a game mesh (.nif of Skyrim LE / SE or Fallout 4), with UVs. It replaces the cube; the Cube button brings the cube back.")))) StartCoroutine (PickMesh ());
 
-		return offsetY + 30;
+		return (int)DrawMeshParts (offsetX, offsetY + 30);
 
 	}
 
@@ -551,13 +551,60 @@ public class MaterialGui : MonoBehaviour {
 	Mesh originalCubeMesh, customMesh;
 	string customMeshName = "";
 
+	// The parts of the imported mesh (shapes of a .nif, groups of an .obj): the material goes on the ticked ones,
+	// the others are drawn in a neutral grey.
+	List<MeshPart> meshParts = new List<MeshPart> ();
+	bool[] partOn = new bool[0];
+	Material neutralMaterial;
+	Vector2 partsScroll;
+
+	void ApplyMeshParts () {
+		if (customMesh == null || customMeshName.Length == 0) return;
+		var chosen = new List<int> ();
+		var others = new List<int> ();
+		for (int i = 0; i < meshParts.Count; i++) (partOn[i] ? chosen : others).AddRange (meshParts[i].Triangles);
+		var renderer = testObjectCube.GetComponentInChildren<MeshFilter> (true).GetComponent<Renderer> ();
+		if (neutralMaterial == null) neutralMaterial = new Material (Shader.Find ("Hidden/Preview_Neutral"));
+		// Slot 0 is always the material being made (other code assigns it there); slot 1 the neutral rest.
+		if (others.Count == 0) {
+			customMesh.subMeshCount = 1;
+			customMesh.SetTriangles (chosen, 0);
+			renderer.sharedMaterials = new[] { thisMaterial };
+		} else {
+			customMesh.subMeshCount = 2;
+			customMesh.SetTriangles (chosen, 0);
+			customMesh.SetTriangles (others, 1);
+			renderer.sharedMaterials = new[] { thisMaterial, neutralMaterial };
+		}
+	}
+
+	/// <summary>The list under the mesh button, when the mesh has several parts.</summary>
+	float DrawMeshParts (int offsetX, float y) {
+		if (customMeshName.Length == 0 || meshParts.Count < 2) return y;
+		GUI.Label (new Rect (offsetX, y, 180, 20), L.G ("Material on:", "The parts of the mesh that show the material. The others are drawn in grey."));
+		bool changed = false;
+		if (GUI.Button (new Rect (offsetX + 180, y, 48, 20), L.T ("All"))) { for (int i = 0; i < partOn.Length; i++) partOn[i] = true; changed = true; }
+		if (GUI.Button (new Rect (offsetX + 232, y, 48, 20), L.T ("None"))) { for (int i = 0; i < partOn.Length; i++) partOn[i] = false; changed = true; }
+		y += 24;
+		float listHeight = Mathf.Min (meshParts.Count, 8) * 20;
+		partsScroll = GUI.BeginScrollView (new Rect (offsetX, y, 280, listHeight), partsScroll, new Rect (0, 0, 260, meshParts.Count * 20));
+		for (int i = 0; i < meshParts.Count; i++) {
+			bool on = GUI.Toggle (new Rect (0, i * 20, 260, 20), partOn[i], " " + meshParts[i].Name);
+			if (on != partOn[i]) { partOn[i] = on; changed = true; }
+		}
+		GUI.EndScrollView ();
+		if (changed) ApplyMeshParts ();
+		return y + listHeight + 6;
+	}
+
 	IEnumerator PickMesh () {
 		yield return null;   // out of OnGUI before the native dialog
 		string path = null;
 		try { path = NativeFileDialog.Show ("Open a mesh (.obj, .nif)", "*.obj;*.nif", false); } catch (System.Exception e) { Notifications.Error (e.Message); }
 		if (string.IsNullOrEmpty (path)) yield break;
 		string error;
-		var mesh = path.EndsWith (".nif", System.StringComparison.OrdinalIgnoreCase) ? NifLoader.Load (path, out error) : ObjLoader.Load (path, out error);
+		List<MeshPart> parts;
+		var mesh = path.EndsWith (".nif", System.StringComparison.OrdinalIgnoreCase) ? NifLoader.Load (path, out error, out parts) : ObjLoader.Load (path, out error, out parts);
 		if (mesh == null) { Notifications.Error (error); yield break; }
 		var filter = testObjectCube.GetComponentInChildren<MeshFilter> (true);
 		if (filter == null) { Notifications.Error ("No mesh slot on the preview cube."); yield break; }
@@ -569,6 +616,10 @@ public class MaterialGui : MonoBehaviour {
 		customMesh = mesh;
 		filter.sharedMesh = mesh;
 		customMeshName = mesh.name;
+		meshParts = parts;
+		partOn = new bool[parts.Count];
+		for (int i = 0; i < partOn.Length; i++) partOn[i] = true;
+		ApplyMeshParts ();
 		SetShape (1);
 		Notifications.Info ("Mesh loaded: " + mesh.name + " (" + mesh.vertexCount + " vertices).");
 	}
@@ -576,8 +627,12 @@ public class MaterialGui : MonoBehaviour {
 	void RestoreCube () {
 		if (originalCubeMesh == null) return;
 		var filter = testObjectCube.GetComponentInChildren<MeshFilter> (true);
-		if (filter != null) filter.sharedMesh = originalCubeMesh;
+		if (filter != null) {
+			filter.sharedMesh = originalCubeMesh;
+			filter.GetComponent<Renderer> ().sharedMaterials = new[] { thisMaterial };
+		}
 		customMeshName = "";
+		meshParts = new List<MeshPart> ();
 	}
 
 	public void SetShape (int s) {

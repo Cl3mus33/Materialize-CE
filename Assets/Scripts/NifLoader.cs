@@ -24,11 +24,16 @@ public static class NifLoader
     [DllImport(Dll, CallingConvention = CallingConvention.Cdecl)] static extern int getTriangles(IntPtr nif, IntPtr shape, [Out] ushort[] buffer, int shorts, int start);
     [DllImport(Dll, CallingConvention = CallingConvention.Cdecl)] static extern void getNodeTransform(IntPtr node, [Out] float[] matTransform);
     [DllImport(Dll, CallingConvention = CallingConvention.Cdecl)] static extern IntPtr getNodeParent(IntPtr nif, IntPtr node);
+    [DllImport(Dll, CallingConvention = CallingConvention.Cdecl)] static extern int getShapeName(IntPtr shape, [Out] byte[] buffer, int length);
 
     /// <summary>Null and an error message when the file cannot be used.</summary>
-    public static Mesh Load(string path, out string error)
+    public static Mesh Load(string path, out string error) => Load(path, out error, out _);
+
+    /// <summary>The same, with one part per shape of the file.</summary>
+    public static Mesh Load(string path, out string error, out List<MeshPart> parts)
     {
         error = null;
+        parts = new List<MeshPart>();
         IntPtr nif = IntPtr.Zero;
         try
         {
@@ -75,6 +80,11 @@ public static class NifLoader
                     node = getNodeParent(nif, node);
                 }
 
+                var nameBuffer = new byte[256];
+                int nameLength = Mathf.Clamp(getShapeName(shape, nameBuffer, nameBuffer.Length), 0, nameBuffer.Length - 1);
+                var part = new MeshPart { Name = nameLength > 0 ? Encoding.UTF8.GetString(nameBuffer, 0, nameLength) : "shape " + (parts.Count + 1) };
+                parts.Add(part);
+
                 int first = positions.Count;
                 for (int i = 0; i < vertexCount; i++)
                 {
@@ -96,6 +106,7 @@ public static class NifLoader
                     int a = tri[i * 3], b = tri[i * 3 + 1], c = tri[i * 3 + 2];
                     if (a >= vertexCount || b >= vertexCount || c >= vertexCount) continue;
                     triangles.Add(first + a); triangles.Add(first + c); triangles.Add(first + b);
+                    part.Triangles.Add(first + a); part.Triangles.Add(first + c); part.Triangles.Add(first + b);
                 }
             }
 

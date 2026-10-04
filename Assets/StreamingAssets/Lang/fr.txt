@@ -861,6 +861,10 @@ Back to the starting framing, keeping the angle. ==> Revient au cadrage de dépa
 Grid at level 0 (G) ==> Grille au niveau 0 (G)
 A reference grid at the plane's zero level: what the displacement raises covers it, what sinks shows under it. ==> Une grille de référence au niveau zéro du plane : ce que le displacement monte la recouvre, ce qui descend passe dessous.
 Grid at level 0 ==> Grille au niveau 0
+Material on: ==> Matériau sur :
+The parts of the mesh that show the material. The others are drawn in grey. ==> Les parties du mesh qui affichent le matériau. Les autres sont dessinées en gris.
+All ==> Toutes
+None ==> Aucune
 Retouch ==> Retouche
 Clone stamp on the plane: paint a clean area over a seam or a repeated detail, on every map at once. ==> Tampon de clonage sur le plan : peins une zone propre par-dessus une couture ou un détail répété, sur toutes les maps à la fois.
 Retouch (clone stamp) ==> Retouche (tampon)
