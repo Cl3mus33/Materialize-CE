@@ -77,6 +77,61 @@ public static class MapAdjust
         gui.SetMaterialValues();
     }
 
+    // ---------- Undo / redo of applied adjustments ----------
+
+    struct Step { public MapType Type; public string Name; public Texture2D Map; public RenderTexture Hd; }
+    const int MaxSteps = 6;   // a 4K map is about 85 MB with its mipmaps
+    static readonly List<Step> undo = new List<Step>(), redo = new List<Step>();
+
+    public static bool CanUndo => undo.Count > 0 && !applying;
+    public static bool CanRedo => redo.Count > 0 && !applying;
+
+    static void Push(List<Step> stack, Step step)
+    {
+        stack.Add(step);
+        while (stack.Count > MaxSteps) { Release(stack[0]); stack.RemoveAt(0); }
+    }
+
+    static void Release(Step s)
+    {
+        if (s.Map != null) Object.Destroy(s.Map);
+        if (s.Hd != null) s.Hd.Release();
+    }
+
+    static void Drop(List<Step> stack)
+    {
+        foreach (var s in stack) Release(s);
+        stack.Clear();
+    }
+
+    /// <summary>New project or everything cleared: the kept steps belong to the previous maps.</summary>
+    public static void ClearHistory() { Drop(undo); Drop(redo); }
+
+    /// <summary>Ctrl+Z / Ctrl+Y: the map as it was before the last Apply, and back.</summary>
+    public static void Undo(MainGui gui) => Swap(gui, undo, redo, "Undone: ");
+    public static void Redo(MainGui gui) => Swap(gui, redo, undo, "Redone: ");
+
+    static void Swap(MainGui gui, List<Step> from, List<Step> to, string verb)
+    {
+        if (from.Count == 0 || applying) return;
+        var step = from[from.Count - 1];
+        from.RemoveAt(from.Count - 1);
+        if (step.Map == null) return;   // destroyed meanwhile (new project)
+        bool wasActive = active && type == step.Type;
+        if (wasActive) End(gui);
+        var current = Current(gui, step.Type);
+        to.Add(new Step { Type = step.Type, Name = step.Name, Map = current, Hd = step.Type == MapType.height ? gui._HDHeightMap : null });
+        Assign(gui, step.Type, step.Map);
+        if (step.Type == MapType.height) gui._HDHeightMap = step.Hd;
+        // The adjustment starts again from the restored map.
+        if (originals.TryGetValue(step.Type, out var kept) && kept != null) Object.Destroy(kept);
+        Forget(step.Type);
+        lastResult.Remove(step.Type);
+        if (wasActive) Begin(gui, step.Type, step.Name);
+        gui.SetMaterialValues();
+        Notifications.Info(L.T(verb) + step.Name);
+    }
+
     /// <summary>Forget the kept originals when maps are replaced (new file, new project, clear).</summary>
     public static void Forget(MapType mapType)
     {
@@ -287,8 +342,14 @@ public static class MapAdjust
         GUI.backgroundColor = new Color(0.55f, 0.8f, 1f);
         if (GUI.Button(new Rect(2 * (bw + 4), y, bw, 24), UiHelp.Content("Apply"))) gui.StartCoroutine(Apply(gui));
         GUI.backgroundColor = old;
+        y += 30;
+        float hw = (w - 4) / 2f;
+        GUI.enabled = CanUndo;
+        if (GUI.Button(new Rect(0, y, hw, 22), L.G("↶ Undo", "The map as it was before the last Apply (Ctrl+Z). The last 6 are kept."))) Undo(gui);
+        GUI.enabled = CanRedo;
+        if (GUI.Button(new Rect(hw + 4, y, hw, 22), L.G("↷ Redo", "Applies again what was undone (Ctrl+Y)."))) Redo(gui);
         GUI.enabled = true;
-        return y + 30;
+        return y + 28;
     }
 
     static void Revert(MainGui gui)
@@ -525,14 +586,17 @@ public static class MapAdjust
         var old = Current(gui, t);
         Assign(gui, t, result);
         lastResult[t] = result;
-        // Replaced maps are destroyed, but never the kept original.
-        if (old != null && old != originals[t]) Object.Destroy(old);
+        // The map as it was goes on the undo stack (Ctrl+Z) instead of being destroyed.
+        RenderTexture oldHd = t == MapType.height ? gui._HDHeightMap : null;
+        if (old != null && old != originals[t]) Push(undo, new Step { Type = t, Name = title, Map = old, Hd = oldHd });
+        else oldHd = null;
+        Drop(redo);
         // The high-precision height follows, adjusted at full precision.
         if (t == MapType.height && originalHD.TryGetValue(t, out var hdOriginal) && hdOriginal != null)
         {
             var hd = new RenderTexture(hdOriginal.width, hdOriginal.height, 0, hdOriginal.format, RenderTextureReadWrite.Linear) { wrapMode = TextureWrapMode.Repeat };
             Process(hdOriginal, hd, settings[t]);
-            if (gui._HDHeightMap != null) gui._HDHeightMap.Release();
+            if (gui._HDHeightMap != null && gui._HDHeightMap != oldHd) gui._HDHeightMap.Release();   // kept when it is on the undo stack
             gui._HDHeightMap = hd;
         }
         // Applied means done: the adjusted map becomes the starting point and the sliders go back to neutral, so

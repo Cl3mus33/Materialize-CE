@@ -475,6 +475,7 @@ public partial class MainGui : MonoBehaviour {
 		SupportLinks.Draw ();
 		ChannelPacker.DrawWindow (this);
 		ExportWindow.Draw (this);
+		BatchExport.Draw (this);
 		Tips.Capture ();
 	}
 
@@ -1427,6 +1428,8 @@ public partial class MainGui : MonoBehaviour {
 	}
 
 	public void ClearAllTextures() {
+
+		MapAdjust.ClearHistory ();
 
 		ClearTexture( MapType.height );
 		ClearTexture( MapType.diffuse );

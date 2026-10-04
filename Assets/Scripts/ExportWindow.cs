@@ -260,6 +260,10 @@ public static class ExportWindow
         GUI.enabled = true;
         y += 38;
         if (status.Length > 0) { GUI.Label(new Rect(x, y, w, 20), status); y += 22; }
+        GUI.enabled = !exporting && !BatchExport.Running;
+        if (GUI.Button(new Rect(x, y, 220, 22), L.G("Batch: a folder of textures…", "Exports every texture set of a folder (stone_albedo, stone_normal, stone_roughness…) with this profile, to this folder, each under its own name.")))
+            BatchExport.Pick(gui);
+        GUI.enabled = true;
         if (GUI.Button(new Rect(x + w - 70, y, 70, 22), L.T("Close"))) Open = false;
         windowRect.height = y + 32;
 
@@ -326,6 +330,17 @@ public static class ExportWindow
     }
 
     public static string LastStatus => status;
+
+    /// <summary>Exports the current profile to the current folder under another name (batch export), then puts the name back.</summary>
+    public static IEnumerator RunAs(MainGui gui, string name)
+    {
+        if (profiles == null) Load();
+        string keep = baseName;
+        baseName = name;
+        yield return gui.StartCoroutine(Export(gui));
+        baseName = keep;
+        PlayerPrefs.SetString(BaseKey, keep ?? "");
+    }
 
     static IEnumerator Export(MainGui gui)
     {

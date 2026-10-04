@@ -209,6 +209,7 @@ public partial class MainGui
                 case KeyCode.S: RunMenu("File", "Save project…"); break;                          // save as
                 case KeyCode.C: ExportWindow.Toggle(); break;                                      // export channels
                 case KeyCode.M: SetMaterialPanel(!materialPanel); break;                           // material editor
+                case KeyCode.Z: MapAdjust.Redo(this); break;                                       // redo an adjustment
                 default: used = false; break;
             }
         }
@@ -220,6 +221,8 @@ public partial class MainGui
                 case KeyCode.O: RunMenu("File", "Open project…"); break;
                 case KeyCode.S: if (currentProject.Length > 0) SaveProject(currentProject); else RunMenu("File", "Save project…"); break;
                 case KeyCode.K: SettingsGui.instance.Toggle(); break;
+                case KeyCode.Z: MapAdjust.Undo(this); break;   // the map before the last applied adjustment
+                case KeyCode.Y: MapAdjust.Redo(this); break;
                 default: used = false; break;
             }
         }

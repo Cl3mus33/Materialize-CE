@@ -861,6 +861,23 @@ Back to the starting framing, keeping the angle. ==> Revient au cadrage de dépa
 Grid at level 0 (G) ==> Grille au niveau 0 (G)
 A reference grid at the plane's zero level: what the displacement raises covers it, what sinks shows under it. ==> Une grille de référence au niveau zéro du plane : ce que le displacement monte la recouvre, ce qui descend passe dessous.
 Grid at level 0 ==> Grille au niveau 0
+Batch export ==> Export par lot
+Batch: a folder of textures… ==> Lot : un dossier de textures…
+Exports every texture set of a folder (stone_albedo, stone_normal, stone_roughness…) with this profile, to this folder, each under its own name. ==> Exporte chaque jeu de textures d'un dossier (stone_albedo, stone_normal, stone_roughness…) avec ce profil, dans ce dossier, chacun sous son nom.
+{0} texture sets in {1} ==> {0} jeux de textures dans {1}
+Profile:  ==> Profil : 
+Each set replaces the maps in the window, then is exported under its own name. Save your project first. ==> Chaque jeu remplace les maps de la fenêtre, puis est exporté sous son nom. Enregistre ton projet avant.
+Choose the export folder first. ==> Choisis d'abord le dossier d'export.
+Start ==> Démarrer
+Stop ==> Arrêter
+Batch export stopped: {0} of {1} sets. ==> Export par lot arrêté : {0} jeux sur {1}.
+Batch export done: {0} of {1} sets. ==> Export par lot terminé : {0} jeux sur {1}.
+↶ Undo ==> ↶ Annuler
+↷ Redo ==> ↷ Rétablir
+The map as it was before the last Apply (Ctrl+Z). The last 6 are kept. ==> La map telle qu'elle était avant le dernier Apply (Ctrl+Z). Les 6 derniers sont gardés.
+Applies again what was undone (Ctrl+Y). ==> Réapplique ce qui a été annulé (Ctrl+Y).
+Undone:  ==> Annulé : 
+Redone:  ==> Rétabli : 
 Precise from Normal ==> Précis depuis la normale
 The exact height of the normal map, by integration: best with a clean normal map (bake, scan) that tiles. Replaces the height map at once; the sliders above are not used. ==> La hauteur exacte de la normal map, par intégration : idéal avec une normal map propre (bake, scan) qui boucle. Remplace la height map aussitôt ; les curseurs au-dessus ne servent pas.
 Emission ==> Émission
