@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>Muddy ground with glossy puddles seen from afar: looks for the stair-stepped outlines. -executeMethod PixelTest.Run</summary>
 public static class PixelTest
 {
-    const string Out = @"C:\Users\cleme\AppData\Local\Temp\claude\E--Claude-Dev\90fcc055-d8e5-4510-97a7-122983977505\scratchpad";
+    static readonly string Out = System.IO.Path.Combine(System.IO.Path.GetTempPath(), @"MaterializeCE-tests");
     const int N = 2048;
     static float[] h;
 

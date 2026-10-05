@@ -7,7 +7,7 @@ using UnityEngine;
 /// </summary>
 public static class HdriPack
 {
-    const string Source = @"C:\Users\cleme\AppData\Local\Temp\claude\E--Claude-Dev\90fcc055-d8e5-4510-97a7-122983977505\scratchpad\hdri4k";
+    static readonly string Source = System.IO.Path.Combine(System.IO.Path.GetTempPath(), @"MaterializeCE-tests\hdri4k");
 
     public static void Run()
     {

@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>Reports, for each source HDRI, whether the app finds a sun and how high it is. -executeMethod HdriSunTest.Run</summary>
 public static class HdriSunTest
 {
-    const string Source = @"C:\Users\cleme\AppData\Local\Temp\claude\E--Claude-Dev\90fcc055-d8e5-4510-97a7-122983977505\scratchpad\hdri4k";
+    static readonly string Source = System.IO.Path.Combine(System.IO.Path.GetTempPath(), @"MaterializeCE-tests\hdri4k");
 
     public static void Run()
     {

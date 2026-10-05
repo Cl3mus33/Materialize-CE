@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>Sizes and errors of ways to store a 4K HDRI. -executeMethod HdriCompressTest.Run</summary>
 public static class HdriCompressTest
 {
-    const string Dir = @"C:\Users\cleme\AppData\Local\Temp\claude\E--Claude-Dev\90fcc055-d8e5-4510-97a7-122983977505\scratchpad\hdri4k";
+    static readonly string Dir = System.IO.Path.Combine(System.IO.Path.GetTempPath(), @"MaterializeCE-tests\hdri4k");
 
     /// <summary>Keeps <paramref name="bits"/> of the 10 mantissa bits of a half: the rest compresses away.</summary>
     static ushort Trim(ushort h, int bits) => (ushort)(h & ~((1 << (10 - bits)) - 1));

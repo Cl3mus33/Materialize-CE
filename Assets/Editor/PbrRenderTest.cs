@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>Renders a bumpy test material with the rendering-quality options off and on. -executeMethod PbrRenderTest.Run</summary>
 public static class PbrRenderTest
 {
-    const string Out = @"C:\Users\cleme\AppData\Local\Temp\claude\E--Claude-Dev\90fcc055-d8e5-4510-97a7-122983977505\scratchpad";
+    static readonly string Out = System.IO.Path.Combine(System.IO.Path.GetTempPath(), @"MaterializeCE-tests");
 
     static Texture2D Make(System.Func<int, int, Color> f, bool linear)
     {
