@@ -64,4 +64,9 @@ Materialize CE is released under the **GNU General Public License v3.0**, like t
 
 The full licence texts are in `Assets/StreamingAssets/Licenses`.
 
-Materialize CE is developed by Clemus. If you want to support the work: [Ko-fi](https://ko-fi.com/clemus).
+Materialize CE is developed by Clemus.
+
+## Support
+
+Materialize CE is free and will stay free. Feedback, bug reports and ideas are the best way to help.
+If it saves you time and you feel like saying thanks, a [small donation](https://www.paypal.com/donate/?business=clemus3dart%40gmail.com&no_recurring=0&currency_code=EUR) is appreciated, and never expected.
