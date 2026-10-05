@@ -39,18 +39,6 @@ Windows 64-bit only. Interface in English and French.
 - DDS export with BC1, BC4, BC5 and BC7 compression, linear or sRGB, through Microsoft's texconv (included).
 - Batch export: the texture sets of a folder, one after the other, with the current profile.
 
-## Skyrim pack
-
-The Skyrim content is an optional add-on, kept in [`Addons/Skyrim`](Addons/Skyrim):
-
-- export profiles for **vanilla / Complex Material** (diffuse, `_n`, `_p`, `_m`) and for **PBR with Community Shaders** (albedo, `_n`, `_rmaos`, `_p`), with the right compression for each file;
-- render presets that imitate the game: vanilla, Complex Material, PBR (Community Shaders);
-- three test planes (`.nif`) to check a texture set in NifSkope or in game.
-
-The export presets are ready to use. **The Skyrim previews are a first pass**: not much time went into them yet, and they will need some tuning before they match the game exactly. Comparisons with in-game screenshots are especially useful.
-
-To install it, copy the `Skyrim` folder into the `Addons` folder of your workspace (see its README).
-
 ## Building
 
 1. Install **Unity 6000.6.3f1**.
