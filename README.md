@@ -17,7 +17,7 @@ Windows 64-bit only. Interface in English and French.
 - Mixer-style viewport shortcuts.
 
 ### Maps and tools
-- Fast loading and saving, done in the background. 16-bit and EXR height maps keep their precision; modern DDS files (BC7, BC5…) can be opened.
+- **Much faster loading of large textures** (4K, 8K): opening a map no longer freezes the application. Saving is done in the background too. 16-bit and EXR height maps keep their precision; modern DDS files (BC7, BC5…) can be opened.
 - Adjust any map after it is made: levels with a histogram, smoothing, a before / after slider, undo and redo.
 - Metallic / Specular and Roughness / Glossiness workflows, switchable at any time.
 - New maps: **Curvature** (replaces Edge), **Emission**, **Subsurface**.
