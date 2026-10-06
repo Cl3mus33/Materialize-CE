@@ -103,7 +103,7 @@ public class ControlsGui : MonoBehaviour {
 		windowRect = new Rect (Screen.width / 2 - 210, UiShell.Top + 20, 420, contentHeight);
 
 		if (windowOpen){
-			windowRect = GUI.Window (22, windowRect, DoMyWindow, L.T("Controls"));
+			windowRect = GUI.Window (22, windowRect, DoMyWindow, L.T("Controls") + "   ·   Materialize CE " + Application.version + " alpha");
 			Tips.Block (windowRect);
 		}
 

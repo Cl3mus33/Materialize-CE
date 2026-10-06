@@ -358,7 +358,7 @@ public class SettingsGui : MonoBehaviour {
 		windowRect = UiShell.Active ? new Rect (Screen.width - 392, UiShell.Top + 8, 384, h) : new Rect (Screen.width - 400, Screen.height - h - 60, 384, h);
 
 		if (windowOpen){
-			windowRect = GUI.Window (20, windowRect, DoMyWindow, L.T("Preferences"));
+			windowRect = GUI.Window (20, windowRect, DoMyWindow, L.T("Preferences") + "   ·   Materialize CE " + Application.version + " alpha");
 			Tips.Block (windowRect);
 		}
 
