@@ -351,6 +351,11 @@ public class EdgeFromNormalGui : MonoBehaviour {
 		offsetY += 50;
 
 
+		if( GUI.Button (new Rect (offsetX, offsetY, 130, 30), UiHelp.Content ("Reset")) ){
+			settingsInitialized = false;
+			InitializeSettings ();
+			doStuff = true;
+		}
 		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), UiHelp.Content ("Set as Curvature Map")) ){
 			StartCoroutine( ProcessEdge() );
 		}

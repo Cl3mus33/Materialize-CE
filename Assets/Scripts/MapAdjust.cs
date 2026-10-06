@@ -13,9 +13,9 @@ public static class MapAdjust
 {
     sealed class Settings
     {
-        public float Black = 0, White = 1, Gamma = 1, Contrast = 1, Brightness = 0, Saturation = 1, Strength = 1, Blur = 0;
+        public float Black = 0, White = 1, OutBlack = 0, OutWhite = 1, Gamma = 1, Contrast = 1, Brightness = 0, Saturation = 1, Strength = 1, Blur = 0;
         public bool Invert, FlipGreen;
-        public string BlurT, BlackT, WhiteT, GammaT, ContrastT, BrightnessT, SaturationT, StrengthT;
+        public string BlurT, BlackT, WhiteT, OutBlackT, OutWhiteT, GammaT, ContrastT, BrightnessT, SaturationT, StrengthT;
         public bool Pending;   // changed since the last Apply
         public Settings Copy() => (Settings)MemberwiseClone();
     }
@@ -199,6 +199,8 @@ public static class MapAdjust
         material.SetFloat("_InBlack", s.Black);
         material.SetFloat("_InWhite", s.White);
         material.SetFloat("_Gamma", s.Gamma);
+        material.SetFloat("_OutBlack", s.OutBlack);
+        material.SetFloat("_OutWhite", s.OutWhite);
         material.SetFloat("_Contrast", s.Contrast);
         material.SetFloat("_Brightness", s.Brightness);
         material.SetFloat("_Invert", s.Invert ? 1 : 0);
@@ -306,6 +308,8 @@ public static class MapAdjust
             Slider(ref y, w, "Black Point", ref s.Black, ref s.BlackT, 0f, 1f);
             Slider(ref y, w, "White Point", ref s.White, ref s.WhiteT, 0f, 1f);
             Slider(ref y, w, "Midtones", ref s.Gamma, ref s.GammaT, 0.2f, 5f);
+            Slider(ref y, w, "Output Black", ref s.OutBlack, ref s.OutBlackT, 0f, 1f);
+            Slider(ref y, w, "Output White", ref s.OutWhite, ref s.OutWhiteT, 0f, 1f);
             Slider(ref y, w, "Contrast", ref s.Contrast, ref s.ContrastT, 0f, 3f);
             Slider(ref y, w, "Brightness", ref s.Brightness, ref s.BrightnessT, -1f, 1f);
             if (type == MapType.diffuseOriginal) Slider(ref y, w, "Saturation", ref s.Saturation, ref s.SaturationT, 0f, 2f);
@@ -384,6 +388,7 @@ public static class MapAdjust
         float g = PreInverted ? 1f - v : v;
         float c = Mathf.Clamp01((g - s.Black) / Mathf.Max(s.White - s.Black, 1e-4f));
         c = Mathf.Pow(c, 1f / Mathf.Max(s.Gamma, 0.01f));
+        c = Mathf.Lerp(s.OutBlack, s.OutWhite, c);
         c = Mathf.Clamp01((c - 0.5f) * s.Contrast + 0.5f + s.Brightness);
         if (s.Invert) c = 1f - c;
         if (PreInverted) c = 1f - c;

@@ -3,9 +3,14 @@ using System.Collections;
 
 public static class GuiHelper {
 
+	/// <summary>Materialize CE: a typed value, with a point or a comma as decimal separator. 0 when unreadable.</summary>
+	public static bool ParseFloat ( string text, out float value ) {
+		return float.TryParse( (text ?? "").Trim ().Replace (',', '.'), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out value );
+	}
+
 	public static string FloatToString ( float num, int length ) {
 		
-		string numString = num.ToString ();
+		string numString = num.ToString (System.Globalization.CultureInfo.InvariantCulture);
 		int numStringLength = numString.Length;
 		int lastIndex = Mathf.FloorToInt( Mathf.Min ( (float)numStringLength , (float)length ) );
 		
@@ -36,7 +41,7 @@ public static class GuiHelper {
 		}
 		textValue = GUI.TextField (new Rect (offsetX + rect.width - 50, offsetY - 5, 50, 20), textValue);
 		if (Event.current.type == EventType.KeyDown || Event.current.character == '\n') {
-			float.TryParse( textValue, out value );
+			ParseFloat( textValue, out value );
 			value = Mathf.Clamp( value, minValue, maxValue );
 			textValue = FloatToString (value, 6);
 
@@ -112,7 +117,7 @@ public static class GuiHelper {
 		}
 		textValue = GUI.TextField (new Rect (offsetX + rect.width - 50, offsetY - 5, 50, 20), textValue);
 		if (Event.current.type == EventType.KeyDown || Event.current.character == '\n') {
-			float.TryParse( textValue, out value );
+			ParseFloat( textValue, out value );
 			value = Mathf.Clamp( value, minValue, maxValue );
 			textValue = FloatToString (value, 6);
 

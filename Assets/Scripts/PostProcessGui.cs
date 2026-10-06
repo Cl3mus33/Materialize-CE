@@ -165,6 +165,14 @@ public class PostProcessGui : MonoBehaviour {
 		AutoFocus = GUI.Toggle (new Rect (offsetX, offsetY, 150, 20), AutoFocus, UiHelp.Content ("Use Auto Focus"));
 		offsetY += 30;
 
+		if (GUI.Button (new Rect (offsetX, offsetY, 130, 30), UiHelp.Content ("Reset"))) {
+			EnablePostProcess = true; FilmicTonemap = true; AutoFocus = true;
+			Exposure = 1.0f; ExposureText = "1";
+			BloomThreshold = 0.8f; BloomThresholdText = "0.8"; BloomAmount = 1.0f; BloomAmountText = "1.0";
+			LensFlareAmount = 0.5f; LensFlareAmountText = "0.5"; LensDirtAmount = 1.0f; LensDirtAmountText = "1.0";
+			VignetteAmount = 0.2f; VignetteAmountText = "0.2";
+			DOFMaxBlur = 0.0f; DOFMaxBlurText = "0.0"; DOFFocalDepth = 10.0f; DOFFocalDepthText = "10.0"; DOFMaxDistance = 50.0f; DOFMaxDistanceText = "50.0";
+		}
 		if (GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), UiHelp.Content ("Close"))) {
 			this.gameObject.SetActive(false);
 		}

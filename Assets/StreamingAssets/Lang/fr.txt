@@ -50,6 +50,17 @@ Open ==> Ouvrir
 Save ==> Enregistrer
 Save this map to a file ( ==> Enregistre cette map dans un fichier (
 More: paste, copy, quick save, preview alone, clear. ==> Plus : coller, copier, enregistrement rapide, aperçu seul, effacer.
+Material ==> Matériau
+Workflow, render mode, presets, light, tiling, preview shape. ==> Workflow, mode de rendu, presets, lumière, répétition, forme de l'aperçu.
+The HDRI that lights the material, and the background. ==> Le HDRI qui éclaire le matériau, et l'arrière-plan.
+Empty every map (asks first). ==> Vide toutes les maps (demande confirmation).
+Output Black ==> Noir de sortie
+Output White ==> Blanc de sortie
+What black becomes: raise it to lighten the darkest areas (on a height map, shallower hollows). ==> Ce que devient le noir : monte-le pour éclaircir les zones les plus sombres (sur une height map, des creux moins profonds).
+What white becomes: lower it to darken the brightest areas (on a height map, lower peaks). ==> Ce que devient le blanc : baisse-le pour assombrir les zones les plus claires (sur une height map, des sommets moins hauts).
+Puts every setting of this tool back to its default value. ==> Remet tous les réglages de cet outil à leur valeur par défaut.
+Maps panel ==> Panneau des maps
+Properties panel ==> Panneau des propriétés
 Paste ==> Coller
 Put the image from the clipboard into this map. ==> Met l'image du presse-papiers dans cette map.
 Copy ==> Copier

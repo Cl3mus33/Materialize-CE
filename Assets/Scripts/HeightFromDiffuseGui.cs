@@ -834,6 +834,12 @@ public class HeightFromDiffuseGui : MonoBehaviour {
             StartCoroutine( IntegrateNormal () );
 		}
 		GUI.enabled = true;
+		offsetY += 36;
+		if( GUI.Button (new Rect (offsetX, offsetY, 130, 30), UiHelp.Content ("Reset")) ){
+			settingsInitialized = false;
+			InitializeSettings ();
+			doStuff = true;
+		}
 
 		Tips.Capture (true);
 
@@ -844,7 +850,7 @@ public class HeightFromDiffuseGui : MonoBehaviour {
 		Theme.Apply ();
 
 		windowRect.width = 300;
-		windowRect.height = 590;
+		windowRect.height = 626;
 
 		if (HFDS.UseSample1 && !HFDS.useNormal) {
 			windowRect.height += 110;

@@ -202,6 +202,11 @@ public class AOFromNormalGui : MonoBehaviour {
 		offsetY += 50;
 
 		if (busy) { GUI.enabled = false; } else { GUI.enabled = true; }
+		if( GUI.Button (new Rect (offsetX, offsetY, 130, 30), UiHelp.Content ("Reset")) ){
+			settingsInitialized = false;
+			InitializeSettings ();
+			doStuff = true;
+		}
 		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), UiHelp.Content ("Set as AO Map")) ){
 			StartCoroutine( ProcessAO () );
 		}

@@ -7,7 +7,10 @@ public static class UiShell
 {
     public const int MenuHeight = 0;   // the menu bar was merged into the toolbar
     public const int ToolbarHeight = 46;
-    public const int ListWidth = 300;
+    public const int ListFull = 300;
+    /// <summary>The left column (maps, environment, project) and the properties column hide one by one (F1, F2).</summary>
+    public static bool ListHidden, PropsHidden;
+    public static int ListWidth => ListHidden ? 0 : ListFull;
     public const int PropsWidth = 324;
     public const int PropsHeader = 64;
     public static int Top => MenuHeight + ToolbarHeight;
@@ -37,6 +40,8 @@ public static class UiShell
         if (!Active) return GUI.Window(id, rect, func, title);
         // "Hide panels": the tools hide with the rest (their settings are kept).
         if (MainGui.instance != null && MainGui.instance.hideGui) return rect;
+        // F2: the tools docked in the properties column hide with it (not the windows on the right).
+        if (PropsHidden && rect.x < ListFull + PropsWidth) return rect;
         if (panelWindow == null)
         {
             panelWindow = new GUIStyle(GUI.skin.window);
@@ -67,7 +72,8 @@ public partial class MainGui
     const int MaterialRow = 100, EnvRow = 101;
     int selected = -1;
     // Read at the first frame: PlayerPrefs cannot be read while Unity builds the object.
-    bool materialPanel = true, materialPanelRead;
+    bool materialPanel;   // closed at launch: only the maps column shows
+    int rightTab;         // 0 material, 1 environment
     Vector2 listScroll;
     float listHeight = 800;
     int propTab;
@@ -192,14 +198,13 @@ public partial class MainGui
         if (f11) { Fullscreen(); Event.current.Use(); }
         HandleShortcuts();
 
-        if (!materialPanelRead) { materialPanelRead = true; materialPanel = PlayerPrefs.GetInt("MaterializeCE.MaterialPanel", 1) == 1; }
         UiShell.RightPanel = materialPanel && !hideGui ? UiShell.PropsWidth : 0;
         DrawToolbar();
         if (!hideGui)
         {
-            DrawMapsList();
+            if (!UiShell.ListHidden) DrawMapsList();
             bool tool = TilingTextureMakerGuiObject.activeSelf || AlignmentGuiScript.gameObject.activeSelf;
-            if ((selected >= 0 && selected < mapEntries.Length) || tool) DrawProperties();
+            if (!UiShell.PropsHidden && ((selected >= 0 && selected < mapEntries.Length) || tool)) DrawProperties();
             if (materialPanel) DrawMaterialPanel();
         }
         if (!Workspace.Chosen) DrawWorkspaceWelcome();
@@ -250,6 +255,10 @@ public partial class MainGui
             switch (e.keyCode)
             {
                 case KeyCode.Space: RunMenu("View", hideGui ? "Show panels" : "Hide panels"); break;
+                // One panel at a time (function keys: the same on every keyboard layout).
+                case KeyCode.F1: UiShell.ListHidden = !UiShell.ListHidden; mapMenu = -1; profileListOpen = false; break;
+                case KeyCode.F2: UiShell.PropsHidden = !UiShell.PropsHidden; break;
+                case KeyCode.F3: SetMaterialPanel(!materialPanel); break;
                 case KeyCode.Alpha1: case KeyCode.Keypad1: RunMenu("View", "Full material"); break;
                 case KeyCode.Alpha2: case KeyCode.Keypad2: view = 1; break;   // albedo
                 case KeyCode.Alpha3: case KeyCode.Keypad3: view = 3; break;   // metalness / specular
@@ -409,6 +418,7 @@ public partial class MainGui
             case "Hide panels": hideGui = true; HideWindows(); break;
             case "Show panels":
                 hideGui = false;
+                UiShell.ListHidden = UiShell.PropsHidden = false;
                 for (int i = 0; i < objectsToUnhide.Count; i++) objectsToUnhide[i].SetActive(true);
                 break;
             case "Full screen (F11)": case "Windowed (F11)": Fullscreen(); break;
@@ -472,7 +482,7 @@ public partial class MainGui
         string text = "<b>" + aloneLabel + "</b>" + (aloneKey.Length > 0 ? "  (" + aloneKey + ")" : "") + "   ·   " + L.T("1 = full material");
         var content = new GUIContent(text);
         var size = viewLabelStyle.CalcSize(content);
-        float left = UiShell.ListWidth + ((selected >= 0 && selected < mapEntries.Length) ? UiShell.PropsWidth : 0);
+        float left = UiShell.ListWidth + ((!UiShell.PropsHidden && selected >= 0 && selected < mapEntries.Length) ? UiShell.PropsWidth : 0);
         float right = Screen.width - UiShell.RightPanel;
         GUI.Box(new Rect(left + (right - left - size.x) / 2, UiShell.Top + 10, size.x, size.y), content, viewLabelStyle);
     }
@@ -583,15 +593,11 @@ public partial class MainGui
         var view = new Rect(0, side.y + 4, w, side.height - 4 - block);
         listScroll = GUI.BeginScrollView(view, listScroll, new Rect(0, 0, w - 16, listHeight));
         float cw = listHeight > view.height ? w - 16 : w;
-        GUI.Label(new Rect(12, 6, cw - 24, 16), L.T("MAPS"), mapInfoLeft);
-        float y = 26;
+        GUI.Label(new Rect(12, 8, cw - 120, 16), L.T("MAPS"), mapInfoLeft);
+        if (GUI.Button(new Rect(cw - 102, 4, 90, 22), L.G("Clear all", "Empty every map (asks first)."))) confirmClearAll = true;
+        float y = 32;
         for (int i = 0; i < mapEntries.Length; i++) y = DrawMapRow(i, y, cw);
 
-        // The environment, under the maps.
-        y += 10;
-        GUI.Box(new Rect(12, y, cw - 24, 1), GUIContent.none);
-        y += 10;
-        y = DrawEnvironmentPanel(12, y, cw - 24);
         listHeight = y + 12;
         GUI.EndScrollView();
 
@@ -783,6 +789,15 @@ public partial class MainGui
         }
     }
 
+    void ClearMap(MapEntry e)
+    {
+        MapAdjust.End(this);
+        ClearTexture(e.Type == MapType.diffuseOriginal ? MapType.diffuse : e.Type);
+        CloseWindows();
+        SetMaterialValues();
+        FixSize();
+    }
+
     void DrawMapMenu(MapEntry e, float y)
     {
         Texture2D tex = e.Get(this);
@@ -794,7 +809,7 @@ public partial class MainGui
             ("Copy", "Put this map on the clipboard.", tex != null, () => { textureToSave = ShownTexture(e); CopyFile(); }),
             ("Quick save", "Save again to the last file this map was saved to.", tex != null && QuickPath(e.Type) != "", () => SaveMap(e, true)),
             ("Preview alone", "Show only this map on the preview.", tex != null, () => { SetPreviewMaterial(ShownTexture(e)); aloneLabel = DisplayName(e); aloneKey = ""; }),
-            ("Clear", "Empty this map.", tex != null, () => { MapAdjust.End(this); ClearTexture(e.Type == MapType.diffuseOriginal ? MapType.diffuse : e.Type); CloseWindows(); SetMaterialValues(); FixSize(); }),
+            ("Clear", "Empty this map.", tex != null, () => ClearMap(e)),
         };
         var r = new Rect(UiShell.ListWidth - 180, y, 170, items.Count * 26 + 8);
         Tips.Block(r);
@@ -862,7 +877,7 @@ public partial class MainGui
     // ---------- Properties ----------
 
     Vector2 matScroll, envScroll;
-    float matHeight = 900;
+    float matHeight = 900, envHeight = 700;
 
     void DrawProperties()
     {
@@ -936,6 +951,19 @@ public partial class MainGui
         GUI.Label(new Rect(x, y, w - 40, 24), L.T("Material & lighting"), titleStyle);
         if (GUI.Button(new Rect(col.xMax - 36, y, 26, 24), L.G("×", "Hide this panel (the Material & lighting button brings it back)."))) SetMaterialPanel(false);
         y += 30;
+        rightTab = GUI.Toolbar(new Rect(x, y, w, 24), rightTab, new[] {
+            L.G("Material", "Workflow, render mode, presets, light, tiling, preview shape."),
+            L.G("Environment", "The HDRI that lights the material, and the background.") });
+        y += 32;
+        if (rightTab == 1)
+        {
+            envScroll = GUI.BeginScrollView(new Rect(x, y, w + 12, col.yMax - y - 6), envScroll, new Rect(0, 0, w - 6, envHeight));
+            envHeight = DrawEnvironmentPanel(0, 2, w - 6) + 10;
+            GUI.EndScrollView();
+            Tips.Capture(true);
+            Tips.Block(col);
+            return;
+        }
         if (!MaterialGuiObject.activeSelf)
         {
             if (GUI.Button(new Rect(x, y, w, 26), L.G("Show the full material", "Every map together on the preview."))) ShowFullMaterial();

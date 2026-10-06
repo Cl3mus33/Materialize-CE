@@ -317,6 +317,11 @@ public class EditDiffuseGui : MonoBehaviour {
 		GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Saturation", EDS.Saturation, EDS.SaturationText, out EDS.Saturation, out EDS.SaturationText, 0.0f, 1.0f );		
 		offsetY += 50;
 		
+		if( GUI.Button (new Rect (offsetX, offsetY, 130, 30), UiHelp.Content ("Reset")) ){
+			settingsInitialized = false;
+			InitializeSettings ();
+			doStuff = true;
+		}
 		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), UiHelp.Content ("Set as Albedo")) ){
 			StartCoroutine( ProcessDiffuse ( MapType.diffuse ) );
 		}

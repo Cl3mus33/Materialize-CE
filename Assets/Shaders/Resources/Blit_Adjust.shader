@@ -2,6 +2,8 @@
 Shader "Hidden/Blit_Adjust" {
 	Properties {
 		_MainTex ("Base (RGB)", 2D) = "white" {}
+		_OutBlack ("Output black", Float) = 0
+		_OutWhite ("Output white", Float) = 1
 	}
 	CGINCLUDE
 	#include "UnityCG.cginc"
@@ -9,6 +11,7 @@ Shader "Hidden/Blit_Adjust" {
 	sampler2D _MainTex;
 	float _Mode;          // 0 grey map, 1 normal map, 2 colour
 	float _InBlack, _InWhite, _Gamma;
+	float _OutBlack, _OutWhite;   // output levels: what black and white become
 	float _Contrast, _Brightness, _Invert;
 	float _HeightMode, _Strength;   // height: depth scaled below white (0 = flat white)
 	float _Saturation, _FlipGreen;
@@ -25,6 +28,7 @@ Shader "Hidden/Blit_Adjust" {
 	{
 		c = saturate( ( c - _InBlack ) / max( _InWhite - _InBlack, 1e-4 ) );
 		c = pow( c, 1.0 / max( _Gamma, 0.01 ) );
+		c = lerp( _OutBlack.xxx, _OutWhite.xxx, c );
 		return saturate( ( c - 0.5 ) * _Contrast + 0.5 + _Brightness );
 	}
 

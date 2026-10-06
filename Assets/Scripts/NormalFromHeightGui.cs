@@ -376,6 +376,11 @@ public class NormalFromHeightGui : MonoBehaviour {
 		GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Final Contrast", NFHS.FinalContrast, NFHS.FinalContrastText, out NFHS.FinalContrast, out NFHS.FinalContrastText, 0.0f, 10.0f);
 		offsetY += 50;
 		
+		if( GUI.Button (new Rect (offsetX, offsetY, 130, 30), UiHelp.Content ("Reset")) ){
+			settingsInitialized = false;
+			InitializeSettings ();
+			doStuff = true;
+		}
 		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), UiHelp.Content ("Set as Normal Map")) ){
 			StartCoroutine( ProcessNormal () );
 		}

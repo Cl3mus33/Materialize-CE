@@ -453,6 +453,18 @@ public class TilingTextureMakerGui : MonoBehaviour {
 		GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Texture Offset Y", TexOffsetY, TexOffsetYText, out TexOffsetY, out TexOffsetYText, -1.0f, 1.0f);
 		offsetY += 40;
 		
+		if( GUI.Button (new Rect (offsetX, offsetY, 130, 30), UiHelp.Content ("Reset")) ){
+			// Everything as when the application starts: technique, size, pattern and sliders.
+			techniqueOverlap = true; techniqueSplat = false; tileTech = TileTechnique.Overlap;
+			NewTexSelectionX = 2; NewTexSelectionY = 2; patternSeed = 1;
+			Falloff = 0.1f; FalloffText = "0.1";
+			OverlapX = 0.2f; OverlapXText = "0.2"; OverlapY = 0.2f; OverlapYText = "0.2";
+			SplatRotation = 0.0f; SplatRotationText = "0.0"; SplatRotationRandom = 0.25f; SplatRotationRandomText = "0.25";
+			SplatScale = 1.0f; SplatScaleText = "1.0"; SplatWobble = 0.2f; SplatWobbleText = "0.2";
+			SplatRandomize = 0.0f; SplatRandomizeText = "0.0";
+			TexTiling = 1.0f; TexTilingText = "1.0"; TexOffsetX = 0.0f; TexOffsetXText = "0.0"; TexOffsetY = 0.0f; TexOffsetYText = "0.0";
+			doStuff = true;
+		}
 		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), UiHelp.Content ("Set Maps")) ){
 			StartCoroutine( SetMaps ( ) );
 		}

@@ -344,6 +344,11 @@ public class MetallicGui : MonoBehaviour {
 		GuiHelper.Slider (new Rect (offsetX, offsetY, 280, 50), "Final Bias", MS.FinalBias, MS.FinalBiasText, out MS.FinalBias, out MS.FinalBiasText, -0.5f, 0.5f );
 		offsetY += 50;
 		
+		if( GUI.Button (new Rect (offsetX, offsetY, 130, 30), UiHelp.Content ("Reset")) ){
+			settingsInitialized = false;
+			InitializeSettings ();
+			doStuff = true;
+		}
 		if( GUI.Button (new Rect (offsetX + 150, offsetY, 130, 30), UiHelp.Content ("Set as Metallic")) ){
 			StartCoroutine( ProcessMetallic() );
 		}

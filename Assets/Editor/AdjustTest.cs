@@ -29,5 +29,10 @@ public static class AdjustTest
         Set(0, 1, 1, 1, 0, true, false, 1); Debug.Log($"ADJUSTTEST invert 0.3 -> {Run1(m, 0.3f):0.000} (expect 0.700)");
         Set(0, 1, 1, 1, 0, false, true, 0); Debug.Log($"ADJUSTTEST height strength 0, 0.3 -> {Run1(m, 0.3f):0.000} (expect 1.000)");
         Set(0, 1, 1, 1, 0, false, true, 2); Debug.Log($"ADJUSTTEST height strength 2, 0.8 -> {Run1(m, 0.8f):0.000} (expect 0.600)");
+        // Output levels: black lifted to 0.2, white lowered to 0.8; then a typed value with a comma or a point.
+        Set(0, 1, 1, 1, 0, false, false, 1); m.SetFloat("_OutBlack", 0.2f); m.SetFloat("_OutWhite", 0.8f);
+        Debug.Log($"ADJUSTTEST output 0.2..0.8: 0 -> {Run1(m, 0f):0.000} (expect 0.200), 1 -> {Run1(m, 1f):0.000} (expect 0.800), 0.5 -> {Run1(m, 0.5f):0.000} (expect 0.500)");
+        GuiHelper.ParseFloat("1,65", out float a); GuiHelper.ParseFloat("1.65", out float b);
+        Debug.Log($"ADJUSTTEST typed 1,65 -> {a} and 1.65 -> {b}; written: {GuiHelper.FloatToString(1.65f, 6)}");
     }
 }
